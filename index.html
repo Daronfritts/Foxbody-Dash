@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Foxbody BCM Dashboard</title>
+
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/gauges.css">
+
+</head>
+
+<body>
+
+<div id="dashboard">
+
+    <!-- TOP BAR -->
+
+    <header id="topBar">
+
+        <div class="leftStatus">
+            ◀ HIGH
+        </div>
+
+        <div class="clock">
+            12:00 PM
+        </div>
+
+        <div class="title">
+            FOXBODY BCM
+        </div>
+
+        <div class="rightStatus">
+            GPS&nbsp;&nbsp;WiFi&nbsp;&nbsp;BT&nbsp;&nbsp;14.2V ▶
+        </div>
+
+    </header>
+
+
+    <!-- MAIN GAUGES -->
+
+    <main id="gauges">
+
+        <svg id="tach" width="400" height="400"></svg>
+
+        <section id="centerGauges">
+
+            <div class="smallGauge">Coolant</div>
+            <div class="smallGauge">Fuel</div>
+            <div class="smallGauge">Oil</div>
+            <div class="smallGauge">Battery</div>
+
+        </section>
+
+        <svg id="speed" width="400" height="400"></svg>
+
+    </main>
+
+
+    <!-- ALERT BAR -->
+
+    <section id="warningBar">
+
+        CHECK ENGINE
+        &nbsp;&nbsp;&nbsp;
+        ABS
+        &nbsp;&nbsp;&nbsp;
+        BRAKE
+        &nbsp;&nbsp;&nbsp;
+        DOOR
+
+    </section>
+
+
+    <!-- NAVIGATION -->
+
+    <footer id="bottomNav">
+
+        <button>Home</button>
+        <button>Vehicle</button>
+        <button>Music</button>
+        <button>Themes</button>
+        <button>Settings</button>
+
+    </footer>
+
+</div>
+
+<!-- Components -->
+
+<script src="components/gaugeFace.js"></script>
+<script src="components/gauge.js"></script>
+
+<script>
+
+const tach = new Gauge(
+    "tach",
+    0,
+    8000,
+    0,
+    "RPM"
+);
+
+const speed = new Gauge(
+    "speed",
+    0,
+    180,
+    0,
+    "MPH"
+);
+
+tach.sweep();
+
+</script>
+
+</body>
+
+</html>
