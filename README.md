@@ -1,5 +1,9 @@
 # FoxbodyDash
 
+<p align="center">
+  <img src="assets/images/dashboard_template.png" alt="FoxbodyDash Dashboard Template" width="900">
+</p>
+
 A modern touchscreen digital dashboard and Body Control Module (BCM) for the 1988 Ford Mustang Foxbody.
 
 FoxbodyDash is more than a digital gauge cluster. It is part of a complete vehicle electronics system built around a Raspberry Pi that replaces many of the functions normally handled by separate automotive modules.
