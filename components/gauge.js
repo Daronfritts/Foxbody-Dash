@@ -28,9 +28,9 @@ class Gauge {
             x:200,
             y:165,
             fill:"#ffffff",
-            "font-size":"50",
+            "font-size":"38",
             "font-family":"Arial",
-            "font-weight":"700",
+            "font-weight":"600",
             "text-anchor":"middle",
             "letter-spacing":"2"
         });
@@ -54,20 +54,17 @@ class Gauge {
         });
 
         this.shadow.style.transformOrigin="200px 200px";
+        this.shadow.style.transformOrigin = "200px 200px";
         this.svg.appendChild(this.shadow);
-
+       
         // Needle
-        this.needle = svgElement("line",{
-            x1:this.cx,
-            y1:this.cy,
-            x2:this.cx,
-            y2:this.cy-122,
-            stroke:"#ff6b1a",
-            "stroke-width":"5",
-            "stroke-linecap":"round"
+        this.needle = svgElement("polygon",{
+        points:"200,200 196,198 200,72 204,198 201,205 199,205",
+        fill:"#FF0000"
         });
 
         this.needle.style.transformOrigin="200px 200px";
+        this.needle.style.transition = "transform .15s ease-out"; 
         this.svg.appendChild(this.needle);
 
         // Center hub
@@ -76,7 +73,7 @@ class Gauge {
             cy:this.cy,
             r:12,
             fill:"#202020",
-            stroke:"#6cefff",
+            stroke:"#3E8FD6",
             "stroke-width":"3"
         });
 
@@ -86,7 +83,7 @@ class Gauge {
             cx:this.cx,
             cy:this.cy,
             r:5,
-            fill:"#ffffff"
+            fill:"#FF0000"
         });
 
         this.svg.appendChild(this.hubInner);
@@ -115,7 +112,8 @@ class Gauge {
 
         const timer=setInterval(()=>{
 
-            value+=direction*150;
+            const step = (this.max - this.min) / 120;
+        value += direction * step;
 
             if(value>=this.max){
 
@@ -136,7 +134,7 @@ class Gauge {
 
             this.setValue(value);
 
-        },18);
+        },15);
 
     }
 

@@ -1,1 +1,43 @@
-h
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vehicle</title>
+
+    <link rel="stylesheet" href="../css/vehicle.css">
+</head>
+
+<body>
+
+<div id="vehicle-page">
+
+    <h1>Vehicle</h1>
+
+    <div id="vehicle-view">
+
+        <object
+            id="vehicle-svg"
+            data="../assets/vehicle/exterior/frontView.svg"
+            type="image/svg+xml">
+        </object>
+
+    </div>
+
+    <div id="vehicle-buttons">
+
+        <button data-view="front">Front</button>
+        <button data-view="rear">Rear</button>
+        <button data-view="driver">Driver</button>
+        <button data-view="passenger">Passenger</button>
+        <button data-view="top">Top</button>
+        <button data-view="engine">Engine</button>
+
+    </div>
+
+</div>
+
+<script src="../js/vehicle.js"></script>
+
+</body>
+</html>

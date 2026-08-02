@@ -21,71 +21,161 @@
 
     <header id="topBar">
 
-        <div class="leftStatus">
-            ◀ HIGH
+    <div id="clusterLogo">
+
+        <div id="foxbodyTitle">
+
+            FOXBODY GT
+
         </div>
 
-        <div class="clock">
-            12:00 PM
-        </div>
+        <img id="mustangLogo"
+             src="assets/images/mustangWhite.svg">
 
-        <div class="title">
-            FOXBODY BCM
-        </div>
+    </div>
 
-        <div class="rightStatus">
-            GPS&nbsp;&nbsp;WiFi&nbsp;&nbsp;BT&nbsp;&nbsp;14.2V ▶
-        </div>
 
-    </header>
+    <div id="rightIndicators">
 
+        <img id="rightTurn"
+             src="assets/icons/rightTurn.svg"
+             class="indicator">
+
+    </div>
+
+</header>
 
     <!-- MAIN GAUGES -->
 
     <main id="gauges">
 
-        <svg id="tach" width="400" height="400"></svg>
+    <!-- LEFT TURN -->
+    <div id="leftTurnIndicator" class="topIndicator">
+        <img src="assets/icons/status/leftTurn.svg" alt="Left Turn">
+    </div>
 
-        <section id="centerGauges">
+    <!-- HIGH BEAM -->
+    <div id="highBeamIndicator" class="topIndicator">
+        <img src="assets/icons/status/highBeam.svg" alt="High Beam">
+    </div>
 
-            <div class="smallGauge">Coolant</div>
-            <div class="smallGauge">Fuel</div>
-            <div class="smallGauge">Oil</div>
-            <div class="smallGauge">Battery</div>
+    <!-- RIGHT TURN -->
+    <div id="rightTurnIndicator" class="topIndicator">
+        <img src="assets/icons/status/rightTurn.svg" alt="Right Turn">
+    </div>
 
-        </section>
+    
+    <!-- MAIN CLUSTER -->
 
-        <svg id="speed" width="400" height="400"></svg>
+    <section id="cluster">
 
-    </main>
+        <div class="clusterScrew screwTL"></div>
+        <div class="clusterScrew screwTR"></div>
+        <div class="clusterScrew screwBL"></div>
+        <div class="clusterScrew screwBR"></div>
 
+        <svg id="tach" width="430" height="430"></svg>
 
-    <!-- ALERT BAR -->
+        <!-- CENTER INFORMATION DISPLAY -->
 
-    <section id="warningBar">
+   <section id="centerCluster">
 
-        CHECK ENGINE
-        &nbsp;&nbsp;&nbsp;
-        ABS
-        &nbsp;&nbsp;&nbsp;
-        BRAKE
-        &nbsp;&nbsp;&nbsp;
-        DOOR
+    <div id="clusterHeader">
+
+        <div id="clockDisplay">12:00 PM</div>
+
+        <div id="outsideTemp">74°F</div>
+
+    </div>
+
+    <div id="gearRow">
+
+        <span class="label">GEAR</span>
+
+        <span id="gearDisplay">3</span>
+
+        <span id="gearType">N</span>
+
+    </div>
+
+    <div class="clusterDivider"></div>
+
+    <div class="clusterInfo">
+
+        <div class="infoLabel">ODOMETER</div>
+        <div id="odometer">184,232 MI</div>
+
+    </div>
+
+    <div class="clusterDivider"></div>
+
+    <div class="clusterInfo">
+
+        <div class="infoLabel">TRIP A</div>
+        <div id="tripA">123.4 MI</div>
+
+    </div>
+
+    <div class="clusterDivider"></div>
+
+    <div id="cruiseStatus">
+
+        CRUISE OFF
+
+    </div>
+
+</section>
+
+    <!-- Top Row -->
+
+    <div class="miniGauge" id="fuelGauge"></div>
+
+    <div class="miniGauge" id="coolantGauge"></div>
+
+    <div class="miniGauge" id="oilGauge"></div>
+
+    <div class="miniGauge" id="batteryGauge"></div>
+
+</section>
+
+    <!-- LIVE DATA BAR -->
+
+    <section id="liveRibbon">
+
+        <span>Oil 62 PSI</span>
+
+        <span>AFR 14.7</span>
+
+        <span>MAP 34 kPa</span>
+
+        <span>Battery 14.2V</span>
+
+        <span>Fuel 41 PSI</span>
+
+        <span>ECT 188°</span>
 
     </section>
 
+</main>
+
+    <!-- ALERT BAR -->
+
+    <section id="statusBar"></section>
+
+
 
     <!-- NAVIGATION -->
+    
+     <footer id="bottomNav">
 
-    <footer id="bottomNav">
-
-        <button>Home</button>
-        <button>Vehicle</button>
+        
+        <button onclick="location.href='index.html'">Home</button>
+        <button onclick="location.href='vehicle.html'">Vehicle</button>
         <button>Music</button>
         <button>Themes</button>
         <button>Settings</button>
 
-    </footer>
+     </footer>
 
 </div>
 
@@ -93,28 +183,10 @@
 
 <script src="components/gaugeFace.js"></script>
 <script src="components/gauge.js"></script>
-
-<script>
-
-const tach = new Gauge(
-    "tach",
-    0,
-    8000,
-    0,
-    "RPM"
-);
-
-const speed = new Gauge(
-    "speed",
-    0,
-    180,
-    0,
-    "MPH"
-);
-
-tach.sweep();
-
-</script>
+<script src="components/miniGauge.js"></script>
+<script src="components/miniGaugeFace.js"></script>
+<script src="components/statusbar.js"></script>
+<script src="js/dashboard.js"></script>
 
 </body>
 

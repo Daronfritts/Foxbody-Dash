@@ -1,0 +1,43 @@
+.indicator{
+
+    color:#222;
+
+    font-size:22px;
+
+    transition:.25s;
+
+    opacity:.35;
+
+}
+
+.indicator.red{
+
+    color:#ff3030;
+
+    opacity:1;
+
+}
+
+.indicator.amber{
+
+    color:#ffb000;
+
+    opacity:1;
+
+}
+
+.indicator.green{
+
+    color:#34ff5a;
+
+    opacity:1;
+
+}
+
+.indicator.blue{
+
+    color:#4aa8ff;
+
+    opacity:1;
+
+}

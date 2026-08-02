@@ -1,119 +1,612 @@
+/*==================================================
+    FOXBODY BCM DASHBOARD
+    STYLE.CSS
+    REVISION 2
+    PART 1 OF 5
+==================================================*/
+
+
+/*==================================================
+    RESET
+==================================================*/
+
 *{
     margin:0;
     padding:0;
     box-sizing:border-box;
 }
 
+html,
 body{
 
-    background:#050505;
-    color:white;
-    font-family:Arial,Helvetica,sans-serif;
+    width:100%;
+    height:100%;
+
+    overflow:hidden;
+
+    background:#020202;
+
+    color:#ffffff;
+
+    font-family:
+        "Segoe UI",
+        Arial,
+        Helvetica,
+        sans-serif;
+
+}
+
+
+/*==================================================
+    DASHBOARD
+==================================================*/
+
+#dashboard{
+
+    position:relative;
 
     width:100vw;
     height:100vh;
 
+    display:flex;
+
+    flex-direction:column;
+
+    align-items:center;
+
     overflow:hidden;
 
+    background:
+
+        radial-gradient(
+
+            circle at center,
+
+            #222222 0%,
+
+            #111111 55%,
+
+            #030303 100%
+
+        );
+
 }
 
-#dashboard{
 
-    display:grid;
-
-    grid-template-rows:
-
-        60px
-        1fr
-        60px
-        70px;
-
-    height:100vh;
-
-}
-
-/* ================= TOP BAR ================= */
+/*==================================================
+    TOP BAR
+==================================================*/
 
 #topBar{
+
+    position:relative;
+
+    width:100%;
+
+    height:88px;
 
     display:grid;
 
     grid-template-columns:
 
+        180px
+
         1fr
-        1fr
-        2fr
-        2fr;
+
+        180px;
 
     align-items:center;
 
-    padding:0 20px;
+    padding:0 32px;
 
-    background:#111;
-
-    border-bottom:2px solid #222;
+    z-index:100;
 
 }
 
-.leftStatus{
+
+/*==================================================
+    INDICATORS
+==================================================*/
+
+#leftIndicators,
+#rightIndicators{
 
     display:flex;
 
-    gap:10px;
+    align-items:center;
 
-    font-size:18px;
-
-}
-
-.clock{
-
-    text-align:center;
-
-    font-size:28px;
-
-    font-weight:bold;
+    gap:18px;
 
 }
 
-.title{
+#rightIndicators{
 
-    text-align:center;
-
-    font-size:34px;
-
-    letter-spacing:4px;
+    justify-content:flex-end;
 
 }
 
-.rightStatus{
+.indicator{
+
+    width:42px;
+
+    height:42px;
+
+    opacity:.35;
+
+    transition:.20s;
+
+}
+
+.indicator.active{
+
+    opacity:1;
+
+    filter:
+
+        drop-shadow(0 0 8px #00aaff);
+
+}
+
+
+/*==================================================
+    CENTER TITLE
+==================================================*/
+
+#clusterLogo{
 
     display:flex;
 
-    justify-content:space-evenly;
+    flex-direction:column;
 
-    font-size:18px;
+    align-items:center;
+
+    justify-content:center;
 
 }
 
-/* ================= MAIN ================= */
+#foxbodyTitle{
 
-#gauges{
+    color:#34a8ff;
+
+    font-size:46px;
+
+    font-weight:700;
+
+    letter-spacing:6px;
+
+    text-shadow:
+
+        0 0 12px rgba(0,140,255,.70),
+
+        0 0 28px rgba(0,140,255,.45);
+
+}
+
+#mustangLogo{
+
+    width:170px;
+
+    margin-top:6px;
+
+}
+
+/*==================================================
+    MAIN INSTRUMENT BEZEL
+==================================================*/
+
+#cluster{
+
+    position:relative;
+
+    width:1320px;
+
+    height:760px;
+
+    margin-top:45px;
 
     display:grid;
 
     grid-template-columns:
 
         420px
-        1fr
+        260px
         420px;
 
-    align-items:center;
+    grid-template-rows:
+
+        360px
+        160px;
+
+    grid-template-areas:
+
+        "tach center speed"
+
+        "mini mini mini";
+
+    justify-content:center;
+
+    align-items:start;
+
+    column-gap:55px;
+
+    row-gap:25px;
+
+    border-radius:34px;
+
+    overflow:hidden;
+
+    background:
+
+        linear-gradient(
+            180deg,
+            #dcdcdc 0%,
+            #bababa 12%,
+            #8c8c8c 50%,
+            #bcbcbc 88%,
+            #eeeeee 100%
+        );
+
+    border:2px solid #8f8f8f;
+
+    box-shadow:
+
+        inset 0 3px 3px rgba(255,255,255,.70),
+
+        inset 0 -5px 12px rgba(0,0,0,.60),
+
+        0 18px 40px rgba(0,0,0,.70);
 
 }
 
-/* ================= WARNING BAR ================= */
 
-#warningBar{
+/*==================================================
+    BLUE ACCENT RING
+==================================================*/
+
+#cluster::before{
+
+    content:"";
+
+    position:absolute;
+
+    inset:14px;
+
+    border-radius:24px;
+
+    border:2px solid #159dff;
+
+    box-shadow:
+
+        0 0 10px rgba(0,140,255,.75),
+
+        inset 0 0 10px rgba(0,140,255,.30);
+
+}
+
+
+/*==================================================
+    INNER DASH PANEL
+==================================================*/
+
+#cluster::after{
+
+    content:"";
+
+    position:absolute;
+
+    inset:28px;
+
+    border-radius:18px;
+
+    background:
+
+        radial-gradient(
+
+            circle at center,
+
+            #232323 0%,
+
+            #131313 65%,
+
+            #070707 100%
+
+        );
+
+    box-shadow:
+
+        inset 0 0 35px rgba(0,0,0,.90);
+
+}
+
+
+/*==================================================
+    KEEP EVERYTHING ABOVE PANEL
+==================================================*/
+
+#cluster>*{
+
+    position:relative;
+
+    z-index:20;
+
+}
+
+
+/*==================================================
+    MAIN GAUGES
+==================================================*/
+
+#tach{
+
+    grid-area:tach;
+
+    align-self:end;
+
+    margin-top:35px;
+
+}
+
+#speed{
+
+    grid-area:speed;
+
+    align-self:end;
+
+    margin-top:35px;
+
+}
+
+
+/*==================================================
+    DRIVER INFORMATION CENTER
+==================================================*/
+
+#driverInfoCenter{
+
+    grid-area:center;
+
+    align-self:start;
+
+    margin-top:-15px;
+
+}
+
+
+/*==================================================
+    MINI GAUGE ROW
+==================================================*/
+
+#fuelGauge,
+#oilGauge,
+#coolantGauge,
+#batteryGauge{
+
+    position:absolute;
+
+    bottom:58px;
+
+    width:120px;
+
+    height:120px;
+
+}
+
+#fuelGauge{
+
+    left:155px;
+
+}
+
+#oilGauge{
+
+    left:410px;
+
+}
+
+#coolantGauge{
+
+    right:410px;
+
+}
+
+#batteryGauge{
+
+    right:155px;
+
+}
+
+/*==================================================
+    DRIVER INFORMATION CENTER
+==================================================*/
+
+#driverInfoCenter{
+
+    width:250px;
+
+    height:340px;
+
+    background:
+
+        linear-gradient(
+            180deg,
+            #171717 0%,
+            #0d0d0d 100%
+        );
+
+    border:2px solid #3b3b3b;
+
+    border-radius:14px;
+
+    display:flex;
+
+    flex-direction:column;
+
+    justify-content:space-between;
+
+    overflow:hidden;
+
+    box-shadow:
+
+        inset 0 0 15px rgba(255,255,255,.04),
+
+        inset 0 0 45px rgba(0,0,0,.85),
+
+        0 0 20px rgba(0,0,0,.45);
+
+}
+
+
+/*==================================================
+    DRIVER INFO HEADER
+==================================================*/
+
+#clusterHeader{
+
+    height:50px;
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    padding:0 16px;
+
+    border-bottom:2px solid #128eff;
+
+    color:white;
+
+    font-size:18px;
+
+}
+
+
+/*==================================================
+    GEAR DISPLAY
+==================================================*/
+
+#gearRow{
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:flex-end;
+
+    gap:14px;
+
+    padding:20px 0;
+
+}
+
+#gearRow .label{
+
+    font-size:16px;
+
+    opacity:.75;
+
+    margin-bottom:10px;
+
+}
+
+#gearDisplay{
+
+    font-size:72px;
+
+    font-weight:700;
+
+    line-height:1;
+
+}
+
+#gearType{
+
+    font-size:24px;
+
+    margin-bottom:12px;
+
+}
+
+
+/*==================================================
+    DIVIDERS
+==================================================*/
+
+.clusterDivider{
+
+    height:2px;
+
+    background:#128eff;
+
+}
+
+
+/*==================================================
+    INFO ROWS
+==================================================*/
+
+.clusterInfo{
+
+    padding:14px 0;
+
+    text-align:center;
+
+}
+
+.infoLabel{
+
+    font-size:14px;
+
+    letter-spacing:2px;
+
+    color:#bdbdbd;
+
+}
+
+#odometer,
+#tripA{
+
+    margin-top:8px;
+
+    font-size:24px;
+
+    font-weight:600;
+
+}
+
+
+/*==================================================
+    CRUISE STATUS
+==================================================*/
+
+#cruiseStatus{
+
+    height:48px;
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+    font-size:18px;
+
+    border-top:2px solid #128eff;
+
+}
+
+
+/*==================================================
+    LIVE DATA RIBBON
+==================================================*/
+
+#liveRibbon{
+
+    width:1180px;
+
+    height:44px;
+
+    margin-top:18px;
 
     display:flex;
 
@@ -121,40 +614,356 @@ body{
 
     align-items:center;
 
-    background:#770000;
+    border-top:1px solid #2d2d2d;
 
-    font-weight:bold;
+    border-bottom:1px solid #2d2d2d;
 
-    font-size:22px;
+    background:#090909;
+
+    color:#f2f2f2;
+
+    font-size:18px;
 
 }
 
-/* ================= NAV ================= */
+/*==================================================
+    WARNING STATUS BAR
+==================================================*/
+
+#statusBar{
+
+    width:1180px;
+
+    height:54px;
+
+    margin-top:12px;
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+    gap:26px;
+
+    background:#080808;
+
+    border-top:1px solid #2a2a2a;
+
+    border-bottom:1px solid #2a2a2a;
+
+    border-radius:10px;
+
+}
+
+.warningIcon{
+
+    width:34px;
+
+    height:34px;
+
+    opacity:.25;
+
+    transition:
+
+        opacity .20s,
+
+        transform .20s,
+
+        filter .20s;
+
+}
+
+.warningIcon.active{
+
+    opacity:1;
+
+    transform:scale(1.08);
+
+}
+
+
+/*==================================================
+    SYSTEM MESSAGE BAR
+==================================================*/
+
+#systemBar{
+
+    width:1180px;
+
+    height:52px;
+
+    margin-top:10px;
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+    gap:16px;
+
+    background:#111111;
+
+    border-radius:10px;
+
+    border:1px solid #2f2f2f;
+
+}
+
+#statusIcon{
+
+    font-size:28px;
+
+    color:#33d04a;
+
+}
+
+#statusText{
+
+    font-size:22px;
+
+    letter-spacing:2px;
+
+    color:#f0f0f0;
+
+}
+
+
+/*==================================================
+    BOTTOM NAVIGATION
+==================================================*/
 
 #bottomNav{
 
-    display:grid;
+    width:100%;
 
-    grid-template-columns:repeat(5,1fr);
+    height:82px;
 
-    gap:10px;
+    margin-top:auto;
 
-    padding:10px;
+    display:flex;
 
-    background:#111;
+    justify-content:space-evenly;
+
+    align-items:center;
+
+    background:
+
+        linear-gradient(
+
+            180deg,
+
+            #111111 0%,
+
+            #050505 100%
+
+        );
+
+    border-top:2px solid #1b1b1b;
 
 }
 
 #bottomNav button{
 
-    background:#202020;
+    width:180px;
 
-    color:white;
+    height:54px;
 
     border:none;
 
-    border-radius:15px;
+    border-radius:12px;
 
-    font-size:22px;
+    background:
+
+        linear-gradient(
+
+            180deg,
+
+            #2c2c2c 0%,
+
+            #111111 100%
+
+        );
+
+    color:white;
+
+    font-size:18px;
+
+    cursor:pointer;
+
+    transition:
+
+        .20s;
 
 }
+
+#bottomNav button:hover{
+
+    transform:translateY(-2px);
+
+    box-shadow:
+
+        0 0 14px rgba(0,140,255,.45);
+
+}
+
+#bottomNav button.active{
+
+    background:
+
+        linear-gradient(
+
+            180deg,
+
+            #178dff 0%,
+
+            #0b5fa7 100%
+
+        );
+
+}
+
+/*==================================================
+    SHIFT LIGHT / MUSTANG LOGO
+==================================================*/
+
+#mustangLogo{
+
+    transition:
+
+        opacity .20s,
+
+        filter .20s,
+
+        transform .20s;
+
+    opacity:.35;
+
+}
+
+/* Yellow Shift */
+
+#mustangLogo.shiftYellow{
+
+    opacity:1;
+
+    filter:
+
+        drop-shadow(0 0 8px #ffd400)
+
+        drop-shadow(0 0 18px #ffd400);
+
+}
+
+/* Red Shift */
+
+#mustangLogo.shiftRed{
+
+    opacity:1;
+
+    filter:
+
+        drop-shadow(0 0 10px #ff2a2a)
+
+        drop-shadow(0 0 20px #ff2a2a)
+
+        drop-shadow(0 0 38px #ff2a2a);
+
+}
+
+
+/*==================================================
+    TURN SIGNAL / HIGH BEAM GLOW
+==================================================*/
+
+.indicator{
+
+    transition:
+
+        opacity .18s,
+
+        transform .18s,
+
+        filter .18s;
+
+}
+
+.indicator.active{
+
+    opacity:1;
+
+    transform:scale(1.10);
+
+    filter:
+
+        drop-shadow(0 0 10px #00b7ff);
+
+}
+
+
+/*==================================================
+    CLUSTER LAYER ORDER
+==================================================*/
+
+#tach,
+#speed,
+#driverInfoCenter,
+#fuelGauge,
+#oilGauge,
+#coolantGauge,
+#batteryGauge,
+#liveRibbon,
+#statusBar{
+
+    position:relative;
+
+    z-index:20;
+
+}
+
+
+/*==================================================
+    RESPONSIVE
+==================================================*/
+
+@media (max-width:1600px){
+
+    #cluster{
+
+        transform:scale(.94);
+
+        transform-origin:top center;
+
+    }
+
+}
+
+@media (max-width:1400px){
+
+    #cluster{
+
+        transform:scale(.86);
+
+        transform-origin:top center;
+
+    }
+
+}
+
+@media (max-width:1200px){
+
+    #cluster{
+
+        transform:scale(.76);
+
+        transform-origin:top center;
+
+    }
+
+}
+
+
+/*==================================================
+    REVISION 2 COMPLETE
+==================================================*/
