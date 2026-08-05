@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Foxbody BCM Dashboard</title>
+
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/gauges.css">
+
+</head>
+
+<body>
+
+<div id="dashboard">
+
+    <!-- TOP BAR -->
+
+    <header id="topBar">
+
+    <div id="clusterLogo">
+
+        <div id="foxbodyTitle">
+
+            FOXBODY GT
+
+        </div>
+
+        <img id="mustangLogo"
+             src="assets/images/mustangWhite.svg">
+
+    </div>
+
+
+    <div id="rightIndicators">
+
+        <img id="rightTurn"
+             src="assets/icons/rightTurn.svg"
+             class="indicator">
+
+    </div>
+
+</header>
+
+    <!-- MAIN GAUGES -->
+
+    <main id="gauges">
+
+    <!-- LEFT TURN -->
+    <div id="leftTurnIndicator" class="topIndicator">
+        <img src="assets/icons/status/leftTurn.svg" alt="Left Turn">
+    </div>
+
+    <!-- HIGH BEAM -->
+    <div id="highBeamIndicator" class="topIndicator">
+        <img src="assets/icons/status/highBeam.svg" alt="High Beam">
+    </div>
+
+    <!-- RIGHT TURN -->
+    <div id="rightTurnIndicator" class="topIndicator">
+        <img src="assets/icons/status/rightTurn.svg" alt="Right Turn">
+    </div>
+
+    
+    <!-- MAIN CLUSTER -->
+
+    <section id="cluster">
+
+        <div class="clusterScrew screwTL"></div>
+        <div class="clusterScrew screwTR"></div>
+        <div class="clusterScrew screwBL"></div>
+        <div class="clusterScrew screwBR"></div>
+
+        <svg id="tach" width="430" height="430"></svg>
+
+        <!-- CENTER INFORMATION DISPLAY -->
+
+   <section id="centerCluster">
+
+    <div id="clusterHeader">
+
+        <div id="clockDisplay">12:00 PM</div>
+
+        <div id="outsideTemp">74°F</div>
+
+    </div>
+
+    <div id="gearRow">
+
+        <span class="label">GEAR</span>
+
+        <span id="gearDisplay">3</span>
+
+        <span id="gearType">N</span>
+
+    </div>
+
+    <div class="clusterDivider"></div>
+
+    <div class="clusterInfo">
+
+        <div class="infoLabel">ODOMETER</div>
+        <div id="odometer">184,232 MI</div>
+
+    </div>
+
+    <div class="clusterDivider"></div>
+
+    <div class="clusterInfo">
+
+        <div class="infoLabel">TRIP A</div>
+        <div id="tripA">123.4 MI</div>
+
+    </div>
+
+    <div class="clusterDivider"></div>
+
+    <div id="cruiseStatus">
+
+        CRUISE OFF
+
+    </div>
+
+</section>
+
+    <!-- Top Row -->
+
+    <div class="miniGauge" id="fuelGauge"></div>
+
+    <div class="miniGauge" id="coolantGauge"></div>
+
+    <div class="miniGauge" id="oilGauge"></div>
+
+    <div class="miniGauge" id="batteryGauge"></div>
+
+</section>
+
+    <!-- LIVE DATA BAR -->
+
+    <section id="liveRibbon">
+
+        <span>Oil 62 PSI</span>
+
+        <span>AFR 14.7</span>
+
+        <span>MAP 34 kPa</span>
+
+        <span>Battery 14.2V</span>
+
+        <span>Fuel 41 PSI</span>
+
+        <span>ECT 188°</span>
+
+    </section>
+
+</main>
+
+    <!-- ALERT BAR -->
+
+    <section id="statusBar"></section>
+
+
+
+    <!-- NAVIGATION -->
+    
+     <footer id="bottomNav">
+
+        
+        <button onclick="location.href='index.html'">Home</button>
+        <button onclick="location.href='vehicle.html'">Vehicle</button>
+        <button>Music</button>
+        <button>Themes</button>
+        <button>Settings</button>
+
+     </footer>
+
+</div>
+
+<!-- Components -->
+
+<script src="components/gaugeFace.js"></script>
+<script src="components/gauge.js"></script>
+<script src="components/miniGauge.js"></script>
+<script src="components/miniGaugeFace.js"></script>
+<script src="components/statusbar.js"></script>
+<script src="js/dashboard.js"></script>
+
+</body>
+
+</html>
