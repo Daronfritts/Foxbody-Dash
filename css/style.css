@@ -147,6 +147,20 @@ body{
 
 }
 
+.placeholder{
+
+    width:42px;
+
+    height:42px;
+
+    border-radius:50%;
+
+    background:rgba(255,255,255,.10);
+
+    opacity:.08;
+
+}
+
 
 /*==================================================
     CENTER TITLE
@@ -373,7 +387,7 @@ body{
 
     height:340px;
 
-    margin-top:48px;
+    margin-top:78px;
 
     background:
 
