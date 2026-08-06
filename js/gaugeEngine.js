@@ -62,10 +62,11 @@ class Gauge {
     }
 
     _build() {
-        const size = 430;
+        const size = this.options.size ?? 430;
         const cx = size / 2;
         const cy = size / 2;
         const r = this.options.radius;
+        const needleLength = this.options.needleLength ?? (r - 34);
 
         const svg = this._svg("svg", {
             viewBox: `0 0 ${size} ${size}`,
@@ -110,29 +111,32 @@ class Gauge {
         }
 
         const tickGroup = this._svg("g", { class: "gaugeTicks" });
-        const majorStep = (this.max - this.min) / this.options.majorTicks;
+        const majorCount = this.options.majorTicks;
         const minorCount = this.options.minorTicks;
         const minorStep = (this.max - this.min) / minorCount;
+        const ticksPerMajor = minorCount / majorCount;
 
         for (let i = 0; i <= minorCount; i++) {
             const value = this.min + (i * minorStep);
             const angle = this._valueToAngle(value);
             const outer = this._polarToCartesian(cx, cy, r - 4, angle);
-            const innerLength = (i % (minorCount / this.options.majorTicks) === 0) ? 22 : 12;
+            const majorTick = i % ticksPerMajor === 0;
+            const innerLength = majorTick ? 28 : 14;
             const inner = this._polarToCartesian(cx, cy, r - innerLength, angle);
             tickGroup.appendChild(this._svg("line", {
                 x1: inner.x, y1: inner.y,
                 x2: outer.x, y2: outer.y,
-                class: i % (minorCount / this.options.majorTicks) === 0 ? "gaugeMajorTick" : "gaugeMinorTick"
+                class: majorTick ? "gaugeMajorTick" : "gaugeMinorTick"
             }));
         }
         svg.appendChild(tickGroup);
 
         const labelGroup = this._svg("g", { class: "gaugeLabels" });
-        for (let i = 0; i <= this.options.majorTicks; i++) {
+        const majorStep = (this.max - this.min) / majorCount;
+        for (let i = 0; i <= majorCount; i++) {
             const value = this.min + (i * majorStep);
             const angle = this._valueToAngle(value);
-            const p = this._polarToCartesian(cx, cy, r - 48, angle);
+            const p = this._polarToCartesian(cx, cy, r - 56, angle);
             const label = this.options.labels && this.options.labels[i] !== undefined && this.options.labels[i] !== ""
                 ? this.options.labels[i]
                 : Math.round(value).toString();
@@ -151,7 +155,7 @@ class Gauge {
             x1: cx,
             y1: cy,
             x2: cx,
-            y2: cy - r + 55,
+            y2: cy - needleLength,
             class: "gaugeNeedle"
         });
         this.needle.appendChild(this.needleLine);
@@ -222,6 +226,8 @@ class MiniGauge {
             startAngle: options.startAngle ?? 220,
             endAngle: options.endAngle ?? -40,
             radius: options.radius ?? 46,
+            size: options.size ?? 160,
+            needleLength: options.needleLength ?? 58,
             title: label,
             needleColor: options.needleColor ?? "#ff4a4a",
             accentColor: options.accentColor ?? "#4cc3ff"
