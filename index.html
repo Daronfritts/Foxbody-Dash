@@ -3,78 +3,72 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>FoxbodyDash 2.0</title>
+  <title>Foxbody Dash</title>
   <link rel="stylesheet" href="css/style.css" />
   <link rel="stylesheet" href="css/gauges.css" />
+  <style>
+    body {
+      margin: 0;
+      background: #000;
+    }
+  </style>
 </head>
 <body>
-  <div id="appShell">
-    <div id="backgroundLayer"></div>
-    <div id="bezelLayer"></div>
-
-    <header id="topStatusBar">
-      <div id="topLeftStatus">
-        <span id="brandMark">FOXBODY DASH</span>
-        <span id="driveMode">DEMO MODE</span>
+  <div id="dashboard">
+    <header id="topBar">
+      <div id="leftIndicators">
+        <img id="leftTurn" class="indicator" src="assets/icons/status/leftTurn.svg" alt="Left Turn" />
+        <img id="highBeam" class="indicator" src="assets/icons/status/highBeam.svg" alt="High Beam" />
       </div>
-      <div id="topRightStatus">
-        <span id="clockDisplay">12:00 PM</span>
-        <span id="outsideTemp">74°F</span>
+      <div id="clusterLogo">
+        <div id="foxbodyTitle">FOXBODY GT</div>
+        <img id="mustangLogo" src="assets/images/mustangWhite.svg" alt="Mustang" />
+      </div>
+      <div id="rightIndicators">
+        <img id="rightTurn" class="indicator" src="assets/icons/status/rightTurn.svg" alt="Right Turn" />
       </div>
     </header>
 
-    <main id="dashboardSurface">
-      <section id="indicatorLayer" aria-label="status indicators">
-        <div id="leftTurnIndicator" class="indicatorSlot">◀</div>
-        <div id="highBeamIndicator" class="indicatorSlot">HB</div>
-        <div id="rightTurnIndicator" class="indicatorSlot">▶</div>
-      </section>
+    <main id="mainView">
+      <section id="cluster">
+        <div class="clusterScrew screwTL"></div>
+        <div class="clusterScrew screwTR"></div>
+        <div class="clusterScrew screwBL"></div>
+        <div class="clusterScrew screwBR"></div>
 
-      <section id="leftGaugeArea" aria-label="tachometer area">
-        <svg id="tachometerGauge" viewBox="0 0 400 400" role="img" aria-label="Tachometer"></svg>
-      </section>
-
-      <section id="centerCluster" aria-label="vehicle information">
-        <div class="clusterCard clusterTopRow">
-          <div class="clusterLabel">GEAR</div>
+        <svg id="tach" viewBox="0 0 430 430" aria-label="Tachometer"></svg>
+        <section id="driverInfoCenter">
+          <div id="clusterHeader">
+            <div id="clockDisplay">12:00 PM</div>
+            <div id="outsideTemp">74°F</div>
+          </div>
           <div id="gearRow">
+            <span class="label">GEAR</span>
             <span id="gearDisplay">3</span>
             <span id="gearType">N</span>
           </div>
-        </div>
+          <div class="clusterDivider"></div>
+          <div class="clusterInfo">
+            <div class="infoLabel">ODOMETER</div>
+            <div id="odometer">184,232 MI</div>
+          </div>
+          <div class="clusterDivider"></div>
+          <div class="clusterInfo">
+            <div class="infoLabel">TRIP A</div>
+            <div id="tripA">123.4 MI</div>
+          </div>
+          <div class="clusterDivider"></div>
+          <div id="cruiseStatus">CRUISE OFF</div>
+        </section>
+        <svg id="speed" viewBox="0 0 430 430" aria-label="Speedometer"></svg>
 
-        <div class="clusterCard">
-          <div class="clusterLabel">ODOMETER</div>
-          <div id="odometer">184,232 MI</div>
-        </div>
-
-        <div class="clusterDivider"></div>
-
-        <div class="clusterCard">
-          <div class="clusterLabel">TRIP A</div>
-          <div id="tripA">123.4 MI</div>
-        </div>
-
-        <div class="clusterDivider"></div>
-
-        <div class="clusterCard">
-          <div class="clusterLabel">CRUISE</div>
-          <div id="cruiseStatus">OFF</div>
-        </div>
+        <div id="fuelGauge" class="smallGauge"></div>
+        <div id="oilGauge" class="smallGauge"></div>
+        <div id="coolantGauge" class="smallGauge"></div>
+        <div id="batteryGauge" class="smallGauge"></div>
       </section>
 
-      <section id="rightGaugeArea" aria-label="speedometer area">
-        <svg id="speedometerGauge" viewBox="0 0 400 400" role="img" aria-label="Speedometer"></svg>
-      </section>
-
-      <section id="auxGaugeRow" aria-label="auxiliary gauges">
-        <div class="miniGauge" id="fuelGauge"></div>
-        <div class="miniGauge" id="coolantGauge"></div>
-        <div class="miniGauge" id="oilGauge"></div>
-        <div class="miniGauge" id="batteryGauge"></div>
-      </section>
-
-      <section id="liveRibbon" aria-label="live vehicle data">
+      <section id="liveRibbon">
         <span>Oil 62 PSI</span>
         <span>AFR 14.7</span>
         <span>MAP 34 kPa</span>
@@ -83,23 +77,20 @@
         <span>ECT 188°</span>
       </section>
 
-      <section id="statusBar" aria-label="alerts"></section>
+      <section id="statusBar"></section>
+      <section id="systemBar">
+        <div id="statusIcon">●</div>
+        <div id="statusText">READY</div>
+      </section>
     </main>
 
-    <footer id="bottomNav" aria-label="navigation">
-      <button type="button">Home</button>
-      <button type="button">Vehicle</button>
-      <button type="button">Music</button>
-      <button type="button">Themes</button>
-      <button type="button">Settings</button>
+    <footer id="bottomNav">
+      <button class="active">Home</button>
+      <button>Vehicle</button>
+      <button>Music</button>
+      <button>Themes</button>
+      <button>Settings</button>
     </footer>
   </div>
-
-  <script src="components/gaugeFace.js"></script>
-  <script src="components/gauge.js"></script>
-  <script src="components/miniGauge.js"></script>
-  <script src="components/miniGaugeFace.js"></script>
-  <script src="components/statusbar.js"></script>
-  <script src="js/dashboard.js"></script>
 </body>
 </html>
