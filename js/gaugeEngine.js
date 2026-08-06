@@ -11,10 +11,8 @@ class Gauge {
             labels: options.labels ?? null,
             unit: options.unit ?? "",
             redlineStart: options.redlineStart ?? null,
-            // Use a conventional left-to-right analog sweep.
-            // This is later overridden per-gauge where needed.
             startAngle: options.startAngle ?? 225,
-            endAngle: options.endAngle ?? -45,
+            endAngle: options.endAngle ?? 45,
             radius: options.radius ?? 180,
             size: options.size ?? 430,
             needleLength: options.needleLength ?? null,
@@ -228,7 +226,7 @@ class MiniGauge {
             unit,
             redlineStart: options.redlineStart ?? null,
             startAngle: options.startAngle ?? 220,
-            endAngle: options.endAngle ?? -40,
+            endAngle: options.endAngle ?? 140,
             radius: options.radius ?? 46,
             size: options.size ?? 120,
             needleLength: options.needleLength ?? 44,
