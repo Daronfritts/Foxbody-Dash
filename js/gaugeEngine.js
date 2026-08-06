@@ -11,9 +11,13 @@ class Gauge {
             labels: options.labels ?? null,
             unit: options.unit ?? "",
             redlineStart: options.redlineStart ?? null,
+            // Use a conventional left-to-right analog sweep.
+            // This is later overridden per-gauge where needed.
             startAngle: options.startAngle ?? 225,
             endAngle: options.endAngle ?? -45,
             radius: options.radius ?? 180,
+            size: options.size ?? 430,
+            needleLength: options.needleLength ?? null,
             title: options.title ?? label,
             needleColor: options.needleColor ?? "#ff4a4a",
             accentColor: options.accentColor ?? "#4cc3ff"
@@ -62,7 +66,7 @@ class Gauge {
     }
 
     _build() {
-        const size = this.options.size ?? 430;
+        const size = this.options.size;
         const cx = size / 2;
         const cy = size / 2;
         const r = this.options.radius;
@@ -121,7 +125,7 @@ class Gauge {
             const angle = this._valueToAngle(value);
             const outer = this._polarToCartesian(cx, cy, r - 4, angle);
             const majorTick = i % ticksPerMajor === 0;
-            const innerLength = majorTick ? 28 : 14;
+            const innerLength = majorTick ? 18 : 10;
             const inner = this._polarToCartesian(cx, cy, r - innerLength, angle);
             tickGroup.appendChild(this._svg("line", {
                 x1: inner.x, y1: inner.y,
@@ -136,7 +140,7 @@ class Gauge {
         for (let i = 0; i <= majorCount; i++) {
             const value = this.min + (i * majorStep);
             const angle = this._valueToAngle(value);
-            const p = this._polarToCartesian(cx, cy, r - 56, angle);
+            const p = this._polarToCartesian(cx, cy, r - 52, angle);
             const label = this.options.labels && this.options.labels[i] !== undefined && this.options.labels[i] !== ""
                 ? this.options.labels[i]
                 : Math.round(value).toString();
@@ -226,8 +230,8 @@ class MiniGauge {
             startAngle: options.startAngle ?? 220,
             endAngle: options.endAngle ?? -40,
             radius: options.radius ?? 46,
-            size: options.size ?? 160,
-            needleLength: options.needleLength ?? 58,
+            size: options.size ?? 120,
+            needleLength: options.needleLength ?? 44,
             title: label,
             needleColor: options.needleColor ?? "#ff4a4a",
             accentColor: options.accentColor ?? "#4cc3ff"
