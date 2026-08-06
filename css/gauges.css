@@ -11,11 +11,11 @@
 #cluster {
     position: relative;
     display: grid;
-    grid-template-columns: 430px 260px 430px;
+    grid-template-columns: 406px 238px 406px;
     grid-template-areas: "tach center speed" "mini mini mini";
     justify-content: center;
     align-items: start;
-    column-gap: 55px;
+    column-gap: 28px;
     row-gap: 24px;
     width: 1320px;
     height: 760px;
@@ -35,7 +35,7 @@
 #cluster::before {
     content: "";
     position: absolute;
-    inset: 14px;
+    inset: 18px;
     border-radius: 24px;
     border: 2px solid #159dff;
     box-shadow:
@@ -47,7 +47,7 @@
 #cluster::after {
     content: "";
     position: absolute;
-    inset: 28px;
+    inset: 34px;
     border-radius: 18px;
     background: radial-gradient(circle at center, #232323 0%, #131313 65%, #070707 100%);
     box-shadow: inset 0 0 35px rgba(0,0,0,.90);
@@ -65,8 +65,8 @@
 
 #tach,
 #speed {
-    width: 430px;
-    height: 430px;
+    width: 398px;
+    height: 398px;
     overflow: visible;
     display: block;
     filter: drop-shadow(0 0 16px rgba(0,0,0,.7));
@@ -75,13 +75,17 @@
 #tach {
     grid-area: tach;
     align-self: end;
-    margin-top: 35px;
+    justify-self: end;
+    margin-top: 54px;
+    margin-right: -8px;
 }
 
 #speed {
     grid-area: speed;
     align-self: end;
-    margin-top: 35px;
+    justify-self: start;
+    margin-top: 54px;
+    margin-left: -8px;
 }
 
 /* ===========================
@@ -92,9 +96,9 @@
     grid-area: center;
     align-self: center;
     justify-self: center;
-    width: 250px;
+    width: 238px;
     height: 340px;
-    margin-top: 78px;
+    margin-top: 88px;
     background: linear-gradient(180deg, #171717 0%, #0d0d0d 100%);
     border: 2px solid #3b3b3b;
     border-radius: 14px;
@@ -267,7 +271,7 @@
 
 #mustangLogo {
     width: 170px;
-    margin-top: 6px;
+    margin-top: 18px;
     transition: opacity .20s, filter .20s, transform .20s;
     opacity: .35;
 }
