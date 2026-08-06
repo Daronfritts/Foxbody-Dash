@@ -365,9 +365,43 @@ body{
 
     grid-area:center;
 
-    align-self:start;
+    align-self:center;
 
-    margin-top:-15px;
+    justify-self:center;
+
+    width:250px;
+
+    height:340px;
+
+    margin-top:48px;
+
+    background:
+
+        linear-gradient(
+            180deg,
+            #171717 0%,
+            #0d0d0d 100%
+        );
+
+    border:2px solid #3b3b3b;
+
+    border-radius:14px;
+
+    display:flex;
+
+    flex-direction:column;
+
+    justify-content:space-between;
+
+    overflow:hidden;
+
+    box-shadow:
+
+        inset 0 0 15px rgba(255,255,255,.04),
+
+        inset 0 0 45px rgba(0,0,0,.85),
+
+        0 0 20px rgba(0,0,0,.45);
 
 }
 
@@ -414,47 +448,6 @@ body{
     right:155px;
 
 }
-
-/*==================================================
-    DRIVER INFORMATION CENTER
-==================================================*/
-
-#driverInfoCenter{
-
-    width:250px;
-
-    height:340px;
-
-    background:
-
-        linear-gradient(
-            180deg,
-            #171717 0%,
-            #0d0d0d 100%
-        );
-
-    border:2px solid #3b3b3b;
-
-    border-radius:14px;
-
-    display:flex;
-
-    flex-direction:column;
-
-    justify-content:space-between;
-
-    overflow:hidden;
-
-    box-shadow:
-
-        inset 0 0 15px rgba(255,255,255,.04),
-
-        inset 0 0 45px rgba(0,0,0,.85),
-
-        0 0 20px rgba(0,0,0,.45);
-
-}
-
 
 /*==================================================
     DRIVER INFO HEADER
