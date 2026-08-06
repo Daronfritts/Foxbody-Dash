@@ -1,338 +1,505 @@
 /* =========================================================
    FOXBODY BCM DASHBOARD V2
    GAUGE CLUSTER
+   CURRENT LAYOUT ALIGNMENT
 ========================================================= */
 
 /* ===========================
-   MAIN CLUSTER
+   CLUSTER CONTAINER
 =========================== */
 
-#cluster{
-
-    position:relative;
-
-    display:grid;
-
-    grid-template-columns:450px 360px 450px;
-
-    align-items:center;
-
-    justify-content:center;
-
-    gap:40px;
-
-    width:1360px;
-    height:640px;
-
-    margin:auto;
-
-    border-radius:42px;
-
+#cluster {
+    position: relative;
+    display: grid;
+    grid-template-columns: 430px 260px 430px;
+    grid-template-areas: "tach center speed" "mini mini mini";
+    justify-content: center;
+    align-items: start;
+    column-gap: 55px;
+    row-gap: 24px;
+    width: 1320px;
+    height: 760px;
+    margin: auto;
+    margin-top: 45px;
+    border-radius: 34px;
+    overflow: hidden;
     background:
-        radial-gradient(circle at top,
-            rgba(255,255,255,.06),
-            rgba(255,255,255,0) 30%),
-        linear-gradient(#1A1A1A,#090909);
-
-    border:3px solid #2E2E2E;
-
+        linear-gradient(180deg, #dcdcdc 0%, #bababa 12%, #8c8c8c 50%, #bcbcbc 88%, #eeeeee 100%);
+    border: 2px solid #8f8f8f;
     box-shadow:
-        inset 0 0 80px rgba(255,255,255,.04),
-        inset 0 -25px 70px rgba(0,0,0,.8),
-        0 0 45px rgba(0,0,0,.7);
+        inset 0 3px 3px rgba(255,255,255,.70),
+        inset 0 -5px 12px rgba(0,0,0,.60),
+        0 18px 40px rgba(0,0,0,.70);
+}
 
+#cluster::before {
+    content: "";
+    position: absolute;
+    inset: 14px;
+    border-radius: 24px;
+    border: 2px solid #159dff;
+    box-shadow:
+        0 0 10px rgba(0,140,255,.75),
+        inset 0 0 10px rgba(0,140,255,.30);
+    pointer-events: none;
+}
+
+#cluster::after {
+    content: "";
+    position: absolute;
+    inset: 28px;
+    border-radius: 18px;
+    background: radial-gradient(circle at center, #232323 0%, #131313 65%, #070707 100%);
+    box-shadow: inset 0 0 35px rgba(0,0,0,.90);
+    pointer-events: none;
+}
+
+#cluster > * {
+    position: relative;
+    z-index: 20;
 }
 
 /* ===========================
-   MAIN GAUGES
+   MAIN SVG GAUGES
 =========================== */
 
 #tach,
-#speed{
+#speed {
+    width: 430px;
+    height: 430px;
+    overflow: visible;
+    display: block;
+    filter: drop-shadow(0 0 16px rgba(0,0,0,.7));
+}
 
-    width:430px;
-    height:430px;
+#tach {
+    grid-area: tach;
+    align-self: end;
+    margin-top: 35px;
+}
 
-    overflow:visible;
-
-    filter:
-        drop-shadow(0 0 16px rgba(0,0,0,.7));
-
+#speed {
+    grid-area: speed;
+    align-self: end;
+    margin-top: 35px;
 }
 
 /* ===========================
-   CENTER SECTION
+   CENTER INFO BLOCK
 =========================== */
 
-#centerGauges{
-
-    display:grid;
-
-    grid-template-columns:160px 160px;
-
-    grid-template-rows:
-        160px
-        140px
-        160px;
-
-    justify-content:center;
-
-    gap:22px;
-
-}
-
-/* ===========================
-   MESSAGE DISPLAY
-=========================== */
-
-.clusterMessage{
-
-    grid-column:1 / span 2;
-
-    display:flex;
-
-    flex-direction:column;
-
-    justify-content:center;
-
-    align-items:center;
-
-    border-radius:22px;
-
-    background:#101010;
-
-    border:2px solid #303030;
-
+#driverInfoCenter {
+    grid-area: center;
+    align-self: center;
+    justify-self: center;
+    width: 250px;
+    height: 340px;
+    margin-top: 78px;
+    background: linear-gradient(180deg, #171717 0%, #0d0d0d 100%);
+    border: 2px solid #3b3b3b;
+    border-radius: 14px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    overflow: hidden;
     box-shadow:
-        inset 0 0 18px rgba(255,255,255,.03);
-
+        inset 0 0 15px rgba(255,255,255,.04),
+        inset 0 0 45px rgba(0,0,0,.85),
+        0 0 20px rgba(0,0,0,.45);
 }
 
-#gearDisplay{
-
-    font-size:42px;
-
-    font-weight:bold;
-
-    letter-spacing:4px;
-
+#clusterHeader {
+    height: 50px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 16px;
+    border-bottom: 2px solid #128eff;
+    color: white;
+    font-size: 18px;
 }
 
-#clusterClock{
-
-    font-size:26px;
-
-    margin-top:8px;
-
+#gearRow {
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    gap: 14px;
+    padding: 20px 0;
 }
 
-#outsideTemp{
-
-    font-size:22px;
-
-    color:#BBBBBB;
-
-    margin-top:6px;
-
+#gearRow .label {
+    font-size: 16px;
+    opacity: .75;
+    margin-bottom: 10px;
 }
 
-#clusterMessageText{
+#gearDisplay {
+    font-size: 72px;
+    font-weight: 700;
+    line-height: 1;
+}
 
-    margin-top:14px;
+#gearType {
+    font-size: 24px;
+    margin-bottom: 12px;
+}
 
-    color:#66C9FF;
+.clusterDivider {
+    height: 2px;
+    background: #128eff;
+}
 
-    font-size:18px;
+.clusterInfo {
+    padding: 14px 0;
+    text-align: center;
+}
 
-    font-weight:bold;
+.infoLabel {
+    font-size: 14px;
+    letter-spacing: 2px;
+    color: #bdbdbd;
+}
 
+#odometer,
+#tripA {
+    margin-top: 8px;
+    font-size: 24px;
+    font-weight: 600;
+}
+
+#cruiseStatus {
+    height: 48px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 18px;
+    border-top: 2px solid #128eff;
 }
 
 /* ===========================
-   MINI GAUGES
+   LOWER MINI GAUGES
 =========================== */
 
-.smallGauge{
+#fuelGauge,
+#oilGauge,
+#coolantGauge,
+#batteryGauge {
+    position: absolute;
+    bottom: 58px;
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+}
 
-    width:160px;
-    height:160px;
+#fuelGauge { left: 155px; }
+#oilGauge { left: 410px; }
+#coolantGauge { right: 410px; }
+#batteryGauge { right: 155px; }
 
-    border-radius:50%;
-
+.smallGauge {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
     background:
-        radial-gradient(circle at top,
-            rgba(255,255,255,.08),
-            rgba(255,255,255,0) 45%),
+        radial-gradient(circle at top, rgba(255,255,255,.08), rgba(255,255,255,0) 45%),
         #131313;
-
-    border:4px solid #505050;
-
+    border: 3px solid #505050;
     box-shadow:
         inset 0 0 22px black,
         0 0 22px rgba(0,0,0,.6);
-
 }
 
 /* ===========================
-   TOP INDICATORS
+   TOP INDICATORS / PLACEHOLDERS
 =========================== */
 
-.topIndicator{
-
-    position:absolute;
-
-    top:78px;
-
-    width:42px;
-
-    height:42px;
-
-    opacity:.18;
-
+#leftIndicators,
+#rightIndicators {
+    display: flex;
+    align-items: center;
+    gap: 18px;
 }
 
-.topIndicator img{
-
-    width:100%;
-    height:100%;
-
+#rightIndicators {
+    justify-content: flex-end;
 }
 
-#leftTurnIndicator{
-
-    left:60px;
-
+.indicator {
+    width: 42px;
+    height: 42px;
+    opacity: .35;
+    transition: .20s;
 }
 
-#rightTurnIndicator{
-
-    right:60px;
-
+.indicator.active {
+    opacity: 1;
+    filter: drop-shadow(0 0 8px #00aaff);
 }
 
-#highBeamIndicator{
-
-    left:50%;
-
-    transform:translateX(-50%);
-
+.placeholder {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: rgba(255,255,255,.10);
+    opacity: .08;
 }
 
 /* ===========================
-   SHIFT LIGHT BAR
+   LOGO / TITLE
 =========================== */
 
-#shiftLightBar{
-
-    position:absolute;
-
-    top:125px;
-
-    left:50%;
-
-    transform:translateX(-50%);
-
-    display:flex;
-
-    gap:8px;
-
+#clusterLogo {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
 }
 
-.shiftLed{
+#foxbodyTitle {
+    color: #34a8ff;
+    font-size: 46px;
+    font-weight: 700;
+    letter-spacing: 6px;
+    text-shadow:
+        0 0 12px rgba(0,140,255,.70),
+        0 0 28px rgba(0,140,255,.45);
+}
 
-    width:20px;
+#mustangLogo {
+    width: 170px;
+    margin-top: 6px;
+    transition: opacity .20s, filter .20s, transform .20s;
+    opacity: .35;
+}
 
-    height:10px;
+#mustangLogo.shiftYellow {
+    opacity: 1;
+    filter:
+        drop-shadow(0 0 8px #ffd400)
+        drop-shadow(0 0 18px #ffd400);
+}
 
-    border-radius:8px;
-
-    background:#222;
-
+#mustangLogo.shiftRed {
+    opacity: 1;
+    filter:
+        drop-shadow(0 0 10px #ff2a2a)
+        drop-shadow(0 0 20px #ff2a2a)
+        drop-shadow(0 0 38px #ff2a2a);
 }
 
 /* ===========================
-   LIVE DATA BAR
+   LIVE DATA / STATUS / NAV
 =========================== */
 
-#liveRibbon{
+#liveRibbon {
+    display: flex;
+    justify-content: space-evenly;
+    align-items: center;
+    margin-top: 18px;
+    font-size: 20px;
+    letter-spacing: 1px;
+    color: #EAEAEA;
+}
 
-    display:flex;
+#statusBar {
+    width: 1180px;
+    height: 54px;
+    margin-top: 12px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 26px;
+    background: #080808;
+    border-top: 1px solid #2a2a2a;
+    border-bottom: 1px solid #2a2a2a;
+    border-radius: 10px;
+}
 
-    justify-content:space-evenly;
+.warningIcon {
+    width: 34px;
+    height: 34px;
+    opacity: .25;
+    transition: opacity .20s, transform .20s, filter .20s;
+}
 
-    align-items:center;
+.warningIcon.active {
+    opacity: 1;
+    transform: scale(1.08);
+}
 
-    margin-top:18px;
+#systemBar {
+    width: 1180px;
+    height: 52px;
+    margin-top: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 16px;
+    background: #111111;
+    border-radius: 10px;
+    border: 1px solid #2f2f2f;
+}
 
-    font-size:20px;
+#statusIcon {
+    font-size: 28px;
+    color: #33d04a;
+}
 
-    letter-spacing:1px;
+#statusText {
+    font-size: 22px;
+    letter-spacing: 2px;
+    color: #f0f0f0;
+}
 
-    color:#EAEAEA;
+#bottomNav {
+    width: 100%;
+    height: 82px;
+    margin-top: auto;
+    display: flex;
+    justify-content: space-evenly;
+    align-items: center;
+    background: linear-gradient(180deg, #111111 0%, #050505 100%);
+    border-top: 2px solid #1b1b1b;
+}
 
+#bottomNav button {
+    width: 180px;
+    height: 54px;
+    border: none;
+    border-radius: 12px;
+    background: linear-gradient(180deg, #2c2c2c 0%, #111111 100%);
+    color: white;
+    font-size: 18px;
+    cursor: pointer;
+    transition: .20s;
+}
+
+#bottomNav button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0 14px rgba(0,140,255,.45);
+}
+
+#bottomNav button.active {
+    background: linear-gradient(180deg, #178dff 0%, #0b5fa7 100%);
 }
 
 /* ===========================
-   SCREWS
+   SVG GAUGE DRAWING STYLES
 =========================== */
 
-.clusterScrew{
-
-    position:absolute;
-
-    width:22px;
-
-    height:22px;
-
-    border-radius:50%;
-
-    background:
-        radial-gradient(circle at 30% 30%,
-        #D8D8D8,
-        #888,
-        #444);
-
-    box-shadow:
-
-        inset -2px -2px 5px rgba(0,0,0,.6),
-
-        0 0 4px rgba(255,255,255,.15);
-
+.gaugeSvg {
+    overflow: visible;
 }
 
-.clusterScrew::after{
-
-    content:"";
-
-    position:absolute;
-
-    left:4px;
-
-    top:10px;
-
-    width:14px;
-
-    height:2px;
-
-    background:#222;
-
+.gaugeOuterRing {
+    fill: #0f0f0f;
+    stroke: #bfbfbf;
+    stroke-width: 3;
 }
 
-.screwTL{
-
-    top:18px;
-    left:18px;
-
+.gaugeFace {
+    fill: #070707;
+    stroke: #2e2e2e;
+    stroke-width: 2;
 }
 
-.screwTR{
-
-    top:18px;
-    right:18px;
-
+.gaugeTrack {
+    fill: none;
+    stroke: #373737;
+    stroke-width: 14;
+    stroke-linecap: round;
 }
 
-.screwBL{
+.gaugeRedline {
+    fill: none;
+    stroke: #e62b2b;
+    stroke-width: 14;
+    stroke-linecap: round;
+    filter: drop-shadow(0 0 8px rgba(255,0,0,.45));
+}
 
-    bottom:18px;
-   
+.gaugeMajorTick {
+    stroke: #efefef;
+    stroke-width: 3;
+    stroke-linecap: round;
+}
+
+.gaugeMinorTick {
+    stroke: rgba(255,255,255,.38);
+    stroke-width: 1.5;
+    stroke-linecap: round;
+}
+
+.gaugeLabel {
+    fill: #f2f2f2;
+    font-family: "Segoe UI", Arial, Helvetica, sans-serif;
+    font-size: 22px;
+    font-weight: 700;
+    text-anchor: middle;
+    dominant-baseline: middle;
+}
+
+.gaugeCenterTitle {
+    fill: #d9d9d9;
+    font-family: "Segoe UI", Arial, Helvetica, sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    text-anchor: middle;
+}
+
+.gaugeCenterValue {
+    fill: #ffffff;
+    font-family: "Segoe UI", Arial, Helvetica, sans-serif;
+    font-size: 26px;
+    font-weight: 800;
+    text-anchor: middle;
+}
+
+.gaugeNeedle {
+    stroke: #ff4a4a;
+    stroke-width: 4;
+    stroke-linecap: round;
+    filter: drop-shadow(0 0 6px rgba(255,0,0,.45));
+    transform-box: fill-box;
+    transform-origin: center;
+}
+
+.gaugeHub {
+    fill: #101010;
+    stroke: #cfcfcf;
+    stroke-width: 2;
+}
+
+.gaugeHubInner {
+    fill: #ff4a4a;
+    opacity: .85;
+}
+
+.gaugePulse {
+    filter: drop-shadow(0 0 10px rgba(76,195,255,.35));
+}
+
+/* ===========================
+   RESPONSIVE
+=========================== */
+
+@media (max-width: 1600px) {
+    #cluster {
+        transform: scale(.94);
+        transform-origin: top center;
+    }
+}
+
+@media (max-width: 1400px) {
+    #cluster {
+        transform: scale(.86);
+        transform-origin: top center;
+    }
+}
+
+@media (max-width: 1200px) {
+    #cluster {
+        transform: scale(.76);
+        transform-origin: top center;
+    }
+}
