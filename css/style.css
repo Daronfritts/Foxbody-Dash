@@ -176,6 +176,8 @@ body{
 
     justify-content:center;
 
+    transform:translateY(18px);
+
 }
 
 #foxbodyTitle{
@@ -200,7 +202,7 @@ body{
 
     width:170px;
 
-    margin-top:6px;
+    margin-top:2px;
 
 }
 
@@ -387,7 +389,7 @@ body{
 
     height:340px;
 
-    margin-top:78px;
+    margin-top:110px;
 
     background:
 
