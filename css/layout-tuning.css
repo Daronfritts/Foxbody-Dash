@@ -17,18 +17,19 @@
     letter-spacing: 7.5px !important;
 }
 
+/* Shift light moved upward ~25% of its rendered size. */
 #mustangLogo {
     width: 256px !important;
     margin-top: 3px !important;
-    transform: translateY(28px) !important;
+    transform: translateY(-36px) !important;
 }
 
 #mustangLogo.shiftYellow {
-    transform: translateY(28px) scale(1.04) !important;
+    transform: translateY(-36px) scale(1.04) !important;
 }
 
 #mustangLogo.shiftRed {
-    transform: translateY(28px) scale(1.06) !important;
+    transform: translateY(-36px) scale(1.06) !important;
 }
 
 /* Overall bezel enlarged 25% in both directions. */
@@ -53,7 +54,7 @@
     border-radius: 23px !important;
 }
 
-/* Main gauges +25%, keep the lower working vertical position. */
+/* Main gauges +25%, moved down ~15% of gauge diameter. */
 #tach,
 #speed {
     width: 513px !important;
@@ -63,19 +64,19 @@
 
 #tach {
     justify-self: start !important;
-    transform: translate(52px, 131px) !important;
+    transform: translate(52px, 208px) !important;
 }
 
 #speed {
     justify-self: end !important;
-    transform: translate(-52px, 131px) !important;
+    transform: translate(-52px, 208px) !important;
 }
 
-/* Driver information center +35%. */
+/* Driver information center +35%, moved down ~30% of its height. */
 #driverInfoCenter {
     width: 340px !important;
     height: 459px !important;
-    margin-top: 277px !important;
+    margin-top: 415px !important;
     justify-self: center !important;
     border-radius: 19px !important;
 }
