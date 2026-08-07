@@ -193,13 +193,13 @@
 }
 
 /*
-   Lower information/navigation stack remains where it was in the previous
-   working layout.
+   Drop the information/navigation stack back down beneath the shortened bezel.
+   This keeps all three lower rows together while leaving the bezel and gauges untouched.
 */
 #liveRibbon,
 #messageCenter,
 #bottomNav {
-    transform: translateY(-58px) !important;
+    transform: translateY(-12px) !important;
 }
 
 #liveRibbon,
