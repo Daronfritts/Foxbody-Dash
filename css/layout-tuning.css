@@ -21,29 +21,31 @@
     transform: translateY(22px) scale(1.06) !important;
 }
 
-/*
-   Increase bezel height so the main gauges can move much farther down
-   without colliding with the enlarged lower gauges.
-*/
+/* Restore the bezel and lower-row geometry from the working layout. */
 #cluster {
     width: 1480px !important;
-    height: 1050px !important;
+    height: 930px !important;
     margin-top: 64px !important;
     grid-template-columns: 430px 270px 430px !important;
     column-gap: 58px !important;
 }
 
-/* Main gauges: substantially lower than the previous 164px position. */
+/*
+   IMPORTANT: move ONLY the tachometer and speedometer visually.
+   Using translateY here prevents the lower gauges and status bar from moving.
+*/
 #tach,
 #speed {
-    margin-top: 245px !important;
+    margin-top: 164px !important;
+    transform: translateY(105px) !important;
 }
 
-/* Driver information center: about 20% lower than the previous 205px position. */
+/* Restore the info-box position from before the last layout pass. */
 #driverInfoCenter {
-    margin-top: 246px !important;
+    margin-top: 205px !important;
 }
 
+/* Keep the lower gauges exactly where they were before the last update. */
 #fuelGauge,
 #oilGauge,
 #coolantGauge,
@@ -87,11 +89,7 @@
     height: 35px !important;
 }
 
-/*
-   Chromium can fail to render the original SVG gradient on a perfectly
-   vertical line because its object bounding box has zero width.
-   Force a solid needle stroke so every gauge needle remains visible.
-*/
+/* Reliable solid-red needles for Chromium. */
 .gaugeNeedle {
     stroke: #ff3030 !important;
     stroke-width: 5px !important;
