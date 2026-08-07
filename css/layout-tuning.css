@@ -19,7 +19,7 @@
     transform: translateY(6px) !important;
 }
 
-/* Shift light moved down about 5% from the previous position. */
+/* Keep the Mustang shift light at the current working position. */
 #mustangLogo {
     width: 256px !important;
     margin-top: 3px !important;
@@ -55,7 +55,7 @@
     border-radius: 23px !important;
 }
 
-/* Main gauges: keep size/horizontal position and move down about 6%. */
+/* Main gauges stay exactly where they are. */
 #tach,
 #speed {
     width: 513px !important;
@@ -73,7 +73,7 @@
     transform: translate(-168px, 239px) !important;
 }
 
-/* Driver information center: move down about 6% more. */
+/* Driver information center stays exactly where it is. */
 #driverInfoCenter {
     width: 340px !important;
     height: 459px !important;
@@ -127,7 +127,7 @@
     font-size: 24px !important;
 }
 
-/* Secondary gauges retain their size and horizontal spread. */
+/* Secondary gauges retain size and horizontal spread. */
 #fuelGauge,
 #oilGauge,
 #coolantGauge,
@@ -137,32 +137,32 @@
     height: 363px !important;
 }
 
-/* Raise the complete small-gauge row about 4%. */
+/* Raise the complete small-gauge row another 57px. */
 #fuelGauge {
     left: 250px !important;
-    bottom: 113px !important;
+    bottom: 170px !important;
 }
 
 #oilGauge {
     left: 850px !important;
-    bottom: 113px !important;
+    bottom: 170px !important;
 }
 
 #coolantGauge {
     right: 850px !important;
-    bottom: 113px !important;
+    bottom: 170px !important;
 }
 
 #batteryGauge {
     right: 250px !important;
-    bottom: 113px !important;
+    bottom: 170px !important;
 }
 
-/* Status strip: modest readability increase (~18%). */
+/* Raise the warning strip with the small gauges so the lower stack stays together. */
 #statusBar {
     left: 50% !important;
     width: calc(100% - 88px) !important;
-    bottom: 13px !important;
+    bottom: 70px !important;
     height: 86px !important;
     padding: 0 18px !important;
     gap: 9px !important;
@@ -182,7 +182,16 @@
     line-height: 15px !important;
 }
 
-/* Live ribbon / message center: modest readability increase. */
+/*
+   Raise everything below the bezel as one visual stack. This keeps the live
+   ribbon, message center and nav bar aligned while restoring bottom clearance.
+*/
+#liveRibbon,
+#messageCenter,
+#bottomNav {
+    transform: translateY(-58px) !important;
+}
+
 #liveRibbon,
 #messageCenter {
     width: min(97vw, 2560px) !important;
@@ -223,7 +232,7 @@
     font-size: 19px !important;
 }
 
-/* Bottom navigation: taller and easier to read without changing spacing. */
+/* Bottom navigation size stays unchanged; only its vertical position moves. */
 #bottomNav {
     height: 121px !important;
 }
