@@ -34,20 +34,19 @@
     column-gap: 58px !important;
 }
 
-/* Main gauges: last pass was 78px. Move them another ~48px lower. */
+/* Main gauges: move about 30% lower than the previous 126px position. */
 #tach,
 #speed {
-    margin-top: 126px !important;
+    margin-top: 164px !important;
 }
 
-/* Driver information center: last pass was 118px. Move it another ~60px. */
+/* Driver information center: move about 15% lower than the previous 178px position. */
 #driverInfoCenter {
-    margin-top: 178px !important;
+    margin-top: 205px !important;
 }
 
 /*
-   Secondary gauges: approximately double the previous 155px diameter.
-   290px gives four gauges enough horizontal breathing room inside 1480px.
+   Secondary gauges remain at the enlarged size from the previous pass.
 */
 #fuelGauge,
 #oilGauge,
@@ -78,9 +77,19 @@
     bottom: 76px !important;
 }
 
-/* Keep the warning strip clear of the enlarged gauges. */
+/* Warning strip: keep it clear of the gauges and make its icons ~30% larger. */
 #statusBar {
     bottom: 10px !important;
+    height: 58px !important;
+}
+
+.warningTile {
+    height: 52px !important;
+}
+
+.warningTile img {
+    width: 35px !important;
+    height: 35px !important;
 }
 
 /* Scale the complete cluster on smaller displays as one unit. */
