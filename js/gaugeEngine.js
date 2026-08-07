@@ -11,14 +11,17 @@ class Gauge {
             labels: options.labels ?? null,
             unit: options.unit ?? "",
             redlineStart: options.redlineStart ?? null,
+            warningLow: options.warningLow ?? null,
+            warningHigh: options.warningHigh ?? null,
             startAngle: options.startAngle ?? 225,
-            endAngle: options.endAngle ?? 45,
-            radius: options.radius ?? 180,
+            endAngle: options.endAngle ?? 495,
+            radius: options.radius ?? 176,
             size: options.size ?? 430,
             needleLength: options.needleLength ?? null,
             title: options.title ?? label,
-            needleColor: options.needleColor ?? "#ff4a4a",
-            accentColor: options.accentColor ?? "#4cc3ff"
+            subtitle: options.subtitle ?? "",
+            variant: options.variant ?? "main",
+            showValue: options.showValue ?? false
         };
 
         this.element = document.getElementById(elementId);
@@ -46,10 +49,11 @@ class Gauge {
     }
 
     _describeArc(cx, cy, r, startAngle, endAngle) {
-        const start = this._polarToCartesian(cx, cy, r, endAngle);
-        const end = this._polarToCartesian(cx, cy, r, startAngle);
-        const largeArcFlag = Math.abs(endAngle - startAngle) <= 180 ? "0" : "1";
-        const sweepFlag = endAngle > startAngle ? "1" : "0";
+        const start = this._polarToCartesian(cx, cy, r, startAngle);
+        const end = this._polarToCartesian(cx, cy, r, endAngle);
+        const sweep = endAngle - startAngle;
+        const largeArcFlag = Math.abs(sweep) > 180 ? "1" : "0";
+        const sweepFlag = sweep >= 0 ? "1" : "0";
         return [
             "M", start.x, start.y,
             "A", r, r, 0, largeArcFlag, sweepFlag, end.x, end.y
@@ -63,53 +67,137 @@ class Gauge {
         return this.options.startAngle + ((this.options.endAngle - this.options.startAngle) * pct);
     }
 
+    _addGradient(defs, id, stops, attrs = {}) {
+        const gradient = this._svg("linearGradient", {
+            id,
+            x1: attrs.x1 ?? "0%",
+            y1: attrs.y1 ?? "0%",
+            x2: attrs.x2 ?? "0%",
+            y2: attrs.y2 ?? "100%"
+        });
+        stops.forEach(([offset, color, opacity = 1]) => {
+            gradient.appendChild(this._svg("stop", {
+                offset,
+                "stop-color": color,
+                "stop-opacity": opacity
+            }));
+        });
+        defs.appendChild(gradient);
+    }
+
     _build() {
         const size = this.options.size;
-        const cx = size / 2;
-        const cy = size / 2;
+        this.cx = size / 2;
+        this.cy = size / 2;
+        const cx = this.cx;
+        const cy = this.cy;
         const r = this.options.radius;
-        const needleLength = this.options.needleLength ?? (r - 34);
+        const mini = this.options.variant === "mini";
+        const needleLength = this.options.needleLength ?? (mini ? r - 10 : r - 48);
 
         const svg = this._svg("svg", {
             viewBox: `0 0 ${size} ${size}`,
-            width: size,
-            height: size,
-            class: "gaugeSvg"
+            width: "100%",
+            height: "100%",
+            class: `gaugeSvg gaugeSvg--${this.options.variant}`,
+            role: "img",
+            "aria-label": this.options.title
         });
 
         const defs = this._svg("defs");
-        const glow = this._svg("filter", { id: `${this.elementId}-glow`, x: "-50%", y: "-50%", width: "200%", height: "200%" });
-        glow.appendChild(this._svg("feGaussianBlur", { stdDeviation: "3", result: "coloredBlur" }));
-        const glowMerge = this._svg("feMerge");
-        glowMerge.appendChild(this._svg("feMergeNode", { in: "coloredBlur" }));
-        glowMerge.appendChild(this._svg("feMergeNode", { in: "SourceGraphic" }));
-        glow.appendChild(glowMerge);
-        defs.appendChild(glow);
+
+        this._addGradient(defs, `${this.elementId}-bezel`, [
+            ["0%", "#f4f4f4"],
+            ["18%", "#8d8d8d"],
+            ["42%", "#eeeeee"],
+            ["68%", "#626262"],
+            ["100%", "#d9d9d9"]
+        ], { x1: "0%", y1: "0%", x2: "100%", y2: "100%" });
+
+        const faceGlow = this._svg("radialGradient", { id: `${this.elementId}-face` });
+        [
+            ["0%", "#171717", 1],
+            ["58%", "#090909", 1],
+            ["100%", "#020202", 1]
+        ].forEach(([offset, color, opacity]) => {
+            faceGlow.appendChild(this._svg("stop", {
+                offset,
+                "stop-color": color,
+                "stop-opacity": opacity
+            }));
+        });
+        defs.appendChild(faceGlow);
+
+        const needleGradient = this._svg("linearGradient", {
+            id: `${this.elementId}-needle`,
+            x1: "0%", y1: "0%", x2: "100%", y2: "0%"
+        });
+        [
+            ["0%", "#8d0000"],
+            ["40%", "#ff2c2c"],
+            ["72%", "#ff6666"],
+            ["100%", "#f3f3f3"]
+        ].forEach(([offset, color]) => {
+            needleGradient.appendChild(this._svg("stop", {
+                offset,
+                "stop-color": color
+            }));
+        });
+        defs.appendChild(needleGradient);
+
+        const shadow = this._svg("filter", {
+            id: `${this.elementId}-shadow`,
+            x: "-50%", y: "-50%", width: "200%", height: "200%"
+        });
+        shadow.appendChild(this._svg("feDropShadow", {
+            dx: "0", dy: mini ? "1.5" : "3",
+            stdDeviation: mini ? "2" : "4",
+            "flood-color": "#000000",
+            "flood-opacity": ".8"
+        }));
+        defs.appendChild(shadow);
+
         svg.appendChild(defs);
 
         svg.appendChild(this._svg("circle", {
-            cx, cy, r: r + 18,
-            class: "gaugeOuterRing"
+            cx, cy, r: r + (mini ? 10 : 23),
+            class: "gaugeBezelOuter",
+            fill: `url(#${this.elementId}-bezel)`
+        }));
+        svg.appendChild(this._svg("circle", {
+            cx, cy, r: r + (mini ? 6 : 17),
+            class: "gaugeBezelDark"
+        }));
+        svg.appendChild(this._svg("circle", {
+            cx, cy, r: r + (mini ? 3 : 11),
+            class: "gaugeBezelHighlight"
+        }));
+        svg.appendChild(this._svg("circle", {
+            cx, cy, r,
+            class: "gaugeFace",
+            fill: `url(#${this.elementId}-face)`
         }));
 
         svg.appendChild(this._svg("circle", {
-            cx, cy, r: r,
-            class: "gaugeFace"
+            cx, cy, r: r - (mini ? 4 : 7),
+            class: "gaugeInnerRing"
         }));
 
-        this.arcTrack = this._svg("path", {
-            d: this._describeArc(cx, cy, r - 7, this.options.startAngle, this.options.endAngle),
-            class: "gaugeTrack"
-        });
-        svg.appendChild(this.arcTrack);
+        if (this.options.warningLow !== null && this.options.warningLow > this.min) {
+            const lowEnd = this._valueToAngle(this.options.warningLow);
+            svg.appendChild(this._svg("path", {
+                d: this._describeArc(cx, cy, r - (mini ? 8 : 12), this.options.startAngle, lowEnd),
+                class: "gaugeWarningLow"
+            }));
+        }
 
-        if (this.options.redlineStart !== null) {
-            const redStartAngle = this._valueToAngle(this.options.redlineStart);
-            const redArc = this._svg("path", {
-                d: this._describeArc(cx, cy, r - 7, redStartAngle, this.options.endAngle),
-                class: "gaugeRedline"
-            });
-            svg.appendChild(redArc);
+        const highStartValue = this.options.redlineStart ?? this.options.warningHigh;
+        if (highStartValue !== null && highStartValue < this.max) {
+            const highStart = this._valueToAngle(highStartValue);
+            svg.appendChild(this._svg("path", {
+                d: this._describeArc(cx, cy, r - (mini ? 8 : 12), highStart, this.options.endAngle),
+                class: "gaugeWarningHigh"
+            }));
         }
 
         const tickGroup = this._svg("g", { class: "gaugeTicks" });
@@ -121,10 +209,13 @@ class Gauge {
         for (let i = 0; i <= minorCount; i++) {
             const value = this.min + (i * minorStep);
             const angle = this._valueToAngle(value);
-            const outer = this._polarToCartesian(cx, cy, r - 4, angle);
-            const majorTick = i % ticksPerMajor === 0;
-            const innerLength = majorTick ? 18 : 10;
-            const inner = this._polarToCartesian(cx, cy, r - innerLength, angle);
+            const majorTick = Math.abs((i / ticksPerMajor) - Math.round(i / ticksPerMajor)) < 0.0001;
+
+            const outerRadius = r - (mini ? 7 : 10);
+            const innerLength = majorTick ? (mini ? 10 : 21) : (mini ? 5 : 11);
+            const outer = this._polarToCartesian(cx, cy, outerRadius, angle);
+            const inner = this._polarToCartesian(cx, cy, outerRadius - innerLength, angle);
+
             tickGroup.appendChild(this._svg("line", {
                 x1: inner.x, y1: inner.y,
                 x2: outer.x, y2: outer.y,
@@ -138,10 +229,19 @@ class Gauge {
         for (let i = 0; i <= majorCount; i++) {
             const value = this.min + (i * majorStep);
             const angle = this._valueToAngle(value);
-            const p = this._polarToCartesian(cx, cy, r - 52, angle);
-            const label = this.options.labels && this.options.labels[i] !== undefined && this.options.labels[i] !== ""
+            const p = this._polarToCartesian(
+                cx,
+                cy,
+                r - (mini ? 21 : 48),
+                angle
+            );
+
+            const label = this.options.labels && this.options.labels[i] !== undefined
                 ? this.options.labels[i]
                 : Math.round(value).toString();
+
+            if (label === "") continue;
+
             const text = this._svg("text", {
                 x: p.x,
                 y: p.y,
@@ -152,68 +252,114 @@ class Gauge {
         }
         svg.appendChild(labelGroup);
 
-        this.needle = this._svg("g", { class: "gaugeNeedleGroup" });
-        this.needleLine = this._svg("line", {
-            x1: cx,
-            y1: cy,
-            x2: cx,
-            y2: cy - needleLength,
-            class: "gaugeNeedle"
-        });
-        this.needle.appendChild(this.needleLine);
-        this.needleHub = this._svg("circle", {
-            cx,
-            cy,
-            r: 16,
-            class: "gaugeHub"
-        });
-        this.needle.appendChild(this.needleHub);
-        this.needleGlow = this._svg("circle", {
-            cx,
-            cy,
-            r: 8,
-            class: "gaugeHubInner"
-        });
-        this.needle.appendChild(this.needleGlow);
-        svg.appendChild(this.needle);
+        const titleY = mini ? cy + 27 : cy - 56;
+        const unitY = mini ? cy + 41 : cy - 32;
 
         this.titleText = this._svg("text", {
             x: cx,
-            y: cy + 18,
+            y: titleY,
             class: "gaugeCenterTitle"
         });
         this.titleText.textContent = this.options.title;
         svg.appendChild(this.titleText);
 
-        this.valueText = this._svg("text", {
-            x: cx,
-            y: cy + 48,
-            class: "gaugeCenterValue"
+        if (this.options.subtitle) {
+            const subtitle = this._svg("text", {
+                x: cx,
+                y: unitY,
+                class: "gaugeCenterSubtitle"
+            });
+            subtitle.textContent = this.options.subtitle;
+            svg.appendChild(subtitle);
+        }
+
+        this.needle = this._svg("g", {
+            class: "gaugeNeedleGroup",
+            filter: `url(#${this.elementId}-shadow)`
         });
-        this.valueText.textContent = `${Math.round(this.value)}${this.options.unit}`;
-        svg.appendChild(this.valueText);
+
+        const tailLength = mini ? 10 : 25;
+        this.needleTail = this._svg("line", {
+            x1: cx,
+            y1: cy,
+            x2: cx,
+            y2: cy + tailLength,
+            class: "gaugeNeedleTail"
+        });
+        this.needle.appendChild(this.needleTail);
+
+        this.needleLine = this._svg("line", {
+            x1: cx,
+            y1: cy,
+            x2: cx,
+            y2: cy - needleLength,
+            class: "gaugeNeedle",
+            stroke: `url(#${this.elementId}-needle)`
+        });
+        this.needle.appendChild(this.needleLine);
+
+        this.needle.appendChild(this._svg("circle", {
+            cx, cy,
+            r: mini ? 8 : 18,
+            class: "gaugeHub"
+        }));
+        this.needle.appendChild(this._svg("circle", {
+            cx, cy,
+            r: mini ? 5 : 12,
+            class: "gaugeHubInner"
+        }));
+        this.needle.appendChild(this._svg("circle", {
+            cx: cx - (mini ? 1 : 2),
+            cy: cy - (mini ? 1 : 2),
+            r: mini ? 1.5 : 3.5,
+            class: "gaugeHubHighlight"
+        }));
+        svg.appendChild(this.needle);
+
+        if (this.options.showValue) {
+            this.valueText = this._svg("text", {
+                x: cx,
+                y: mini ? cy + 55 : cy + 62,
+                class: "gaugeCenterValue"
+            });
+            svg.appendChild(this.valueText);
+        }
 
         this.element.appendChild(svg);
         this.svg = svg;
     }
 
+    _formatValue(value) {
+        if (this.options.unit === "V") return Number(value).toFixed(1);
+        if (this.options.unit === "%") return `${Math.round(value)}`;
+        return `${Math.round(value)}`;
+    }
+
     setValue(value, immediate = false) {
         this.value = value;
         const angle = this._valueToAngle(value);
-        this.needle.setAttribute("transform", `rotate(${angle} 215 215)`);
-        this.valueText.textContent = `${Math.round(value)}${this.options.unit}`;
+        this.needle.setAttribute("transform", `rotate(${angle} ${this.cx} ${this.cy})`);
+
+        if (this.valueText) {
+            const formatted = this._formatValue(value);
+            this.valueText.textContent = this.options.unit
+                ? `${formatted} ${this.options.unit}`
+                : formatted;
+        }
+
         if (!immediate) {
             this.svg.classList.add("gaugePulse");
-            window.setTimeout(() => this.svg.classList.remove("gaugePulse"), 180);
+            window.setTimeout(() => this.svg.classList.remove("gaugePulse"), 140);
         }
     }
 
     sweep() {
         const span = this.max - this.min;
+        const returnValue = this.value;
         this.setValue(this.min, true);
-        window.requestAnimationFrame(() => this.setValue(this.min + span * 0.45));
-        window.setTimeout(() => this.setValue(this.min + span * 0.78), 120);
-        window.setTimeout(() => this.setValue(this.min), 260);
+        window.setTimeout(() => this.setValue(this.max), 80);
+        window.setTimeout(() => this.setValue(this.min + span * 0.18), 420);
+        window.setTimeout(() => this.setValue(returnValue, true), 700);
     }
 }
 
@@ -225,14 +371,17 @@ class MiniGauge {
             labels: options.labels ?? null,
             unit,
             redlineStart: options.redlineStart ?? null,
-            startAngle: options.startAngle ?? 220,
-            endAngle: options.endAngle ?? 140,
-            radius: options.radius ?? 46,
+            warningLow: options.warningLow ?? null,
+            warningHigh: options.warningHigh ?? null,
+            startAngle: options.startAngle ?? 225,
+            endAngle: options.endAngle ?? 495,
+            radius: options.radius ?? 48,
             size: options.size ?? 120,
-            needleLength: options.needleLength ?? 44,
+            needleLength: options.needleLength ?? 36,
             title: label,
-            needleColor: options.needleColor ?? "#ff4a4a",
-            accentColor: options.accentColor ?? "#4cc3ff"
+            subtitle: options.subtitle ?? unit,
+            variant: "mini",
+            showValue: options.showValue ?? false
         });
     }
 
