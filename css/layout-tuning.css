@@ -166,13 +166,12 @@
 }
 
 /*
-   Keep the warning strip in the same visual position while allowing the new
-   bezel bottom to end just beneath it.
+   Raise the warning strip enough to clear the bezel bottom edge cleanly.
 */
 #statusBar {
     left: 50% !important;
     width: calc(100% - 88px) !important;
-    bottom: 22px !important;
+    bottom: 44px !important;
     height: 86px !important;
     padding: 0 18px !important;
     gap: 9px !important;
