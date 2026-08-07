@@ -21,7 +21,7 @@
     transform: translateY(22px) scale(1.06) !important;
 }
 
-/* Restore the bezel and lower-row geometry from the working layout. */
+/* Working bezel geometry. */
 #cluster {
     width: 1480px !important;
     height: 930px !important;
@@ -31,21 +31,29 @@
 }
 
 /*
-   IMPORTANT: move ONLY the tachometer and speedometer visually.
-   Using translateY here prevents the lower gauges and status bar from moving.
+   Keep the working vertical position, but spread the two main gauges
+   outward so the top row uses more of the bezel width.
 */
 #tach,
 #speed {
     margin-top: 164px !important;
-    transform: translateY(105px) !important;
 }
 
-/* Restore the info-box position from before the last layout pass. */
+#tach {
+    transform: translate(-78px, 105px) !important;
+}
+
+#speed {
+    transform: translate(78px, 105px) !important;
+}
+
+/* Keep the information center centered at the working height. */
 #driverInfoCenter {
     margin-top: 205px !important;
+    justify-self: center !important;
 }
 
-/* Keep the lower gauges exactly where they were before the last update. */
+/* Enlarged secondary gauges. */
 #fuelGauge,
 #oilGauge,
 #coolantGauge,
@@ -55,27 +63,34 @@
     height: 290px !important;
 }
 
+/*
+   Spread the four lower gauges across nearly the full inner bezel width.
+   Outer pair moves outward; inner pair separates from the center.
+*/
 #fuelGauge {
-    left: 72px !important;
+    left: 34px !important;
     bottom: 76px !important;
 }
 
 #oilGauge {
-    left: 418px !important;
+    left: 382px !important;
     bottom: 76px !important;
 }
 
 #coolantGauge {
-    right: 418px !important;
+    right: 382px !important;
     bottom: 76px !important;
 }
 
 #batteryGauge {
-    right: 72px !important;
+    right: 34px !important;
     bottom: 76px !important;
 }
 
+/* Warning strip remains fixed to the working bottom position. */
 #statusBar {
+    left: 50% !important;
+    width: calc(100% - 58px) !important;
     bottom: 10px !important;
     height: 58px !important;
 }
