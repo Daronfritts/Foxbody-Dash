@@ -87,6 +87,32 @@
     height: 35px !important;
 }
 
+/*
+   Chromium can fail to render the original SVG gradient on a perfectly
+   vertical line because its object bounding box has zero width.
+   Force a solid needle stroke so every gauge needle remains visible.
+*/
+.gaugeNeedle {
+    stroke: #ff3030 !important;
+    stroke-width: 5px !important;
+    stroke-linecap: round !important;
+    opacity: 1 !important;
+}
+
+.gaugeSvg--mini .gaugeNeedle {
+    stroke: #ff3030 !important;
+    stroke-width: 3.2px !important;
+}
+
+.gaugeNeedleTail {
+    stroke: #8f0000 !important;
+    opacity: 1 !important;
+}
+
+.gaugeNeedleGroup {
+    opacity: 1 !important;
+}
+
 @media (max-width: 1600px) {
     #cluster {
         transform: scale(.82) !important;
