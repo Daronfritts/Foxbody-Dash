@@ -1,0 +1,106 @@
+/* =========================================================
+   FOXBODY DASH - LAYOUT TUNING
+   Final-position overrides loaded after style.css/gauges.css
+   ========================================================= */
+
+/* Give the Mustang horse more vertical room under the FOXBODY GT title. */
+#clusterLogo {
+    transform: translateY(40px) !important;
+}
+
+#mustangLogo {
+    width: 205px !important;
+    margin-top: 2px !important;
+    transform: translateY(22px) !important;
+}
+
+#mustangLogo.shiftYellow {
+    transform: translateY(22px) scale(1.04) !important;
+}
+
+#mustangLogo.shiftRed {
+    transform: translateY(22px) scale(1.06) !important;
+}
+
+/*
+   Taller inner cluster provides room for the much larger secondary gauges
+   while keeping the warning strip inside the bezel.
+*/
+#cluster {
+    width: 1480px !important;
+    height: 930px !important;
+    margin-top: 64px !important;
+    grid-template-columns: 430px 270px 430px !important;
+    column-gap: 58px !important;
+}
+
+/* Main gauges: last pass was 78px. Move them another ~48px lower. */
+#tach,
+#speed {
+    margin-top: 126px !important;
+}
+
+/* Driver information center: last pass was 118px. Move it another ~60px. */
+#driverInfoCenter {
+    margin-top: 178px !important;
+}
+
+/*
+   Secondary gauges: approximately double the previous 155px diameter.
+   290px gives four gauges enough horizontal breathing room inside 1480px.
+*/
+#fuelGauge,
+#oilGauge,
+#coolantGauge,
+#batteryGauge,
+.smallGauge {
+    width: 290px !important;
+    height: 290px !important;
+}
+
+#fuelGauge {
+    left: 72px !important;
+    bottom: 76px !important;
+}
+
+#oilGauge {
+    left: 418px !important;
+    bottom: 76px !important;
+}
+
+#coolantGauge {
+    right: 418px !important;
+    bottom: 76px !important;
+}
+
+#batteryGauge {
+    right: 72px !important;
+    bottom: 76px !important;
+}
+
+/* Keep the warning strip clear of the enlarged gauges. */
+#statusBar {
+    bottom: 10px !important;
+}
+
+/* Scale the complete cluster on smaller displays as one unit. */
+@media (max-width: 1600px) {
+    #cluster {
+        transform: scale(.82) !important;
+        transform-origin: top center !important;
+    }
+}
+
+@media (max-width: 1400px) {
+    #cluster {
+        transform: scale(.72) !important;
+        transform-origin: top center !important;
+    }
+}
+
+@media (max-width: 1200px) {
+    #cluster {
+        transform: scale(.62) !important;
+        transform-origin: top center !important;
+    }
+}
