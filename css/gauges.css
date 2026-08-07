@@ -1,12 +1,7 @@
 /* =========================================================
-   FOXBODY BCM DASHBOARD V2
-   GAUGE CLUSTER
-   CURRENT LAYOUT ALIGNMENT
+   FOXBODY DASH - GAUGE CLUSTER
+   Realistic OEM-inspired analog gauge treatment
 ========================================================= */
-
-/* ===========================
-   CLUSTER CONTAINER
-=========================== */
 
 #cluster {
     position: relative;
@@ -19,12 +14,10 @@
     row-gap: 24px;
     width: 1320px;
     height: 760px;
-    margin: auto;
-    margin-top: 45px;
+    margin: 45px auto 0;
     border-radius: 34px;
     overflow: hidden;
-    background:
-        linear-gradient(180deg, #dcdcdc 0%, #bababa 12%, #8c8c8c 50%, #bcbcbc 88%, #eeeeee 100%);
+    background: linear-gradient(180deg, #dcdcdc 0%, #bababa 12%, #8c8c8c 50%, #bcbcbc 88%, #eeeeee 100%);
     border: 2px solid #8f8f8f;
     box-shadow:
         inset 0 3px 3px rgba(255,255,255,.70),
@@ -38,9 +31,7 @@
     inset: 18px;
     border-radius: 24px;
     border: 2px solid #159dff;
-    box-shadow:
-        0 0 10px rgba(0,140,255,.75),
-        inset 0 0 10px rgba(0,140,255,.30);
+    box-shadow: 0 0 10px rgba(0,140,255,.75), inset 0 0 10px rgba(0,140,255,.30);
     pointer-events: none;
 }
 
@@ -59,17 +50,13 @@
     z-index: 20;
 }
 
-/* ===========================
-   MAIN SVG GAUGES
-=========================== */
-
 #tach,
 #speed {
     width: 398px;
     height: 398px;
     overflow: visible;
     display: block;
-    filter: drop-shadow(0 0 16px rgba(0,0,0,.7));
+    filter: drop-shadow(0 6px 12px rgba(0,0,0,.85));
 }
 
 #tach {
@@ -87,10 +74,6 @@
     margin-top: 54px;
     margin-left: -8px;
 }
-
-/* ===========================
-   CENTER INFO BLOCK
-=========================== */
 
 #driverInfoCenter {
     grid-area: center;
@@ -131,45 +114,13 @@
     padding: 20px 0;
 }
 
-#gearRow .label {
-    font-size: 16px;
-    opacity: .75;
-    margin-bottom: 10px;
-}
-
-#gearDisplay {
-    font-size: 72px;
-    font-weight: 700;
-    line-height: 1;
-}
-
-#gearType {
-    font-size: 24px;
-    margin-bottom: 12px;
-}
-
-.clusterDivider {
-    height: 2px;
-    background: #128eff;
-}
-
-.clusterInfo {
-    padding: 14px 0;
-    text-align: center;
-}
-
-.infoLabel {
-    font-size: 14px;
-    letter-spacing: 2px;
-    color: #bdbdbd;
-}
-
-#odometer,
-#tripA {
-    margin-top: 8px;
-    font-size: 24px;
-    font-weight: 600;
-}
+#gearRow .label { font-size: 16px; opacity: .75; margin-bottom: 10px; }
+#gearDisplay { font-size: 72px; font-weight: 700; line-height: 1; }
+#gearType { font-size: 24px; margin-bottom: 12px; }
+.clusterDivider { height: 2px; background: #128eff; }
+.clusterInfo { padding: 14px 0; text-align: center; }
+.infoLabel { font-size: 14px; letter-spacing: 2px; color: #bdbdbd; }
+#odometer, #tripA { margin-top: 8px; font-size: 24px; font-weight: 600; }
 
 #cruiseStatus {
     height: 48px;
@@ -180,10 +131,6 @@
     border-top: 2px solid #128eff;
 }
 
-/* ===========================
-   LOWER MINI GAUGES
-=========================== */
-
 #fuelGauge,
 #oilGauge,
 #coolantGauge,
@@ -193,6 +140,8 @@
     width: 120px;
     height: 120px;
     border-radius: 50%;
+    overflow: visible;
+    filter: drop-shadow(0 4px 8px rgba(0,0,0,.85));
 }
 
 #fuelGauge { left: 155px; }
@@ -203,19 +152,7 @@
 .smallGauge {
     width: 120px;
     height: 120px;
-    border-radius: 50%;
-    background:
-        radial-gradient(circle at top, rgba(255,255,255,.08), rgba(255,255,255,0) 45%),
-        #131313;
-    border: 3px solid #505050;
-    box-shadow:
-        inset 0 0 22px black,
-        0 0 22px rgba(0,0,0,.6);
 }
-
-/* ===========================
-   TOP INDICATORS / PLACEHOLDERS
-=========================== */
 
 #leftIndicators,
 #rightIndicators {
@@ -224,9 +161,7 @@
     gap: 18px;
 }
 
-#rightIndicators {
-    justify-content: flex-end;
-}
+#rightIndicators { justify-content: flex-end; }
 
 .indicator {
     width: 42px;
@@ -248,10 +183,6 @@
     opacity: .08;
 }
 
-/* ===========================
-   LOGO / TITLE
-=========================== */
-
 #clusterLogo {
     display: flex;
     flex-direction: column;
@@ -264,9 +195,7 @@
     font-size: 46px;
     font-weight: 700;
     letter-spacing: 6px;
-    text-shadow:
-        0 0 12px rgba(0,140,255,.70),
-        0 0 28px rgba(0,140,255,.45);
+    text-shadow: 0 0 12px rgba(0,140,255,.70), 0 0 28px rgba(0,140,255,.45);
 }
 
 #mustangLogo {
@@ -278,22 +207,13 @@
 
 #mustangLogo.shiftYellow {
     opacity: 1;
-    filter:
-        drop-shadow(0 0 8px #ffd400)
-        drop-shadow(0 0 18px #ffd400);
+    filter: drop-shadow(0 0 8px #ffd400) drop-shadow(0 0 18px #ffd400);
 }
 
 #mustangLogo.shiftRed {
     opacity: 1;
-    filter:
-        drop-shadow(0 0 10px #ff2a2a)
-        drop-shadow(0 0 20px #ff2a2a)
-        drop-shadow(0 0 38px #ff2a2a);
+    filter: drop-shadow(0 0 10px #ff2a2a) drop-shadow(0 0 20px #ff2a2a) drop-shadow(0 0 38px #ff2a2a);
 }
-
-/* ===========================
-   LIVE DATA / STATUS / NAV
-=========================== */
 
 #liveRibbon {
     display: flex;
@@ -326,10 +246,7 @@
     transition: opacity .20s, transform .20s, filter .20s;
 }
 
-.warningIcon.active {
-    opacity: 1;
-    transform: scale(1.08);
-}
+.warningIcon.active { opacity: 1; transform: scale(1.08); }
 
 #systemBar {
     width: 1180px;
@@ -344,16 +261,8 @@
     border: 1px solid #2f2f2f;
 }
 
-#statusIcon {
-    font-size: 28px;
-    color: #33d04a;
-}
-
-#statusText {
-    font-size: 22px;
-    letter-spacing: 2px;
-    color: #f0f0f0;
-}
+#statusIcon { font-size: 28px; color: #33d04a; }
+#statusText { font-size: 22px; letter-spacing: 2px; color: #f0f0f0; }
 
 #bottomNav {
     width: 100%;
@@ -387,123 +296,182 @@
     background: linear-gradient(180deg, #178dff 0%, #0b5fa7 100%);
 }
 
-/* ===========================
-   SVG GAUGE DRAWING STYLES
-=========================== */
-
 .gaugeSvg {
     overflow: visible;
+    shape-rendering: geometricPrecision;
 }
 
-.gaugeOuterRing {
-    fill: #0f0f0f;
-    stroke: #bfbfbf;
-    stroke-width: 3;
+.gaugeBezelOuter {
+    stroke: #f6f6f6;
+    stroke-width: 1.2;
 }
 
-.gaugeFace {
-    fill: #070707;
-    stroke: #2e2e2e;
+.gaugeBezelDark {
+    fill: #111;
+    stroke: #545454;
     stroke-width: 2;
 }
 
-.gaugeTrack {
-    fill: none;
-    stroke: #373737;
-    stroke-width: 14;
-    stroke-linecap: round;
+.gaugeBezelHighlight {
+    fill: #020202;
+    stroke: #d9d9d9;
+    stroke-width: 2;
 }
 
-.gaugeRedline {
+.gaugeFace {
+    stroke: #161616;
+    stroke-width: 1.5;
+}
+
+.gaugeInnerRing {
     fill: none;
-    stroke: #e62b2b;
-    stroke-width: 14;
-    stroke-linecap: round;
-    filter: drop-shadow(0 0 8px rgba(255,0,0,.45));
+    stroke: rgba(255,255,255,.10);
+    stroke-width: 1;
+}
+
+.gaugeWarningHigh,
+.gaugeWarningLow {
+    fill: none;
+    stroke-width: 5;
+    stroke-linecap: butt;
+}
+
+.gaugeWarningHigh {
+    stroke: #e32323;
+    filter: drop-shadow(0 0 2px rgba(255,30,30,.55));
+}
+
+.gaugeWarningLow {
+    stroke: #2e8cff;
+    filter: drop-shadow(0 0 2px rgba(46,140,255,.40));
 }
 
 .gaugeMajorTick {
-    stroke: #efefef;
+    stroke: #f3f3f3;
     stroke-width: 3;
-    stroke-linecap: round;
+    stroke-linecap: square;
 }
 
 .gaugeMinorTick {
-    stroke: rgba(255,255,255,.38);
-    stroke-width: 1.5;
-    stroke-linecap: round;
+    stroke: #cfcfcf;
+    stroke-width: 1.25;
+    stroke-linecap: square;
+    opacity: .92;
 }
 
 .gaugeLabel {
-    fill: #f2f2f2;
-    font-family: "Segoe UI", Arial, Helvetica, sans-serif;
+    fill: #f3f3f3;
+    font-family: "Arial Narrow", "Helvetica Neue", Arial, sans-serif;
     font-size: 22px;
-    font-weight: 700;
+    font-weight: 600;
+    font-style: italic;
     text-anchor: middle;
     dominant-baseline: middle;
+    paint-order: stroke;
+    stroke: rgba(0,0,0,.85);
+    stroke-width: 1.5px;
 }
 
 .gaugeCenterTitle {
-    fill: #d9d9d9;
-    font-family: "Segoe UI", Arial, Helvetica, sans-serif;
-    font-size: 18px;
-    font-weight: 700;
+    fill: #ededed;
+    font-family: "Arial Narrow", "Helvetica Neue", Arial, sans-serif;
+    font-size: 20px;
+    font-weight: 600;
+    font-style: italic;
+    letter-spacing: 1px;
     text-anchor: middle;
 }
 
-.gaugeCenterValue {
-    fill: #ffffff;
-    font-family: "Segoe UI", Arial, Helvetica, sans-serif;
-    font-size: 26px;
-    font-weight: 800;
+.gaugeCenterSubtitle {
+    fill: #e5e5e5;
+    font-family: "Arial Narrow", "Helvetica Neue", Arial, sans-serif;
+    font-size: 15px;
+    font-style: italic;
+    letter-spacing: .5px;
     text-anchor: middle;
 }
 
 .gaugeNeedle {
-    stroke: #ff4a4a;
-    stroke-width: 4;
+    stroke-width: 4.5;
     stroke-linecap: round;
-    filter: drop-shadow(0 0 6px rgba(255,0,0,.45));
-    transform-box: fill-box;
-    transform-origin: center;
+}
+
+.gaugeNeedleTail {
+    stroke: #8c0000;
+    stroke-width: 5;
+    stroke-linecap: round;
 }
 
 .gaugeHub {
-    fill: #101010;
-    stroke: #cfcfcf;
+    fill: #090909;
+    stroke: #707070;
     stroke-width: 2;
 }
 
 .gaugeHubInner {
-    fill: #ff4a4a;
-    opacity: .85;
+    fill: #151515;
+    stroke: #292929;
+    stroke-width: 1;
+}
+
+.gaugeHubHighlight {
+    fill: rgba(255,255,255,.38);
+}
+
+.gaugeCenterValue {
+    fill: #fff;
+    font-family: "Arial Narrow", Arial, sans-serif;
+    font-size: 19px;
+    font-weight: 700;
+    text-anchor: middle;
+}
+
+.gaugeSvg--mini .gaugeLabel {
+    font-size: 12px;
+    font-style: normal;
+    font-weight: 700;
+    stroke-width: .7px;
+}
+
+.gaugeSvg--mini .gaugeCenterTitle {
+    font-size: 10px;
+    font-style: normal;
+    font-weight: 600;
+    letter-spacing: .25px;
+}
+
+.gaugeSvg--mini .gaugeCenterSubtitle {
+    font-size: 8px;
+}
+
+.gaugeSvg--mini .gaugeNeedle {
+    stroke-width: 2.4;
+}
+
+.gaugeSvg--mini .gaugeNeedleTail {
+    stroke-width: 2.5;
+}
+
+.gaugeSvg--mini .gaugeMajorTick {
+    stroke-width: 1.6;
+}
+
+.gaugeSvg--mini .gaugeMinorTick {
+    stroke-width: .7;
 }
 
 .gaugePulse {
-    filter: drop-shadow(0 0 10px rgba(76,195,255,.35));
+    filter: drop-shadow(0 0 7px rgba(76,195,255,.24));
 }
 
-/* ===========================
-   RESPONSIVE
-=========================== */
-
 @media (max-width: 1600px) {
-    #cluster {
-        transform: scale(.94);
-        transform-origin: top center;
-    }
+    #cluster { transform: scale(.94); transform-origin: top center; }
 }
 
 @media (max-width: 1400px) {
-    #cluster {
-        transform: scale(.86);
-        transform-origin: top center;
-    }
+    #cluster { transform: scale(.86); transform-origin: top center; }
 }
 
 @media (max-width: 1200px) {
-    #cluster {
-        transform: scale(.76);
-        transform-origin: top center;
-    }
+    #cluster { transform: scale(.76); transform-origin: top center; }
 }
