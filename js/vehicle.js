@@ -1,6 +1,6 @@
 // ======================================================
 // FOXBODY DASH - VEHICLE PAGE
-// Correct paths, working view buttons, inline SVG interaction
+// Working object-based SVG view switching
 // ======================================================
 
 const vehicleViews = {
@@ -37,7 +37,6 @@ const partNames = {
     rightHeadlight: "Right Headlight",
     leftSignal: "Left Turn Signal",
     rightSignal: "Right Turn Signal",
-    spoilerBrakeLight: "Spoiler Brake Light",
     battery: "Battery",
     engine: "Engine",
     intakeAirSystem: "Intake Air System",
@@ -79,57 +78,60 @@ function setViewLabel(view) {
     if (label && vehicleViews[view]) label.textContent = vehicleViews[view].label;
 }
 
-async function loadVehicle(view) {
+function loadVehicle(view) {
     const config = vehicleViews[view];
-    const container = document.getElementById("vehicleView");
+    const object = document.getElementById("vehicleObject");
+    const info = document.getElementById("vehicleInfo");
 
-    if (!config || !container) return;
+    if (!config || !object) return;
 
     currentView = view;
     selectedPartId = null;
     setActiveButton(view);
     setViewLabel(view);
 
-    container.innerHTML = "<p>Loading vehicle view…</p>";
-
-    try {
-        const response = await fetch(config.path, { cache: "no-store" });
-        if (!response.ok) {
-            throw new Error(`${config.path} returned HTTP ${response.status}`);
-        }
-
-        const svgText = await response.text();
-        if (!svgText.trim()) {
-            throw new Error(`${config.path} is empty`);
-        }
-
-        container.innerHTML = svgText;
-        initializeVehicleParts();
-
-        const info = document.getElementById("vehicleInfo");
-        if (info) {
-            info.innerHTML = `
-                <h2>${config.label}</h2>
-                <p>Select a vehicle component for information.</p>
-            `;
-        }
-    } catch (error) {
-        console.error("Vehicle view load failed:", error);
-        container.innerHTML = `
-            <div class="vehicleLoadError">
-                <strong>Unable to load ${config.label}</strong><br>
-                ${error.message}
-            </div>
+    if (info) {
+        info.innerHTML = `
+            <h2>${config.label}</h2>
+            <p>Loading vehicle view…</p>
         `;
     }
+
+    object.data = config.path;
 }
 
-function initializeVehicleParts() {
-    const container = document.getElementById("vehicleView");
-    const svg = container ? container.querySelector("svg") : null;
-    if (!svg) return;
+function initializeLoadedSvg() {
+    const object = document.getElementById("vehicleObject");
+    const info = document.getElementById("vehicleInfo");
+    if (!object) return;
 
-    svg.querySelectorAll("[id]").forEach(part => {
+    let svgDocument;
+
+    try {
+        svgDocument = object.contentDocument;
+    } catch (error) {
+        console.error("Unable to access SVG document:", error);
+        return;
+    }
+
+    if (!svgDocument || !svgDocument.documentElement) {
+        if (info) {
+            info.innerHTML = `
+                <h2>${vehicleViews[currentView].label}</h2>
+                <p>Unable to access this SVG view.</p>
+            `;
+        }
+        return;
+    }
+
+    if (info) {
+        info.innerHTML = `
+            <h2>${vehicleViews[currentView].label}</h2>
+            <p>Select a vehicle component for information.</p>
+        `;
+    }
+
+    svgDocument.querySelectorAll("[id]").forEach(part => {
         if (
             part.id.startsWith("svg") ||
             part.id.startsWith("defs") ||
@@ -152,28 +154,25 @@ function initializeVehicleParts() {
 
         part.addEventListener("click", event => {
             event.stopPropagation();
-            selectPart(part);
+            selectPart(part, svgDocument);
         });
-    });
-
-    svg.addEventListener("click", event => {
-        if (event.target === svg) clearSelection();
     });
 }
 
-function selectPart(part) {
-    const container = document.getElementById("vehicleView");
+function selectPart(part, svgDocument) {
     const info = document.getElementById("vehicleInfo");
-    if (!container || !info || !part) return;
+    if (!part || !svgDocument || !info) return;
 
-    container.querySelectorAll(".selectedPart").forEach(item => {
+    svgDocument.querySelectorAll(".selectedPart").forEach(item => {
         item.classList.remove("selectedPart");
         item.style.opacity = "1";
+        item.style.filter = "";
     });
 
     selectedPartId = part.id;
     part.classList.add("selectedPart");
     part.style.opacity = "1";
+    part.style.filter = "drop-shadow(0 0 10px #3e8fd6) brightness(1.15)";
 
     const realPartId = part.id.endsWith("Click")
         ? part.id.slice(0, -5)
@@ -195,18 +194,6 @@ function selectPart(part) {
     info.innerHTML = html;
 }
 
-function clearSelection() {
-    const container = document.getElementById("vehicleView");
-    if (!container) return;
-
-    container.querySelectorAll(".selectedPart").forEach(item => {
-        item.classList.remove("selectedPart");
-        item.style.opacity = "1";
-    });
-
-    selectedPartId = null;
-}
-
 function updatePartData(partId, data) {
     partInfo[partId] = {
         ...(partInfo[partId] || {}),
@@ -215,6 +202,8 @@ function updatePartData(partId, data) {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
+    const object = document.getElementById("vehicleObject");
+
     document.querySelectorAll(".vehicleViewButton").forEach(button => {
         button.addEventListener("click", () => loadVehicle(button.dataset.view));
     });
@@ -226,5 +215,10 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    loadVehicle("front");
+    if (object) {
+        object.addEventListener("load", initializeLoadedSvg);
+    }
+
+    setActiveButton("front");
+    setViewLabel("front");
 });
