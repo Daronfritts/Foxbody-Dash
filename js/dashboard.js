@@ -5,42 +5,34 @@ const tach = new Gauge(
     0,
     "RPM",
     {
-        unit: "",
         majorTicks: 8,
         minorTicks: 40,
         redlineStart: 6000,
         labels: ["0", "1", "2", "3", "4", "5", "6", "7", "8"],
-        title: "RPM"
+        title: "RPM",
+        subtitle: "x1000",
+        variant: "main",
+        size: 430,
+        radius: 176,
+        needleLength: 132
     }
 );
 
 const speed = new Gauge(
     "speed",
     0,
-    180,
+    200,
     0,
     "MPH",
     {
-        unit: "",
-        majorTicks: 9,
-        minorTicks: 45,
-        labels: ["0", "20", "40", "60", "80", "100", "120", "140", "160", "180"],
-        title: "MPH"
-    }
-);
-
-const coolant = new MiniGauge(
-    "coolantGauge",
-    "COOLANT",
-    185,
-    "°F",
-    {
-        min: 100,
-        max: 260,
-        labels: ["100", "", "180", "", "260"],
-        majorTicks: 4,
-        minorTicks: 20,
-        radius: 46
+        majorTicks: 10,
+        minorTicks: 50,
+        labels: ["0", "20", "40", "60", "80", "100", "120", "140", "160", "180", "200"],
+        title: "MPH",
+        variant: "main",
+        size: 430,
+        radius: 176,
+        needleLength: 132
     }
 );
 
@@ -48,53 +40,82 @@ const fuel = new MiniGauge(
     "fuelGauge",
     "FUEL",
     78,
-    "%",
+    "",
     {
         min: 0,
         max: 100,
         labels: ["E", "", "1/2", "", "F"],
         majorTicks: 4,
         minorTicks: 20,
-        radius: 46
+        warningLow: 15,
+        subtitle: "",
+        radius: 48,
+        needleLength: 34
     }
 );
 
 const oil = new MiniGauge(
     "oilGauge",
-    "OIL",
+    "OIL PSI",
     40,
-    "PSI",
+    "",
     {
         min: 0,
         max: 80,
         labels: ["0", "", "40", "", "80"],
         majorTicks: 4,
         minorTicks: 20,
-        radius: 46
+        warningLow: 12,
+        subtitle: "",
+        radius: 48,
+        needleLength: 34
+    }
+);
+
+const coolant = new MiniGauge(
+    "coolantGauge",
+    "COOLANT",
+    185,
+    "",
+    {
+        min: 100,
+        max: 260,
+        labels: ["C", "", "180", "", "H"],
+        majorTicks: 4,
+        minorTicks: 20,
+        warningHigh: 230,
+        subtitle: "",
+        radius: 48,
+        needleLength: 34
     }
 );
 
 const battery = new MiniGauge(
     "batteryGauge",
-    "BATTERY",
+    "VOLTS",
     14.2,
-    "V",
+    "",
     {
-        min: 8,
+        min: 10,
         max: 18,
-        labels: ["8", "", "14", "", "18"],
+        labels: ["10", "", "14", "", "18"],
         majorTicks: 4,
         minorTicks: 20,
-        radius: 46
+        warningLow: 11.5,
+        warningHigh: 16,
+        subtitle: "",
+        radius: 48,
+        needleLength: 34
     }
 );
 
+// Sequential startup sweep keeps the cluster feeling like an OEM self-test.
 tach.sweep();
-setTimeout(() => speed.sweep(), 100);
-setTimeout(() => coolant.sweep(), 200);
-setTimeout(() => fuel.sweep(), 300);
-setTimeout(() => oil.sweep(), 400);
-setTimeout(() => battery.sweep(), 500);
+setTimeout(() => speed.sweep(), 90);
+setTimeout(() => fuel.sweep(), 180);
+setTimeout(() => oil.sweep(), 250);
+setTimeout(() => coolant.sweep(), 320);
+setTimeout(() => battery.sweep(), 390);
 
 async function updateVehicleData() {
     try {
@@ -106,9 +127,9 @@ async function updateVehicleData() {
 
         if (typeof engine.rpm === "number") tach.setValue(engine.rpm);
         if (typeof engine.speed === "number") speed.setValue(engine.speed);
-        if (typeof engine.coolant === "number") coolant.setValue(engine.coolant);
         if (typeof engine.fuel === "number") fuel.setValue(engine.fuel);
         if (typeof engine.oil === "number") oil.setValue(engine.oil);
+        if (typeof engine.coolant === "number") coolant.setValue(engine.coolant);
         if (typeof engine.battery === "number") battery.setValue(engine.battery);
     } catch (error) {
         console.warn("Vehicle data unavailable:", error);
