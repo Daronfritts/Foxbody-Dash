@@ -34,10 +34,14 @@
     transform: translateY(-61px) scale(1.06) !important;
 }
 
-/* Overall bezel dimensions remain unchanged. */
+/*
+   Shorten only the lower edge of the bezel.
+   The top edge stays in the same place; internal elements are compensated
+   below so their visual positions do not change.
+*/
 #cluster {
     width: 2700px !important;
-    height: 1163px !important;
+    height: 1115px !important;
     margin-top: -95px !important;
     grid-template-columns: 775px 459px 775px !important;
     column-gap: 210px !important;
@@ -137,32 +141,38 @@
     height: 363px !important;
 }
 
-/* Raise the complete small-gauge row another 57px. */
+/*
+   Compensate for the shorter bezel so the small-gauge row remains in the
+   exact same visual position as before.
+*/
 #fuelGauge {
     left: 250px !important;
-    bottom: 170px !important;
+    bottom: 122px !important;
 }
 
 #oilGauge {
     left: 850px !important;
-    bottom: 170px !important;
+    bottom: 122px !important;
 }
 
 #coolantGauge {
     right: 850px !important;
-    bottom: 170px !important;
+    bottom: 122px !important;
 }
 
 #batteryGauge {
     right: 250px !important;
-    bottom: 170px !important;
+    bottom: 122px !important;
 }
 
-/* Raise the warning strip with the small gauges so the lower stack stays together. */
+/*
+   Keep the warning strip in the same visual position while allowing the new
+   bezel bottom to end just beneath it.
+*/
 #statusBar {
     left: 50% !important;
     width: calc(100% - 88px) !important;
-    bottom: 70px !important;
+    bottom: 22px !important;
     height: 86px !important;
     padding: 0 18px !important;
     gap: 9px !important;
@@ -183,8 +193,8 @@
 }
 
 /*
-   Raise everything below the bezel as one visual stack. This keeps the live
-   ribbon, message center and nav bar aligned while restoring bottom clearance.
+   Lower information/navigation stack remains where it was in the previous
+   working layout.
 */
 #liveRibbon,
 #messageCenter,
@@ -232,7 +242,6 @@
     font-size: 19px !important;
 }
 
-/* Bottom navigation size stays unchanged; only its vertical position moves. */
 #bottomNav {
     height: 121px !important;
 }
