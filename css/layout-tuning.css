@@ -12,33 +12,32 @@
     transform: translateY(50px) !important;
 }
 
-/* Move FOXBODY GT down about 10% of its font height. */
+/* Keep FOXBODY GT at the current working position. */
 #foxbodyTitle {
     font-size: 58px !important;
     letter-spacing: 7.5px !important;
     transform: translateY(6px) !important;
 }
 
-/* Shift light moved upward another ~15% of its rendered size. */
+/* Shift light moved down about 5% from the previous position. */
 #mustangLogo {
     width: 256px !important;
     margin-top: 3px !important;
-    transform: translateY(-74px) !important;
+    transform: translateY(-61px) !important;
 }
 
 #mustangLogo.shiftYellow {
-    transform: translateY(-74px) scale(1.04) !important;
+    transform: translateY(-61px) scale(1.04) !important;
 }
 
 #mustangLogo.shiftRed {
-    transform: translateY(-74px) scale(1.06) !important;
+    transform: translateY(-61px) scale(1.06) !important;
 }
 
-/* Overall bezel enlarged 25% in both directions. */
+/* Overall bezel dimensions remain unchanged. */
 #cluster {
     width: 2700px !important;
     height: 1163px !important;
-    /* Move the complete bezel/layout upward by about 15% of its height. */
     margin-top: -95px !important;
     grid-template-columns: 775px 459px 775px !important;
     column-gap: 210px !important;
@@ -56,7 +55,7 @@
     border-radius: 23px !important;
 }
 
-/* Main gauges +25%, keep current vertical position and pull inward ~15%. */
+/* Main gauges: keep size/horizontal position and move down about 6%. */
 #tach,
 #speed {
     width: 513px !important;
@@ -66,19 +65,19 @@
 
 #tach {
     justify-self: start !important;
-    transform: translate(168px, 208px) !important;
+    transform: translate(168px, 239px) !important;
 }
 
 #speed {
     justify-self: end !important;
-    transform: translate(-168px, 208px) !important;
+    transform: translate(-168px, 239px) !important;
 }
 
-/* Driver information center +35%, moved down another ~15% of its height. */
+/* Driver information center: move down about 6% more. */
 #driverInfoCenter {
     width: 340px !important;
     height: 459px !important;
-    margin-top: 484px !important;
+    margin-top: 512px !important;
     justify-self: center !important;
     border-radius: 19px !important;
 }
@@ -128,7 +127,7 @@
     font-size: 24px !important;
 }
 
-/* Secondary gauges +25%. */
+/* Secondary gauges retain their size and horizontal spread. */
 #fuelGauge,
 #oilGauge,
 #coolantGauge,
@@ -138,102 +137,102 @@
     height: 363px !important;
 }
 
-/* Pull all four lower gauges inward by roughly 15% of their current spread. */
+/* Raise the complete small-gauge row about 4%. */
 #fuelGauge {
     left: 250px !important;
-    bottom: 98px !important;
+    bottom: 113px !important;
 }
 
 #oilGauge {
     left: 850px !important;
-    bottom: 98px !important;
+    bottom: 113px !important;
 }
 
 #coolantGauge {
     right: 850px !important;
-    bottom: 98px !important;
+    bottom: 113px !important;
 }
 
 #batteryGauge {
     right: 250px !important;
-    bottom: 98px !important;
+    bottom: 113px !important;
 }
 
-/* Status strip +25%. */
+/* Status strip: modest readability increase (~18%). */
 #statusBar {
     left: 50% !important;
     width: calc(100% - 88px) !important;
     bottom: 13px !important;
-    height: 73px !important;
-    padding: 0 15px !important;
-    gap: 8px !important;
+    height: 86px !important;
+    padding: 0 18px !important;
+    gap: 9px !important;
 }
 
 .warningTile {
-    height: 65px !important;
+    height: 77px !important;
 }
 
 .warningTile img {
-    width: 44px !important;
-    height: 44px !important;
+    width: 52px !important;
+    height: 52px !important;
 }
 
 .warningTile span {
-    font-size: 11px !important;
-    line-height: 13px !important;
+    font-size: 13px !important;
+    line-height: 15px !important;
 }
 
-/* Live ribbon / message center +25%. */
+/* Live ribbon / message center: modest readability increase. */
 #liveRibbon,
 #messageCenter {
     width: min(97vw, 2560px) !important;
 }
 
 #liveRibbon {
-    height: 55px !important;
-    font-size: 21px !important;
-}
-
-#messageCenter {
-    min-height: 78px !important;
-    padding: 10px 23px !important;
-    gap: 20px !important;
-}
-
-#messageIconWrap {
-    width: 55px !important;
-    height: 55px !important;
-}
-
-#messageIcon {
-    width: 48px !important;
-    height: 48px !important;
-}
-
-#messageNormalIcon {
-    width: 40px !important;
-    height: 40px !important;
+    height: 65px !important;
     font-size: 25px !important;
 }
 
+#messageCenter {
+    min-height: 92px !important;
+    padding: 12px 27px !important;
+    gap: 23px !important;
+}
+
+#messageIconWrap {
+    width: 65px !important;
+    height: 65px !important;
+}
+
+#messageIcon {
+    width: 57px !important;
+    height: 57px !important;
+}
+
+#messageNormalIcon {
+    width: 47px !important;
+    height: 47px !important;
+    font-size: 29px !important;
+}
+
 #messageTitle {
-    font-size: 24px !important;
+    font-size: 28px !important;
 }
 
 #messageText {
-    font-size: 16px !important;
+    font-size: 19px !important;
 }
 
-/* Bottom navigation +25%. */
+/* Bottom navigation: taller and easier to read without changing spacing. */
 #bottomNav {
-    height: 103px !important;
+    height: 121px !important;
 }
 
 #bottomNav button {
     width: 225px !important;
-    height: 68px !important;
+    height: 78px !important;
     border-radius: 15px !important;
-    font-size: 23px !important;
+    font-size: 26px !important;
 }
 
 /* Reliable solid-red needles for Chromium. */
@@ -258,11 +257,7 @@
     opacity: 1 !important;
 }
 
-/*
-   Responsive scaling keeps the enlarged dashboard visible while preserving
-   the new 25% larger proportions. These breakpoints intentionally allow the
-   cluster to occupy most of the available screen.
-*/
+/* Responsive scaling preserves the enlarged proportions. */
 @media (max-width: 2800px) {
     #cluster {
         transform: scale(.92) !important;
