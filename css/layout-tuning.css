@@ -21,18 +21,23 @@
     transform: translateY(22px) scale(1.06) !important;
 }
 
-/* Working bezel geometry. */
+/*
+   WIDENED CLUSTER
+   Increase the actual usable width instead of pushing gauges outside
+   the old grid with large transforms. This gives the top and bottom
+   gauges substantially more horizontal separation without clipping.
+*/
 #cluster {
-    width: 1480px !important;
+    width: 1700px !important;
     height: 930px !important;
     margin-top: 64px !important;
-    grid-template-columns: 430px 270px 430px !important;
-    column-gap: 58px !important;
+    grid-template-columns: 520px 280px 520px !important;
+    column-gap: 110px !important;
 }
 
 /*
-   Keep the working vertical position, but spread the two main gauges
-   outward so the top row uses more of the bezel width.
+   Main gauges keep the working vertical position, while their wider
+   grid cells and modest outward offsets spread them far across the bezel.
 */
 #tach,
 #speed {
@@ -40,14 +45,16 @@
 }
 
 #tach {
-    transform: translate(-78px, 105px) !important;
+    justify-self: start !important;
+    transform: translate(-35px, 105px) !important;
 }
 
 #speed {
-    transform: translate(78px, 105px) !important;
+    justify-self: end !important;
+    transform: translate(35px, 105px) !important;
 }
 
-/* Keep the information center centered at the working height. */
+/* Keep the driver information center centered. */
 #driverInfoCenter {
     margin-top: 205px !important;
     justify-self: center !important;
@@ -64,30 +71,31 @@
 }
 
 /*
-   Spread the four lower gauges across nearly the full inner bezel width.
-   Outer pair moves outward; inner pair separates from the center.
+   Spread the lower gauges across almost the full 1700px bezel.
+   The outer pair sits near the bezel edges and the inner pair is pulled
+   well away from the center information column.
 */
 #fuelGauge {
-    left: 34px !important;
+    left: 38px !important;
     bottom: 76px !important;
 }
 
 #oilGauge {
-    left: 382px !important;
+    left: 468px !important;
     bottom: 76px !important;
 }
 
 #coolantGauge {
-    right: 382px !important;
+    right: 468px !important;
     bottom: 76px !important;
 }
 
 #batteryGauge {
-    right: 34px !important;
+    right: 38px !important;
     bottom: 76px !important;
 }
 
-/* Warning strip remains fixed to the working bottom position. */
+/* Warning strip follows the wider bezel. */
 #statusBar {
     left: 50% !important;
     width: calc(100% - 58px) !important;
@@ -102,6 +110,12 @@
 .warningTile img {
     width: 35px !important;
     height: 35px !important;
+}
+
+/* Keep the data/message rows visually aligned with the wider cluster. */
+#liveRibbon,
+#messageCenter {
+    width: min(1600px, 94vw) !important;
 }
 
 /* Reliable solid-red needles for Chromium. */
@@ -126,14 +140,15 @@
     opacity: 1 !important;
 }
 
-@media (max-width: 1600px) {
+/* Scale the wider cluster as one unit on smaller screens. */
+@media (max-width: 1800px) {
     #cluster {
         transform: scale(.82) !important;
         transform-origin: top center !important;
     }
 }
 
-@media (max-width: 1400px) {
+@media (max-width: 1500px) {
     #cluster {
         transform: scale(.72) !important;
         transform-origin: top center !important;
