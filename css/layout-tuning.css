@@ -35,7 +35,8 @@
 #cluster {
     width: 2700px !important;
     height: 1163px !important;
-    margin-top: 80px !important;
+    /* Move the complete bezel/layout upward by about 15% of its height. */
+    margin-top: -95px !important;
     grid-template-columns: 775px 459px 775px !important;
     column-gap: 210px !important;
     border-radius: 43px !important;
