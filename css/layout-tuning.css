@@ -12,24 +12,26 @@
     transform: translateY(50px) !important;
 }
 
+/* Move FOXBODY GT down about 10% of its font height. */
 #foxbodyTitle {
     font-size: 58px !important;
     letter-spacing: 7.5px !important;
+    transform: translateY(6px) !important;
 }
 
-/* Shift light moved upward ~25% of its rendered size. */
+/* Shift light moved upward another ~15% of its rendered size. */
 #mustangLogo {
     width: 256px !important;
     margin-top: 3px !important;
-    transform: translateY(-36px) !important;
+    transform: translateY(-74px) !important;
 }
 
 #mustangLogo.shiftYellow {
-    transform: translateY(-36px) scale(1.04) !important;
+    transform: translateY(-74px) scale(1.04) !important;
 }
 
 #mustangLogo.shiftRed {
-    transform: translateY(-36px) scale(1.06) !important;
+    transform: translateY(-74px) scale(1.06) !important;
 }
 
 /* Overall bezel enlarged 25% in both directions. */
@@ -54,7 +56,7 @@
     border-radius: 23px !important;
 }
 
-/* Main gauges +25%, moved down ~15% of gauge diameter. */
+/* Main gauges +25%, keep current vertical position and pull inward ~15%. */
 #tach,
 #speed {
     width: 513px !important;
@@ -64,19 +66,19 @@
 
 #tach {
     justify-self: start !important;
-    transform: translate(52px, 208px) !important;
+    transform: translate(168px, 208px) !important;
 }
 
 #speed {
     justify-self: end !important;
-    transform: translate(-52px, 208px) !important;
+    transform: translate(-168px, 208px) !important;
 }
 
-/* Driver information center +35%, moved down ~30% of its height. */
+/* Driver information center +35%, moved down another ~15% of its height. */
 #driverInfoCenter {
     width: 340px !important;
     height: 459px !important;
-    margin-top: 415px !important;
+    margin-top: 484px !important;
     justify-self: center !important;
     border-radius: 19px !important;
 }
@@ -136,24 +138,24 @@
     height: 363px !important;
 }
 
-/* Spread the larger lower gauges across the larger bezel. */
+/* Pull all four lower gauges inward by roughly 15% of their current spread. */
 #fuelGauge {
-    left: 115px !important;
+    left: 250px !important;
     bottom: 98px !important;
 }
 
 #oilGauge {
-    left: 790px !important;
+    left: 850px !important;
     bottom: 98px !important;
 }
 
 #coolantGauge {
-    right: 790px !important;
+    right: 850px !important;
     bottom: 98px !important;
 }
 
 #batteryGauge {
-    right: 115px !important;
+    right: 250px !important;
     bottom: 98px !important;
 }
 
