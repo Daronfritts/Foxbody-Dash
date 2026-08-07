@@ -1,43 +1,40 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Vehicle</title>
-
-    <link rel="stylesheet" href="../css/vehicle.css">
+    <link rel="stylesheet" href="../css/vehicle.css" />
 </head>
-
 <body>
+    <main id="vehiclePage">
+        <header id="vehicleHeader">
+            <button id="vehicleHome" type="button">HOME</button>
+            <div>
+                <h1>FOXBODY VEHICLE</h1>
+                <p id="vehicleViewName">FRONT VIEW</p>
+            </div>
+            <div class="headerSpacer"></div>
+        </header>
 
-<div id="vehicle-page">
+        <section id="vehicleWorkspace">
+            <div id="vehicleView" aria-live="polite"></div>
 
-    <h1>Vehicle</h1>
+            <aside id="vehicleInfo">
+                <h2>Vehicle</h2>
+                <p>Select a highlighted component for information.</p>
+            </aside>
+        </section>
 
-    <div id="vehicle-view">
+        <nav id="vehicleButtons" aria-label="Vehicle views">
+            <button class="vehicleViewButton active" type="button" data-view="front">FRONT</button>
+            <button class="vehicleViewButton" type="button" data-view="driver">DRIVER</button>
+            <button class="vehicleViewButton" type="button" data-view="passenger">PASSENGER</button>
+            <button class="vehicleViewButton" type="button" data-view="top">TOP</button>
+            <button class="vehicleViewButton" type="button" data-view="engine">ENGINE</button>
+        </nav>
+    </main>
 
-        <object
-            id="vehicle-svg"
-            data="../assets/vehicle/exterior/frontView.svg"
-            type="image/svg+xml">
-        </object>
-
-    </div>
-
-    <div id="vehicle-buttons">
-
-        <button data-view="front">Front</button>
-        <button data-view="rear">Rear</button>
-        <button data-view="driver">Driver</button>
-        <button data-view="passenger">Passenger</button>
-        <button data-view="top">Top</button>
-        <button data-view="engine">Engine</button>
-
-    </div>
-
-</div>
-
-<script src="../js/vehicle.js"></script>
-
+    <script src="../js/vehicle.js"></script>
 </body>
 </html>
