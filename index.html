@@ -7,10 +7,7 @@
   <link rel="stylesheet" href="css/style.css" />
   <link rel="stylesheet" href="css/gauges.css" />
   <style>
-    body {
-      margin: 0;
-      background: #000;
-    }
+    body { margin: 0; background: #000; }
   </style>
 </head>
 <body>
@@ -20,24 +17,27 @@
         <div class="indicator placeholder" aria-hidden="true"></div>
         <div class="indicator placeholder" aria-hidden="true"></div>
       </div>
+
       <div id="clusterLogo">
         <div id="foxbodyTitle">FOXBODY GT</div>
-        <img id="mustangLogo" src="assets/images/mustangWhite.svg" alt="Mustang" />
+        <img id="mustangLogo" src="assets/images/mustangWhite.svg" alt="Mustang shift light" />
       </div>
+
       <div id="rightIndicators">
         <div class="indicator placeholder" aria-hidden="true"></div>
       </div>
     </header>
 
     <main id="mainView">
-      <section id="cluster">
+      <section id="cluster" aria-label="Foxbody instrument cluster">
         <div class="clusterScrew screwTL"></div>
         <div class="clusterScrew screwTR"></div>
         <div class="clusterScrew screwBL"></div>
         <div class="clusterScrew screwBR"></div>
 
         <svg id="tach" viewBox="0 0 430 430" aria-label="Tachometer"></svg>
-        <section id="driverInfoCenter">
+
+        <section id="driverInfoCenter" aria-label="Driver information center">
           <div id="clusterHeader">
             <div id="clockDisplay">12:00 PM</div>
             <div id="outsideTemp">74°F</div>
@@ -60,27 +60,80 @@
           <div class="clusterDivider"></div>
           <div id="cruiseStatus">READY</div>
         </section>
+
         <svg id="speed" viewBox="0 0 430 430" aria-label="Speedometer"></svg>
 
-        <div id="fuelGauge" class="smallGauge"></div>
-        <div id="oilGauge" class="smallGauge"></div>
-        <div id="coolantGauge" class="smallGauge"></div>
-        <div id="batteryGauge" class="smallGauge"></div>
+        <div id="fuelGauge" class="smallGauge" aria-label="Fuel gauge"></div>
+        <div id="oilGauge" class="smallGauge" aria-label="Oil pressure gauge"></div>
+        <div id="coolantGauge" class="smallGauge" aria-label="Coolant temperature gauge"></div>
+        <div id="batteryGauge" class="smallGauge" aria-label="Battery voltage gauge"></div>
+
+        <section id="statusBar" aria-label="Warning indicator strip">
+          <div class="warningTile" id="warning-oil" data-warning="oil">
+            <img src="assets/icons/dashboard/warnings/oil.svg" alt="" />
+            <span>OIL</span>
+          </div>
+          <div class="warningTile" id="warning-battery" data-warning="battery">
+            <img src="assets/icons/dashboard/warnings/battery.svg" alt="" />
+            <span>BATTERY</span>
+          </div>
+          <div class="warningTile" id="warning-check-engine" data-warning="checkEngine">
+            <img src="assets/icons/dashboard/warnings/check-engine.svg" alt="" />
+            <span>CHECK ENGINE</span>
+          </div>
+          <div class="warningTile" id="warning-brake" data-warning="brake">
+            <img src="assets/icons/dashboard/warnings/brake.svg" alt="" />
+            <span>BRAKE</span>
+          </div>
+          <div class="warningTile" id="warning-abs" data-warning="abs">
+            <img src="assets/icons/dashboard/warnings/abs.svg" alt="" />
+            <span>ABS</span>
+          </div>
+          <div class="warningTile" id="warning-seatbelt" data-warning="seatbelt">
+            <img src="assets/icons/dashboard/warnings/seatbelt.svg" alt="" />
+            <span>SEATBELT</span>
+          </div>
+          <div class="warningTile" id="warning-tpms" data-warning="tpms">
+            <img src="assets/icons/dashboard/warnings/tpms.svg" alt="" />
+            <span>LOW TIRE</span>
+          </div>
+          <div class="warningTile" id="warning-coolant" data-warning="coolant">
+            <img src="assets/icons/dashboard/warnings/coolant.svg" alt="" />
+            <span>COOLANT</span>
+          </div>
+          <div class="warningTile" id="warning-low-fuel" data-warning="lowFuel">
+            <img src="assets/icons/dashboard/warnings/low-fuel.svg" alt="" />
+            <span>LOW FUEL</span>
+          </div>
+          <div class="warningTile" id="warning-door" data-warning="doorAjar">
+            <img src="assets/icons/dashboard/warnings/door-ajar.svg" alt="" />
+            <span>DOOR AJAR</span>
+          </div>
+          <div class="warningTile" id="warning-security" data-warning="security">
+            <img src="assets/icons/dashboard/warnings/security.svg" alt="" />
+            <span>SECURITY</span>
+          </div>
+        </section>
       </section>
 
-      <section id="liveRibbon">
-        <span>Oil 62 PSI</span>
-        <span>AFR 14.7</span>
-        <span>MAP 34 kPa</span>
-        <span>Battery 14.2V</span>
-        <span>Fuel 41 PSI</span>
-        <span>ECT 188°</span>
+      <section id="liveRibbon" aria-label="Live vehicle data">
+        <span id="liveOil">Oil -- PSI</span>
+        <span id="liveAfr">AFR --</span>
+        <span id="liveMap">MAP -- kPa</span>
+        <span id="liveBattery">Battery -- V</span>
+        <span id="liveFuelPressure">Fuel -- PSI</span>
+        <span id="liveEct">ECT --°</span>
       </section>
 
-      <section id="statusBar"></section>
-      <section id="systemBar">
-        <div id="statusIcon">●</div>
-        <div id="statusText">READY</div>
+      <section id="messageCenter" class="messageNormal" aria-live="polite" aria-atomic="true">
+        <div id="messageIconWrap">
+          <span id="messageNormalIcon">✓</span>
+          <img id="messageIcon" src="assets/icons/dashboard/warnings/check-engine.svg" alt="" hidden />
+        </div>
+        <div id="messageCopy">
+          <div id="messageTitle">SYSTEMS NORMAL</div>
+          <div id="messageText">No active vehicle warnings.</div>
+        </div>
       </section>
     </main>
 
@@ -88,7 +141,7 @@
       <button class="active">Home</button>
       <button>Vehicle</button>
       <button>Music</button>
-      <button>Themes</button>
+      <button>Diagnostics</button>
       <button>Settings</button>
     </footer>
   </div>
