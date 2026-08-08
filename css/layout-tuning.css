@@ -128,24 +128,6 @@
 .gaugeNeedleTail { stroke: #8f0000 !important; opacity: 1 !important; }
 .gaugeNeedleGroup { opacity: 1 !important; }
 
-/* Physical Foxbody opening reference overlay.
-   Keep the 4% horizontal stretch, increase vertical stretch to 12%,
-   and bias the mask downward so the steering-column notch comes down. */
-#dashboard::after {
-    content: "";
-    position: fixed;
-    left: -2%;
-    top: -4%;
-    width: 104%;
-    height: 112%;
-    z-index: 10000;
-    pointer-events: none;
-    background-image: url("../assets/images/dashMask.svg");
-    background-repeat: no-repeat;
-    background-position: center center;
-    background-size: 100% 100%;
-}
-
 @media (max-width: 2800px) { #cluster { transform: scale(.92) !important; transform-origin: top center !important; } }
 @media (max-width: 2400px) { #cluster { transform: scale(.84) !important; transform-origin: top center !important; } }
 @media (max-width: 2100px) { #cluster { transform: scale(.76) !important; transform-origin: top center !important; } }
