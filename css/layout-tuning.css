@@ -34,10 +34,7 @@
     transform: translateY(-61px) scale(1.06) !important;
 }
 
-/*
-   Extend only the lower edge of the bezel by about 7%.
-   The top edge stays in the same place; all upper gauge positions remain unchanged.
-*/
+/* Extended lower bezel. */
 #cluster {
     width: 2700px !important;
     height: 1193px !important;
@@ -76,7 +73,6 @@
     transform: translate(-168px, 239px) !important;
 }
 
-/* Driver information center stays exactly where it is. */
 #driverInfoCenter {
     width: 340px !important;
     height: 459px !important;
@@ -130,7 +126,6 @@
     font-size: 24px !important;
 }
 
-/* Secondary gauges retain size and horizontal spread. */
 #fuelGauge,
 #oilGauge,
 #coolantGauge,
@@ -160,10 +155,6 @@
     bottom: 122px !important;
 }
 
-/*
-   Status bar remains tied to the bezel bottom, so extending the bezel
-   moves the status bar down with it by the same amount.
-*/
 #statusBar {
     left: 50% !important;
     width: calc(100% - 88px) !important;
@@ -187,18 +178,18 @@
     line-height: 15px !important;
 }
 
-/*
-   Keep the lower stack raised. Move only the live/update ribbon and
-   systems message bar about 7% of viewport width farther to the right.
-*/
+/* Move the update/live and systems bars farther right. */
 #liveRibbon,
 #messageCenter {
-    transform: translate(calc(18px + 7vw), -165px) !important;
+    transform: translate(calc(18px + 12vw), -165px) !important;
     width: min(97vw, 2560px) !important;
 }
 
+/* Raise the bottom navigation independently. */
 #bottomNav {
-    transform: translate(18px, -165px) !important;
+    transform: translate(18px, -220px) !important;
+    height: 121px !important;
+    margin-top: 0 !important;
 }
 
 #liveRibbon {
@@ -236,11 +227,6 @@
 
 #messageText {
     font-size: 19px !important;
-}
-
-#bottomNav {
-    height: 121px !important;
-    margin-top: 0 !important;
 }
 
 #bottomNav button {
