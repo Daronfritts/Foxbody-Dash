@@ -35,13 +35,12 @@
 }
 
 /*
-   Shorten only the lower edge of the bezel.
-   The top edge stays in the same place; internal elements are compensated
-   below so their visual positions do not change.
+   Extend only the lower edge of the bezel by about 7%.
+   The top edge stays in the same place; all upper gauge positions remain unchanged.
 */
 #cluster {
     width: 2700px !important;
-    height: 1115px !important;
+    height: 1193px !important;
     margin-top: -95px !important;
     grid-template-columns: 775px 459px 775px !important;
     column-gap: 210px !important;
@@ -141,10 +140,6 @@
     height: 363px !important;
 }
 
-/*
-   Compensate for the shorter bezel so the small-gauge row remains in the
-   exact same visual position as before.
-*/
 #fuelGauge {
     left: 250px !important;
     bottom: 122px !important;
@@ -166,7 +161,8 @@
 }
 
 /*
-   Raise the warning strip enough to clear the bezel bottom edge cleanly.
+   Status bar remains tied to the bezel bottom, so extending the bezel
+   moves the status bar down with it by the same amount.
 */
 #statusBar {
     left: 50% !important;
@@ -192,18 +188,17 @@
 }
 
 /*
-   Pull the lower information/navigation stack farther upward and slightly
-   right for the 1024x600 touchscreen fit.
+   Keep the lower stack raised. Move only the live/update ribbon and
+   systems message bar about 7% of viewport width farther to the right.
 */
 #liveRibbon,
-#messageCenter,
-#bottomNav {
-    transform: translate(18px, -165px) !important;
+#messageCenter {
+    transform: translate(calc(18px + 7vw), -165px) !important;
+    width: min(97vw, 2560px) !important;
 }
 
-#liveRibbon,
-#messageCenter {
-    width: min(97vw, 2560px) !important;
+#bottomNav {
+    transform: translate(18px, -165px) !important;
 }
 
 #liveRibbon {
