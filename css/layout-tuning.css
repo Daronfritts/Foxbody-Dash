@@ -178,16 +178,16 @@
     line-height: 15px !important;
 }
 
-/* Move the update/live and systems bars farther right. */
+/* Repeat the previous right shift once more. */
 #liveRibbon,
 #messageCenter {
-    transform: translate(calc(18px + 12vw), -165px) !important;
+    transform: translate(calc(18px + 17vw), -165px) !important;
     width: min(97vw, 2560px) !important;
 }
 
-/* Raise the bottom navigation independently. */
+/* Repeat the previous upward nav move once more. */
 #bottomNav {
-    transform: translate(18px, -220px) !important;
+    transform: translate(18px, -275px) !important;
     height: 121px !important;
     margin-top: 0 !important;
 }
