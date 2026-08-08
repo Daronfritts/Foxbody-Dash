@@ -1,224 +1,66 @@
 /* =========================================================
-   FOXBODY DASH - 1024x600 PHYSICAL SCREEN LAYOUT
-   Tuned around assets/images/dashMask.svg
+   FOXBODY DASH - LAYOUT TUNING
+   Coordinated 25% dashboard enlargement pass
    ========================================================= */
 
-/* Work in the actual touchscreen coordinate system. */
-#dashboard {
-    position: relative !important;
-    width: 100vw !important;
-    height: 100vh !important;
-    overflow: hidden !important;
-}
+#topBar { height: 120px !important; }
+#clusterLogo { transform: translateY(50px) !important; }
+#foxbodyTitle { font-size: 58px !important; letter-spacing: 7.5px !important; transform: translateY(6px) !important; }
+#mustangLogo { width: 256px !important; margin-top: 3px !important; transform: translateY(-61px) !important; }
+#mustangLogo.shiftYellow { transform: translateY(-61px) scale(1.04) !important; }
+#mustangLogo.shiftRed { transform: translateY(-61px) scale(1.06) !important; }
 
-#topBar {
-    position: absolute !important;
-    left: 0 !important;
-    top: 0 !important;
-    width: 100% !important;
-    height: 86px !important;
-    z-index: 100 !important;
-}
+#cluster { width: 2700px !important; height: 1193px !important; margin-top: -95px !important; grid-template-columns: 775px 459px 775px !important; column-gap: 210px !important; border-radius: 43px !important; }
+#cluster::before { inset: 18px !important; border-radius: 30px !important; border-width: 3px !important; }
+#cluster::after { inset: 33px !important; border-radius: 23px !important; }
 
-#clusterLogo {
-    transform: translateY(14px) !important;
-}
+#tach,#speed { width: 513px !important; height: 513px !important; margin-top: 205px !important; }
+#tach { justify-self: start !important; transform: translate(168px, 239px) !important; }
+#speed { justify-self: end !important; transform: translate(-168px, 239px) !important; }
+#driverInfoCenter { width: 340px !important; height: 459px !important; margin-top: 512px !important; justify-self: center !important; border-radius: 19px !important; }
+#clusterHeader { height: 68px !important; padding: 0 22px !important; font-size: 24px !important; }
+#gearRow { gap: 19px !important; padding: 27px 0 !important; }
+#gearRow .label { font-size: 22px !important; margin-bottom: 14px !important; }
+#gearDisplay { font-size: 97px !important; }
+#gearType { font-size: 32px !important; margin-bottom: 16px !important; }
+.clusterInfo { padding: 19px 0 !important; }
+.infoLabel { font-size: 19px !important; letter-spacing: 2.7px !important; }
+#odometer,#tripA { margin-top: 11px !important; font-size: 32px !important; }
+#cruiseStatus { height: 65px !important; font-size: 24px !important; }
 
-#foxbodyTitle {
-    font-size: 42px !important;
-    letter-spacing: 5px !important;
-    transform: none !important;
-}
+#fuelGauge,#oilGauge,#coolantGauge,#batteryGauge,.smallGauge { width: 363px !important; height: 363px !important; }
+#fuelGauge { left: 250px !important; bottom: 122px !important; }
+#oilGauge { left: 850px !important; bottom: 122px !important; }
+#coolantGauge { right: 850px !important; bottom: 122px !important; }
+#batteryGauge { right: 250px !important; bottom: 122px !important; }
 
-#mustangLogo {
-    width: 150px !important;
-    margin-top: 0 !important;
-    transform: translateY(-7px) !important;
-}
+#statusBar { left: 50% !important; width: calc(100% - 88px) !important; bottom: 44px !important; height: 86px !important; padding: 0 18px !important; gap: 9px !important; }
+.warningTile { height: 77px !important; }
+.warningTile img { width: 52px !important; height: 52px !important; }
+.warningTile span { font-size: 13px !important; line-height: 15px !important; }
 
-#mustangLogo.shiftYellow { transform: translateY(-7px) scale(1.04) !important; }
-#mustangLogo.shiftRed { transform: translateY(-7px) scale(1.06) !important; }
-
-/* Main bezel now fits the visible upper portion of the physical opening. */
-#mainView {
-    position: absolute !important;
-    inset: 0 !important;
-    width: 100% !important;
-    height: 100% !important;
-}
-
-#cluster {
-    position: absolute !important;
-    left: 50% !important;
-    top: 40px !important;
-    width: 1024px !important;
-    height: 430px !important;
-    margin: 0 !important;
-    transform: translateX(-50%) !important;
-    display: block !important;
-    border-radius: 0 !important;
-    overflow: hidden !important;
-}
-
-#cluster::before {
-    inset: 8px !important;
-    border-radius: 14px !important;
-    border-width: 2px !important;
-}
-
-#cluster::after {
-    inset: 14px !important;
-    border-radius: 10px !important;
-}
-
-/* Main gauges: high and wide, clear of the lower steering-column intrusion. */
-#tach,
-#speed {
-    position: absolute !important;
-    top: 63px !important;
-    width: 230px !important;
-    height: 230px !important;
-    margin: 0 !important;
-    transform: none !important;
-}
-
-#tach { left: 72px !important; }
-#speed { right: 72px !important; }
-
-/* Center information display stays in the narrow safe center area. */
-#driverInfoCenter {
-    position: absolute !important;
-    left: 50% !important;
-    top: 78px !important;
-    width: 145px !important;
-    height: 215px !important;
-    margin: 0 !important;
-    transform: translateX(-50%) !important;
-    border-radius: 8px !important;
-}
-
-#clusterHeader { height: 31px !important; padding: 0 8px !important; font-size: 10px !important; }
-#gearRow { gap: 7px !important; padding: 8px 0 !important; }
-#gearRow .label { font-size: 9px !important; margin-bottom: 4px !important; }
-#gearDisplay { font-size: 42px !important; }
-#gearType { font-size: 14px !important; margin-bottom: 5px !important; }
-.clusterInfo { padding: 6px 0 !important; }
-.infoLabel { font-size: 8px !important; letter-spacing: 1px !important; }
-#odometer,#tripA { margin-top: 2px !important; font-size: 14px !important; }
-#cruiseStatus { height: 27px !important; font-size: 10px !important; }
-
-/* Four mini gauges form a clean row above the warning strip. */
-#fuelGauge,
-#oilGauge,
-#coolantGauge,
-#batteryGauge,
-.smallGauge {
-    position: absolute !important;
-    top: 286px !important;
-    bottom: auto !important;
-    width: 145px !important;
-    height: 145px !important;
-}
-
-#fuelGauge { left: 50px !important; }
-#oilGauge { left: 280px !important; }
-#coolantGauge { right: 280px !important; }
-#batteryGauge { right: 50px !important; }
-
-/* Warning/status strip sits immediately below the mini gauges. */
-#statusBar {
-    position: absolute !important;
-    left: 20px !important;
-    bottom: 0 !important;
-    width: calc(100% - 40px) !important;
-    height: 48px !important;
-    padding: 0 8px !important;
-    gap: 4px !important;
-    transform: none !important;
-}
-
-.warningTile { height: 44px !important; }
-.warningTile img { width: 26px !important; height: 26px !important; }
-.warningTile span { font-size: 7px !important; line-height: 8px !important; }
-
-/* Lower information is deliberately kept out of the center notch.
-   Live data is split visually across the safe lower band. */
-#liveRibbon {
-    position: absolute !important;
-    left: 4% !important;
-    top: 492px !important;
-    width: 92% !important;
-    height: 30px !important;
-    margin: 0 !important;
-    transform: none !important;
-    font-size: 12px !important;
-    z-index: 40 !important;
-}
-
-/* Systems bar is compact and placed above navigation, left of center notch. */
-#messageCenter {
-    position: absolute !important;
-    left: 6% !important;
-    top: 526px !important;
-    width: 38% !important;
-    min-height: 34px !important;
-    height: 34px !important;
-    margin: 0 !important;
-    padding: 3px 9px !important;
-    gap: 7px !important;
-    transform: none !important;
-    z-index: 40 !important;
-}
-
-#messageIconWrap { width: 28px !important; height: 28px !important; }
-#messageIcon { width: 24px !important; height: 24px !important; }
-#messageNormalIcon { width: 24px !important; height: 24px !important; font-size: 15px !important; }
-#messageTitle { font-size: 11px !important; }
-#messageText { font-size: 8px !important; }
-
-/* Navigation occupies the safe lower-right band rather than crossing the notch. */
-#bottomNav {
-    position: absolute !important;
-    right: 4% !important;
-    bottom: 8px !important;
-    width: 50% !important;
-    height: 42px !important;
-    margin: 0 !important;
-    transform: none !important;
-    z-index: 40 !important;
-    justify-content: space-between !important;
-    gap: 4px !important;
-    background: rgba(5,5,5,.90) !important;
-}
-
-#bottomNav button {
-    width: 19% !important;
-    height: 34px !important;
-    border-radius: 7px !important;
-    font-size: 10px !important;
-}
+#liveRibbon { transform: translate(calc(18px + 20vw), -165px) !important; width: min(97vw, 2560px) !important; height: 65px !important; margin-top: 0 !important; font-size: 25px !important; }
+#messageCenter { transform: translate(calc(18px + 17vw), -211px) !important; width: min(97vw, 2560px) !important; min-height: 92px !important; margin-top: 0 !important; padding: 12px 27px !important; gap: 23px !important; }
+#bottomNav { transform: translate(18px, -275px) !important; height: 121px !important; margin-top: 0 !important; }
+#messageIconWrap { width: 65px !important; height: 65px !important; }
+#messageIcon { width: 57px !important; height: 57px !important; }
+#messageNormalIcon { width: 47px !important; height: 47px !important; font-size: 29px !important; }
+#messageTitle { font-size: 28px !important; }
+#messageText { font-size: 19px !important; }
+#bottomNav button { width: 225px !important; height: 78px !important; border-radius: 15px !important; font-size: 26px !important; }
 
 .gaugeNeedle { stroke: #ff3030 !important; stroke-width: 6.25px !important; stroke-linecap: round !important; opacity: 1 !important; }
 .gaugeSvg--mini .gaugeNeedle { stroke: #ff3030 !important; stroke-width: 4px !important; }
 .gaugeNeedleTail { stroke: #8f0000 !important; opacity: 1 !important; }
 .gaugeNeedleGroup { opacity: 1 !important; }
 
-/* =========================================================
-   PHYSICAL FOXBODY DASH MASK
-   The SVG was measured at 232.21764 x 150.55286 mm.
-   Preserve that aspect ratio instead of stretching it.
-   A 1024px-wide rendering is ~664px tall, so crop the excess
-   vertically around the display while keeping the physical shape.
-   ========================================================= */
+/* Physical Foxbody opening reference overlay.
+   Keep the SVG mapped directly to the actual display. Do not resize the
+   dashboard itself to the SVG's document aspect ratio. */
 #dashboard::after {
     content: "";
     position: fixed;
-    left: 50% !important;
-    top: 50% !important;
-    width: 100vw !important;
-    height: auto !important;
-    aspect-ratio: 232.21764 / 150.55286;
-    transform: translate(-50%, -50%) !important;
+    inset: 0;
     z-index: 10000;
     pointer-events: none;
     background-image: url("../assets/images/dashMask.svg");
@@ -227,8 +69,9 @@
     background-size: 100% 100%;
 }
 
-/* The Pi screen is 1024x600. Do not apply the old generic cluster scaling
-   at this size; the positions above are already screen-coordinate tuned. */
-@media (min-width: 1201px) {
-    #cluster { transform: translateX(-50%) !important; }
-}
+@media (max-width: 2800px) { #cluster { transform: scale(.92) !important; transform-origin: top center !important; } }
+@media (max-width: 2400px) { #cluster { transform: scale(.84) !important; transform-origin: top center !important; } }
+@media (max-width: 2100px) { #cluster { transform: scale(.76) !important; transform-origin: top center !important; } }
+@media (max-width: 1800px) { #cluster { transform: scale(.66) !important; transform-origin: top center !important; } }
+@media (max-width: 1500px) { #cluster { transform: scale(.55) !important; transform-origin: top center !important; } }
+@media (max-width: 1200px) { #cluster { transform: scale(.43) !important; transform-origin: top center !important; } }
