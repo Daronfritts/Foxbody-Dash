@@ -78,6 +78,20 @@ function saveSettings(){
 function itemFor(id){ return settings.layout.items.find(item => item.id === id); }
 function clamp(value,min,max){ return Math.max(min,Math.min(max,value)); }
 
+const ITEM_GAP = 0.35;
+function itemsOverlap(a,b,gap=ITEM_GAP){
+  return a.x < b.x + b.w + gap &&
+         a.x + a.w + gap > b.x &&
+         a.y < b.y + b.h + gap &&
+         a.y + a.h + gap > b.y;
+}
+
+function positionAllowed(candidate,ignoreId){
+  if(!Number.isFinite(candidate.x)||!Number.isFinite(candidate.y)||!Number.isFinite(candidate.w)||!Number.isFinite(candidate.h)) return false;
+  if(candidate.w<=0||candidate.h<=0||candidate.x<0||candidate.y<0||candidate.x+candidate.w>100||candidate.y+candidate.h>100) return false;
+  return !settings.layout.items.some(other=>other.id!==ignoreId&&itemsOverlap(candidate,other));
+}
+
 function sizeFor(item,size){
   const presets = item.type === "gauge"
     ? {small:{w:14,h:24},medium:{w:19,h:32},large:{w:25,h:43}}
@@ -138,6 +152,7 @@ function beginDrag(event){
     pointerId:event.pointerId,tile,item,
     startX:event.clientX,startY:event.clientY,
     originX:item.x,originY:item.y,
+    lastValidX:item.x,lastValidY:item.y,
     editorRect,moved:false
   };
   tile.setPointerCapture?.(event.pointerId);
@@ -155,15 +170,30 @@ function dragMove(event){
   if(!dragState.moved) return;
   event.preventDefault();
   const item = dragState.item;
-  item.x = clamp(dragState.originX + dx,0,100-item.w);
-  item.y = clamp(dragState.originY + dy,0,100-item.h);
+  const candidate = {
+    ...item,
+    x:clamp(dragState.originX + dx,0,100-item.w),
+    y:clamp(dragState.originY + dy,0,100-item.h)
+  };
+
+  if(positionAllowed(candidate,item.id)){
+    item.x = candidate.x;
+    item.y = candidate.y;
+    dragState.lastValidX = item.x;
+    dragState.lastValidY = item.y;
+    dragState.tile.classList.remove("blocked");
+  }else{
+    item.x = dragState.lastValidX;
+    item.y = dragState.lastValidY;
+    dragState.tile.classList.add("blocked");
+  }
   dragState.tile.style.left = `${item.x}%`;
   dragState.tile.style.top = `${item.y}%`;
 }
 
 function endDrag(){
   if(!dragState) return;
-  dragState.tile.classList.remove("dragging");
+  dragState.tile.classList.remove("dragging","blocked");
   dragState.tile.removeEventListener("pointermove",dragMove);
   if(dragState.moved) saveSettings();
   dragState = null;
@@ -173,10 +203,16 @@ function endDrag(){
 function setSelectedSize(size){
   const item = itemFor(selectedId); if(!item) return;
   const dims = sizeFor(item,size);
-  item.size = size;
-  item.w = dims.w; item.h = dims.h;
-  item.x = clamp(item.x,0,100-item.w);
-  item.y = clamp(item.y,0,100-item.h);
+  const candidate = {
+    ...item,
+    size,
+    w:dims.w,
+    h:dims.h,
+    x:clamp(item.x,0,100-dims.w),
+    y:clamp(item.y,0,100-dims.h)
+  };
+  if(!positionAllowed(candidate,item.id)) return;
+  Object.assign(item,candidate);
   saveSettings(); renderEditor();
 }
 
