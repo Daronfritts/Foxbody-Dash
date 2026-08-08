@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Gauge Layout Manager</title>
+  <title>Gauge Layout Editor</title>
   <link rel="stylesheet" href="../css/gauge-layout.css" />
 </head>
 <body>
@@ -11,29 +11,36 @@
     <header id="layoutHeader">
       <button id="backButton" type="button">HOME</button>
       <div>
-        <h1>GAUGE LAYOUT MANAGER</h1>
-        <p>Choose which gauge gets the large focus position.</p>
+        <h1>GAUGE LAYOUT EDITOR</h1>
+        <p>Drag gauges, change their size, and save the layout used by the live dash.</p>
       </div>
       <button id="resetButton" type="button">RESET</button>
     </header>
 
-    <section class="layoutCard">
+    <section class="layoutCard editorCard">
       <div class="cardHeading">
         <div>
-          <h2>Manual Focus Gauge</h2>
-          <p>The selected gauge becomes the large priority gauge on the dash.</p>
+          <h2>Touchscreen Layout</h2>
+          <p>Press and drag a gauge to move it. Tap a gauge to select it, then choose its size.</p>
         </div>
-        <div id="saveStatus" aria-live="polite">SAVED</div>
+        <div class="editorActions">
+          <label class="switchLabel"><input id="customLayoutEnabled" type="checkbox" /><span>USE CUSTOM</span></label>
+          <div id="saveStatus" aria-live="polite">SAVED</div>
+        </div>
       </div>
 
-      <div id="gaugeChoices" class="gaugeChoices" role="radiogroup" aria-label="Primary gauge">
-        <button type="button" class="gaugeChoice" data-gauge="none">NORMAL</button>
-        <button type="button" class="gaugeChoice" data-gauge="rpm">RPM</button>
-        <button type="button" class="gaugeChoice" data-gauge="speed">SPEED</button>
-        <button type="button" class="gaugeChoice" data-gauge="fuel">FUEL</button>
-        <button type="button" class="gaugeChoice" data-gauge="oil">OIL PSI</button>
-        <button type="button" class="gaugeChoice" data-gauge="coolant">COOLANT</button>
-        <button type="button" class="gaugeChoice" data-gauge="battery">VOLTS</button>
+      <div id="layoutEditor" class="layoutEditor" aria-label="Gauge layout editor"></div>
+
+      <div class="editorToolbar">
+        <div>
+          <span class="toolbarLabel">SELECTED</span>
+          <strong id="selectedGaugeLabel">RPM</strong>
+        </div>
+        <div class="sizeButtons" role="group" aria-label="Gauge size">
+          <button type="button" data-size="small">SMALL</button>
+          <button type="button" data-size="wide">WIDE</button>
+          <button type="button" data-size="large">LARGE</button>
+        </div>
       </div>
     </section>
 
@@ -41,45 +48,27 @@
       <div class="cardHeading">
         <div>
           <h2>Automatic Gauge Takeover</h2>
-          <p>Critical engine information can temporarily override the manual layout.</p>
+          <p>Warnings can still jump over the custom layout with a large priority gauge.</p>
         </div>
-        <label class="switchLabel">
-          <input id="autoPromote" type="checkbox" />
-          <span>AUTO</span>
-        </label>
+        <label class="switchLabel"><input id="autoPromote" type="checkbox" /><span>AUTO</span></label>
       </div>
-
       <div class="thresholdGrid">
-        <label class="thresholdRow">
-          <span>Coolant high</span>
-          <div><input id="coolantHigh" type="number" min="150" max="280" step="1" /> <span>°F</span></div>
-        </label>
-        <label class="thresholdRow">
-          <span>Oil pressure low</span>
-          <div><input id="oilLow" type="number" min="0" max="80" step="1" /> <span>PSI</span></div>
-        </label>
-        <label class="thresholdRow">
-          <span>Battery low</span>
-          <div><input id="batteryLow" type="number" min="8" max="16" step="0.1" /> <span>V</span></div>
-        </label>
-        <label class="thresholdRow">
-          <span>Battery high</span>
-          <div><input id="batteryHigh" type="number" min="12" max="20" step="0.1" /> <span>V</span></div>
-        </label>
+        <label class="thresholdRow"><span>Coolant high</span><div><input id="coolantHigh" type="number" min="150" max="280" step="1" /> <span>°F</span></div></label>
+        <label class="thresholdRow"><span>Oil pressure low</span><div><input id="oilLow" type="number" min="0" max="80" step="1" /> <span>PSI</span></div></label>
+        <label class="thresholdRow"><span>Battery low</span><div><input id="batteryLow" type="number" min="8" max="16" step="0.1" /> <span>V</span></div></label>
+        <label class="thresholdRow"><span>Battery high</span><div><input id="batteryHigh" type="number" min="12" max="20" step="0.1" /> <span>V</span></div></label>
       </div>
     </section>
 
     <section class="layoutCard previewCard">
       <div>
-        <h2>How it behaves</h2>
-        <p><strong>Manual:</strong> pick COOLANT before a hard pull and coolant becomes the large focus gauge.</p>
-        <p><strong>Automatic:</strong> if coolant reaches the configured high limit, COOLANT takes over until temperature drops back below the threshold.</p>
-        <p><strong>Priority:</strong> oil pressure, coolant temperature, then battery voltage.</p>
+        <h2>Live behavior</h2>
+        <p>Your saved arrangement is loaded automatically on the dashboard when <strong>USE CUSTOM</strong> is enabled.</p>
+        <p>Oil pressure, coolant temperature, and charging warnings can temporarily take over the screen above it.</p>
       </div>
       <button id="openDashButton" type="button">OPEN DASH</button>
     </section>
   </main>
-
   <script src="../js/gaugeLayoutSettings.js"></script>
 </body>
 </html>
