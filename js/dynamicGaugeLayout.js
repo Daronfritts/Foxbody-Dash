@@ -125,17 +125,23 @@ function renderCustomLayout(settings){
       const cell=document.createElement("div");
       cell.className=`customFreeItem customFreeItem--${item.type||"gauge"}`;
       styleFreeItem(cell,item);
+
       if(item.type==="info"){
         buildInfoCell(cell);
+        customPanel.appendChild(cell);
       }else if(item.type==="shift"){
         buildShiftCell(cell);
+        customPanel.appendChild(cell);
       }else{
         const key=item.id||item.gauge;
         const id=`customGauge-${key}-${index}`;
         cell.innerHTML=`<div id="${id}" class="customGaugeCanvas"></div>`;
+
+        // The Gauge constructor resolves its host with document.getElementById(),
+        // so the cell must be attached to the document before the gauge is built.
+        customPanel.appendChild(cell);
         customGaugeInstances[key]=createGaugeForContainer(id,key,item);
       }
-      customPanel.appendChild(cell);
     });
     lastLayoutSignature=signature;
   }
