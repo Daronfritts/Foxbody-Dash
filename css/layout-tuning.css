@@ -4,299 +4,77 @@
    ========================================================= */
 
 /* Header / title area */
-#topBar {
-    height: 120px !important;
-}
+#topBar { height: 120px !important; }
+#clusterLogo { transform: translateY(50px) !important; }
+#foxbodyTitle { font-size: 58px !important; letter-spacing: 7.5px !important; transform: translateY(6px) !important; }
+#mustangLogo { width: 256px !important; margin-top: 3px !important; transform: translateY(-61px) !important; }
+#mustangLogo.shiftYellow { transform: translateY(-61px) scale(1.04) !important; }
+#mustangLogo.shiftRed { transform: translateY(-61px) scale(1.06) !important; }
 
-#clusterLogo {
-    transform: translateY(50px) !important;
-}
+#cluster { width: 2700px !important; height: 1193px !important; margin-top: -95px !important; grid-template-columns: 775px 459px 775px !important; column-gap: 210px !important; border-radius: 43px !important; }
+#cluster::before { inset: 18px !important; border-radius: 30px !important; border-width: 3px !important; }
+#cluster::after { inset: 33px !important; border-radius: 23px !important; }
 
-/* Keep FOXBODY GT at the current working position. */
-#foxbodyTitle {
-    font-size: 58px !important;
-    letter-spacing: 7.5px !important;
-    transform: translateY(6px) !important;
-}
+#tach,#speed { width: 513px !important; height: 513px !important; margin-top: 205px !important; }
+#tach { justify-self: start !important; transform: translate(168px, 239px) !important; }
+#speed { justify-self: end !important; transform: translate(-168px, 239px) !important; }
+#driverInfoCenter { width: 340px !important; height: 459px !important; margin-top: 512px !important; justify-self: center !important; border-radius: 19px !important; }
+#clusterHeader { height: 68px !important; padding: 0 22px !important; font-size: 24px !important; }
+#gearRow { gap: 19px !important; padding: 27px 0 !important; }
+#gearRow .label { font-size: 22px !important; margin-bottom: 14px !important; }
+#gearDisplay { font-size: 97px !important; }
+#gearType { font-size: 32px !important; margin-bottom: 16px !important; }
+.clusterInfo { padding: 19px 0 !important; }
+.infoLabel { font-size: 19px !important; letter-spacing: 2.7px !important; }
+#odometer,#tripA { margin-top: 11px !important; font-size: 32px !important; }
+#cruiseStatus { height: 65px !important; font-size: 24px !important; }
 
-/* Keep the Mustang shift light at the current working position. */
-#mustangLogo {
-    width: 256px !important;
-    margin-top: 3px !important;
-    transform: translateY(-61px) !important;
-}
+#fuelGauge,#oilGauge,#coolantGauge,#batteryGauge,.smallGauge { width: 363px !important; height: 363px !important; }
+#fuelGauge { left: 250px !important; bottom: 122px !important; }
+#oilGauge { left: 850px !important; bottom: 122px !important; }
+#coolantGauge { right: 850px !important; bottom: 122px !important; }
+#batteryGauge { right: 250px !important; bottom: 122px !important; }
 
-#mustangLogo.shiftYellow {
-    transform: translateY(-61px) scale(1.04) !important;
-}
+#statusBar { left: 50% !important; width: calc(100% - 88px) !important; bottom: 44px !important; height: 86px !important; padding: 0 18px !important; gap: 9px !important; }
+.warningTile { height: 77px !important; }
+.warningTile img { width: 52px !important; height: 52px !important; }
+.warningTile span { font-size: 13px !important; line-height: 15px !important; }
 
-#mustangLogo.shiftRed {
-    transform: translateY(-61px) scale(1.06) !important;
-}
-
-/* Extended lower bezel. */
-#cluster {
-    width: 2700px !important;
-    height: 1193px !important;
-    margin-top: -95px !important;
-    grid-template-columns: 775px 459px 775px !important;
-    column-gap: 210px !important;
-    border-radius: 43px !important;
-}
-
-#cluster::before {
-    inset: 18px !important;
-    border-radius: 30px !important;
-    border-width: 3px !important;
-}
-
-#cluster::after {
-    inset: 33px !important;
-    border-radius: 23px !important;
-}
-
-/* Main gauges stay exactly where they are. */
-#tach,
-#speed {
-    width: 513px !important;
-    height: 513px !important;
-    margin-top: 205px !important;
-}
-
-#tach {
-    justify-self: start !important;
-    transform: translate(168px, 239px) !important;
-}
-
-#speed {
-    justify-self: end !important;
-    transform: translate(-168px, 239px) !important;
-}
-
-#driverInfoCenter {
-    width: 340px !important;
-    height: 459px !important;
-    margin-top: 512px !important;
-    justify-self: center !important;
-    border-radius: 19px !important;
-}
-
-#clusterHeader {
-    height: 68px !important;
-    padding: 0 22px !important;
-    font-size: 24px !important;
-}
-
-#gearRow {
-    gap: 19px !important;
-    padding: 27px 0 !important;
-}
-
-#gearRow .label {
-    font-size: 22px !important;
-    margin-bottom: 14px !important;
-}
-
-#gearDisplay {
-    font-size: 97px !important;
-}
-
-#gearType {
-    font-size: 32px !important;
-    margin-bottom: 16px !important;
-}
-
-.clusterInfo {
-    padding: 19px 0 !important;
-}
-
-.infoLabel {
-    font-size: 19px !important;
-    letter-spacing: 2.7px !important;
-}
-
-#odometer,
-#tripA {
-    margin-top: 11px !important;
-    font-size: 32px !important;
-}
-
-#cruiseStatus {
-    height: 65px !important;
-    font-size: 24px !important;
-}
-
-#fuelGauge,
-#oilGauge,
-#coolantGauge,
-#batteryGauge,
-.smallGauge {
-    width: 363px !important;
-    height: 363px !important;
-}
-
-#fuelGauge {
-    left: 250px !important;
-    bottom: 122px !important;
-}
-
-#oilGauge {
-    left: 850px !important;
-    bottom: 122px !important;
-}
-
-#coolantGauge {
-    right: 850px !important;
-    bottom: 122px !important;
-}
-
-#batteryGauge {
-    right: 250px !important;
-    bottom: 122px !important;
-}
-
-#statusBar {
-    left: 50% !important;
-    width: calc(100% - 88px) !important;
-    bottom: 44px !important;
-    height: 86px !important;
-    padding: 0 18px !important;
-    gap: 9px !important;
-}
-
-.warningTile {
-    height: 77px !important;
-}
-
-.warningTile img {
-    width: 52px !important;
-    height: 52px !important;
-}
-
-.warningTile span {
-    font-size: 13px !important;
-    line-height: 15px !important;
-}
-
-/* Repeat the previous right shift once more. */
-#liveRibbon,
-#messageCenter {
-    transform: translate(calc(18px + 17vw), -165px) !important;
-    width: min(97vw, 2560px) !important;
-}
-
-/* Repeat the previous upward nav move once more. */
-#bottomNav {
-    transform: translate(18px, -275px) !important;
-    height: 121px !important;
-    margin-top: 0 !important;
-}
-
+/* Update/live ribbon: another 5vw to the right, same vertical position. */
 #liveRibbon {
+    transform: translate(calc(18px + 22vw), -165px) !important;
+    width: min(97vw, 2560px) !important;
     height: 65px !important;
     margin-top: 0 !important;
     font-size: 25px !important;
 }
 
+/* Systems-good/message bar: keep horizontal position, move up about 20% of its 92px height (~18px). */
 #messageCenter {
+    transform: translate(calc(18px + 17vw), -183px) !important;
+    width: min(97vw, 2560px) !important;
     min-height: 92px !important;
     margin-top: 0 !important;
     padding: 12px 27px !important;
     gap: 23px !important;
 }
 
-#messageIconWrap {
-    width: 65px !important;
-    height: 65px !important;
-}
+#bottomNav { transform: translate(18px, -275px) !important; height: 121px !important; margin-top: 0 !important; }
+#messageIconWrap { width: 65px !important; height: 65px !important; }
+#messageIcon { width: 57px !important; height: 57px !important; }
+#messageNormalIcon { width: 47px !important; height: 47px !important; font-size: 29px !important; }
+#messageTitle { font-size: 28px !important; }
+#messageText { font-size: 19px !important; }
+#bottomNav button { width: 225px !important; height: 78px !important; border-radius: 15px !important; font-size: 26px !important; }
 
-#messageIcon {
-    width: 57px !important;
-    height: 57px !important;
-}
+.gaugeNeedle { stroke: #ff3030 !important; stroke-width: 6.25px !important; stroke-linecap: round !important; opacity: 1 !important; }
+.gaugeSvg--mini .gaugeNeedle { stroke: #ff3030 !important; stroke-width: 4px !important; }
+.gaugeNeedleTail { stroke: #8f0000 !important; opacity: 1 !important; }
+.gaugeNeedleGroup { opacity: 1 !important; }
 
-#messageNormalIcon {
-    width: 47px !important;
-    height: 47px !important;
-    font-size: 29px !important;
-}
-
-#messageTitle {
-    font-size: 28px !important;
-}
-
-#messageText {
-    font-size: 19px !important;
-}
-
-#bottomNav button {
-    width: 225px !important;
-    height: 78px !important;
-    border-radius: 15px !important;
-    font-size: 26px !important;
-}
-
-/* Reliable solid-red needles for Chromium. */
-.gaugeNeedle {
-    stroke: #ff3030 !important;
-    stroke-width: 6.25px !important;
-    stroke-linecap: round !important;
-    opacity: 1 !important;
-}
-
-.gaugeSvg--mini .gaugeNeedle {
-    stroke: #ff3030 !important;
-    stroke-width: 4px !important;
-}
-
-.gaugeNeedleTail {
-    stroke: #8f0000 !important;
-    opacity: 1 !important;
-}
-
-.gaugeNeedleGroup {
-    opacity: 1 !important;
-}
-
-/* Responsive scaling preserves the enlarged proportions. */
-@media (max-width: 2800px) {
-    #cluster {
-        transform: scale(.92) !important;
-        transform-origin: top center !important;
-    }
-}
-
-@media (max-width: 2400px) {
-    #cluster {
-        transform: scale(.84) !important;
-        transform-origin: top center !important;
-    }
-}
-
-@media (max-width: 2100px) {
-    #cluster {
-        transform: scale(.76) !important;
-        transform-origin: top center !important;
-    }
-}
-
-@media (max-width: 1800px) {
-    #cluster {
-        transform: scale(.66) !important;
-        transform-origin: top center !important;
-    }
-}
-
-@media (max-width: 1500px) {
-    #cluster {
-        transform: scale(.55) !important;
-        transform-origin: top center !important;
-    }
-}
-
-@media (max-width: 1200px) {
-    #cluster {
-        transform: scale(.43) !important;
-        transform-origin: top center !important;
-    }
-}
+@media (max-width: 2800px) { #cluster { transform: scale(.92) !important; transform-origin: top center !important; } }
+@media (max-width: 2400px) { #cluster { transform: scale(.84) !important; transform-origin: top center !important; } }
+@media (max-width: 2100px) { #cluster { transform: scale(.76) !important; transform-origin: top center !important; } }
+@media (max-width: 1800px) { #cluster { transform: scale(.66) !important; transform-origin: top center !important; } }
+@media (max-width: 1500px) { #cluster { transform: scale(.55) !important; transform-origin: top center !important; } }
+@media (max-width: 1200px) { #cluster { transform: scale(.43) !important; transform-origin: top center !important; } }
