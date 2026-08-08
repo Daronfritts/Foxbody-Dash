@@ -4,7 +4,7 @@ const GAUGE_LAYOUT_DEFAULTS = {
   focusGauge:"none",
   customLayoutEnabled:false,
   autoPromote:true,
-  layout:{columns:6,rows:3,items:[]},
+  layout:{mode:"freeform",items:[]},
   thresholds:{coolantHigh:230,oilLow:12,batteryLow:11.5,batteryHigh:16.0}
 };
 
@@ -57,42 +57,85 @@ function determineAutomaticGauge(settings){
   return null;
 }
 
+function gaugeSize(item){
+  if(item.size==="large") return {size:430,radius:176,needleLength:132,variant:"main"};
+  if(item.size==="medium") return {size:220,radius:86,needleLength:64,variant:"mini"};
+  return {size:155,radius:61,needleLength:46,variant:"mini"};
+}
+
 function createGaugeForContainer(containerId,key,item){
   const def=focusGaugeDefinitions[key];
   if(!def)return null;
-  const large=item.w>=2&&item.h>=2;
-  const wide=item.w>=2&&item.h===1;
-  const size=large?430:(wide?210:155);
-  const radius=large?176:(wide?78:61);
-  const needleLength=large?132:(wide?58:46);
+  const dims=gaugeSize(item);
   return new Gauge(containerId,def.min,def.max,def.read(),def.label,{
     majorTicks:def.majorTicks,minorTicks:def.minorTicks,labels:def.labels,unit:def.unit,
     redlineStart:def.redlineStart??null,warningLow:def.warningLow??null,warningHigh:def.warningHigh??null,
-    title:def.label,subtitle:def.subtitle??def.unit,variant:large?"main":"mini",showValue:true,size,radius,needleLength
+    title:def.label,subtitle:def.subtitle??def.unit,variant:dims.variant,showValue:true,size:dims.size,radius:dims.radius,needleLength:dims.needleLength
   });
+}
+
+function styleFreeItem(el,item){
+  el.style.left=`${item.x}%`;
+  el.style.top=`${item.y}%`;
+  el.style.width=`${item.w}%`;
+  el.style.height=`${item.h}%`;
+}
+
+function buildInfoCell(cell){
+  cell.classList.add("customInfoCell");
+  cell.innerHTML=`
+    <div class="customInfoHeader"><span data-info="clock"></span><span data-info="temp"></span></div>
+    <div class="customInfoGear"><small>GEAR</small><strong data-info="gear"></strong><span data-info="gearType"></span></div>
+    <div class="customInfoRow"><small>ODOMETER</small><strong data-info="odometer"></strong></div>
+    <div class="customInfoRow"><small>TRIP A</small><strong data-info="trip"></strong></div>
+    <div class="customInfoCruise" data-info="cruise"></div>`;
+}
+
+function buildShiftCell(cell){
+  cell.classList.add("customShiftCell");
+  cell.innerHTML=`<div class="customShiftTitle">FOXBODY GT</div><img src="assets/images/mustangWhite.svg" alt="Mustang shift light" />`;
+}
+
+function syncNonGaugeElements(){
+  const textMap={clock:"clockDisplay",temp:"outsideTemp",gear:"gearDisplay",gearType:"gearType",odometer:"odometer",trip:"tripA",cruise:"cruiseStatus"};
+  Object.entries(textMap).forEach(([target,source])=>{
+    const dest=customPanel.querySelector(`[data-info="${target}"]`);
+    const src=document.getElementById(source);
+    if(dest&&src)dest.textContent=src.textContent;
+  });
+  const sourceLogo=document.getElementById("mustangLogo");
+  const customLogo=customPanel.querySelector(".customShiftCell img");
+  if(sourceLogo&&customLogo){
+    customLogo.classList.toggle("shiftYellow",sourceLogo.classList.contains("shiftYellow"));
+    customLogo.classList.toggle("shiftRed",sourceLogo.classList.contains("shiftRed"));
+  }
 }
 
 function renderCustomLayout(settings){
   const items=Array.isArray(settings.layout?.items)?settings.layout.items:[];
-  const signature=JSON.stringify({enabled:settings.customLayoutEnabled,columns:settings.layout?.columns,rows:settings.layout?.rows,items});
+  const signature=JSON.stringify({enabled:settings.customLayoutEnabled,items});
   cluster.classList.toggle("customLayoutActive",Boolean(settings.customLayoutEnabled&&items.length));
   if(!settings.customLayoutEnabled||!items.length){customPanel.classList.remove("active");return;}
   customPanel.classList.add("active");
-  customPanel.style.setProperty("--custom-cols",settings.layout.columns||6);
-  customPanel.style.setProperty("--custom-rows",settings.layout.rows||3);
 
   if(signature!==lastLayoutSignature){
     customPanel.innerHTML="";
     customGaugeInstances={};
     items.forEach((item,index)=>{
       const cell=document.createElement("div");
-      cell.className="customGaugeCell";
-      cell.style.gridColumn=`${item.col} / span ${item.w}`;
-      cell.style.gridRow=`${item.row} / span ${item.h}`;
-      const id=`customGauge-${item.gauge}-${index}`;
-      cell.innerHTML=`<div class="customGaugeName">${item.label||focusGaugeDefinitions[item.gauge]?.label||item.gauge}</div><div id="${id}" class="customGaugeCanvas"></div>`;
+      cell.className=`customFreeItem customFreeItem--${item.type||"gauge"}`;
+      styleFreeItem(cell,item);
+      if(item.type==="info"){
+        buildInfoCell(cell);
+      }else if(item.type==="shift"){
+        buildShiftCell(cell);
+      }else{
+        const key=item.id||item.gauge;
+        const id=`customGauge-${key}-${index}`;
+        cell.innerHTML=`<div id="${id}" class="customGaugeCanvas"></div>`;
+        customGaugeInstances[key]=createGaugeForContainer(id,key,item);
+      }
       customPanel.appendChild(cell);
-      customGaugeInstances[item.gauge]=createGaugeForContainer(id,item.gauge,item);
     });
     lastLayoutSignature=signature;
   }
@@ -101,6 +144,7 @@ function renderCustomLayout(settings){
     const def=focusGaugeDefinitions[key];
     if(gauge&&def)gauge.setValue(def.read(),true);
   });
+  syncNonGaugeElements();
 }
 
 function buildFocusGauge(key){
