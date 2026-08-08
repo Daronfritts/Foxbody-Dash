@@ -192,13 +192,13 @@
 }
 
 /*
-   Drop the information/navigation stack back down beneath the shortened bezel.
-   This keeps all three lower rows together while leaving the bezel and gauges untouched.
+   Pull the lower information/navigation stack upward so it fits the
+   1024x600 touchscreen without the large dead gap seen in fullscreen.
 */
 #liveRibbon,
 #messageCenter,
 #bottomNav {
-    transform: translateY(-12px) !important;
+    transform: translateY(-118px) !important;
 }
 
 #liveRibbon,
@@ -208,11 +208,13 @@
 
 #liveRibbon {
     height: 65px !important;
+    margin-top: 0 !important;
     font-size: 25px !important;
 }
 
 #messageCenter {
     min-height: 92px !important;
+    margin-top: 0 !important;
     padding: 12px 27px !important;
     gap: 23px !important;
 }
@@ -243,6 +245,7 @@
 
 #bottomNav {
     height: 121px !important;
+    margin-top: 0 !important;
 }
 
 #bottomNav button {
