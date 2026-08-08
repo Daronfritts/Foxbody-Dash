@@ -8,7 +8,7 @@ const DEFAULT_ITEMS = [
   {id:"coolant",type:"gauge",label:"COOLANT",x:55,y:58,w:14,h:24,size:"small"},
   {id:"battery",type:"gauge",label:"VOLTS",x:74,y:58,w:14,h:24,size:"small"},
   {id:"info",type:"info",label:"DRIVER INFO",x:40,y:13,w:20,h:40,size:"medium"},
-  {id:"shift",type:"shift",label:"SHIFT LIGHT",x:43,y:2,w:14,h:12,size:"medium"}
+  {id:"shift",type:"shift",label:"SHIFT LIGHT",x:43,y:1,w:14,h:11,size:"medium"}
 ];
 
 const defaults = {
@@ -20,15 +20,21 @@ const defaults = {
 };
 
 const clone = value => JSON.parse(JSON.stringify(value));
+const clamp = (value,min,max) => Math.max(min,Math.min(max,value));
 
 function migrateItems(savedItems){
   if(!Array.isArray(savedItems)) return clone(DEFAULT_ITEMS);
-  if(savedItems.some(item => typeof item.x === "number")){
+  if(savedItems.some(item => Number.isFinite(Number(item?.x)))){
     const merged = clone(DEFAULT_ITEMS);
     savedItems.forEach(saved => {
       const id = saved.id || saved.gauge;
       const target = merged.find(item => item.id === id);
-      if(target) Object.assign(target,saved,{id,type:saved.type || target.type});
+      if(!target) return;
+      Object.assign(target,saved,{id,type:saved.type || target.type});
+      target.w = clamp(Number(target.w) || target.w,1,100);
+      target.h = clamp(Number(target.h) || target.h,1,100);
+      target.x = clamp(Number(target.x) || 0,0,100-target.w);
+      target.y = clamp(Number(target.y) || 0,0,100-target.h);
     });
     return merged;
   }
@@ -76,21 +82,6 @@ function saveSettings(){
 }
 
 function itemFor(id){ return settings.layout.items.find(item => item.id === id); }
-function clamp(value,min,max){ return Math.max(min,Math.min(max,value)); }
-
-const ITEM_GAP = 0.35;
-function itemsOverlap(a,b,gap=ITEM_GAP){
-  return a.x < b.x + b.w + gap &&
-         a.x + a.w + gap > b.x &&
-         a.y < b.y + b.h + gap &&
-         a.y + a.h + gap > b.y;
-}
-
-function positionAllowed(candidate,ignoreId){
-  if(!Number.isFinite(candidate.x)||!Number.isFinite(candidate.y)||!Number.isFinite(candidate.w)||!Number.isFinite(candidate.h)) return false;
-  if(candidate.w<=0||candidate.h<=0||candidate.x<0||candidate.y<0||candidate.x+candidate.w>100||candidate.y+candidate.h>100) return false;
-  return !settings.layout.items.some(other=>other.id!==ignoreId&&itemsOverlap(candidate,other));
-}
 
 function sizeFor(item,size){
   const presets = item.type === "gauge"
@@ -115,7 +106,7 @@ function renderPreview(tile,item){
 
 function renderEditor(){
   editor.innerHTML = "";
-  settings.layout.items.forEach(item => {
+  settings.layout.items.forEach((item,index) => {
     const tile = document.createElement("button");
     tile.type = "button";
     tile.className = `freeItem freeItem--${item.type}`;
@@ -124,6 +115,7 @@ function renderEditor(){
     tile.style.top = `${item.y}%`;
     tile.style.width = `${item.w}%`;
     tile.style.height = `${item.h}%`;
+    tile.style.zIndex = String(index + 1);
     renderPreview(tile,item);
     tile.classList.toggle("selected",item.id === selectedId);
     tile.addEventListener("click",()=>{selectedId=item.id;renderEditor();});
@@ -152,11 +144,11 @@ function beginDrag(event){
     pointerId:event.pointerId,tile,item,
     startX:event.clientX,startY:event.clientY,
     originX:item.x,originY:item.y,
-    lastValidX:item.x,lastValidY:item.y,
     editorRect,moved:false
   };
   tile.setPointerCapture?.(event.pointerId);
   tile.classList.add("dragging");
+  tile.style.zIndex = "999";
   tile.addEventListener("pointermove",dragMove);
   tile.addEventListener("pointerup",endDrag,{once:true});
   tile.addEventListener("pointercancel",endDrag,{once:true});
@@ -170,30 +162,15 @@ function dragMove(event){
   if(!dragState.moved) return;
   event.preventDefault();
   const item = dragState.item;
-  const candidate = {
-    ...item,
-    x:clamp(dragState.originX + dx,0,100-item.w),
-    y:clamp(dragState.originY + dy,0,100-item.h)
-  };
-
-  if(positionAllowed(candidate,item.id)){
-    item.x = candidate.x;
-    item.y = candidate.y;
-    dragState.lastValidX = item.x;
-    dragState.lastValidY = item.y;
-    dragState.tile.classList.remove("blocked");
-  }else{
-    item.x = dragState.lastValidX;
-    item.y = dragState.lastValidY;
-    dragState.tile.classList.add("blocked");
-  }
+  item.x = clamp(dragState.originX + dx,0,100-item.w);
+  item.y = clamp(dragState.originY + dy,0,100-item.h);
   dragState.tile.style.left = `${item.x}%`;
   dragState.tile.style.top = `${item.y}%`;
 }
 
 function endDrag(){
   if(!dragState) return;
-  dragState.tile.classList.remove("dragging","blocked");
+  dragState.tile.classList.remove("dragging");
   dragState.tile.removeEventListener("pointermove",dragMove);
   if(dragState.moved) saveSettings();
   dragState = null;
@@ -203,17 +180,13 @@ function endDrag(){
 function setSelectedSize(size){
   const item = itemFor(selectedId); if(!item) return;
   const dims = sizeFor(item,size);
-  const candidate = {
-    ...item,
-    size,
-    w:dims.w,
-    h:dims.h,
-    x:clamp(item.x,0,100-dims.w),
-    y:clamp(item.y,0,100-dims.h)
-  };
-  if(!positionAllowed(candidate,item.id)) return;
-  Object.assign(item,candidate);
-  saveSettings(); renderEditor();
+  item.size = size;
+  item.w = dims.w;
+  item.h = dims.h;
+  item.x = clamp(item.x,0,100-item.w);
+  item.y = clamp(item.y,0,100-item.h);
+  saveSettings();
+  renderEditor();
 }
 
 document.querySelectorAll("[data-size]").forEach(button=>button.addEventListener("click",()=>setSelectedSize(button.dataset.size)));
@@ -221,9 +194,16 @@ customLayoutEnabled.addEventListener("change",()=>{settings.customLayoutEnabled=
 autoPromote.addEventListener("change",()=>{settings.autoPromote=autoPromote.checked;saveSettings();});
 
 function bindNumber(input,key){
-  input.addEventListener("change",()=>{const value=Number(input.value);if(Number.isFinite(value)){settings.thresholds[key]=value;saveSettings();}renderEditor();});
+  input.addEventListener("change",()=>{
+    const value=Number(input.value);
+    if(Number.isFinite(value)){settings.thresholds[key]=value;saveSettings();}
+    renderEditor();
+  });
 }
-bindNumber(coolantHigh,"coolantHigh"); bindNumber(oilLow,"oilLow"); bindNumber(batteryLow,"batteryLow"); bindNumber(batteryHigh,"batteryHigh");
+bindNumber(coolantHigh,"coolantHigh");
+bindNumber(oilLow,"oilLow");
+bindNumber(batteryLow,"batteryLow");
+bindNumber(batteryHigh,"batteryHigh");
 
 document.getElementById("resetButton").addEventListener("click",()=>{settings=clone(defaults);selectedId="rpm";saveSettings();renderEditor();});
 document.getElementById("backButton").addEventListener("click",()=>window.location.href="../index.html");
