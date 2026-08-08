@@ -3,7 +3,6 @@
    Coordinated 25% dashboard enlargement pass
    ========================================================= */
 
-/* Header / title area */
 #topBar { height: 120px !important; }
 #clusterLogo { transform: translateY(50px) !important; }
 #foxbodyTitle { font-size: 58px !important; letter-spacing: 7.5px !important; transform: translateY(6px) !important; }
@@ -40,25 +39,8 @@
 .warningTile img { width: 52px !important; height: 52px !important; }
 .warningTile span { font-size: 13px !important; line-height: 15px !important; }
 
-/* Update/live ribbon: back left by 2vw. */
-#liveRibbon {
-    transform: translate(calc(18px + 20vw), -165px) !important;
-    width: min(97vw, 2560px) !important;
-    height: 65px !important;
-    margin-top: 0 !important;
-    font-size: 25px !important;
-}
-
-/* Systems-good/message bar: another 30% of its 92px height upward (~28px). */
-#messageCenter {
-    transform: translate(calc(18px + 17vw), -211px) !important;
-    width: min(97vw, 2560px) !important;
-    min-height: 92px !important;
-    margin-top: 0 !important;
-    padding: 12px 27px !important;
-    gap: 23px !important;
-}
-
+#liveRibbon { transform: translate(calc(18px + 20vw), -165px) !important; width: min(97vw, 2560px) !important; height: 65px !important; margin-top: 0 !important; font-size: 25px !important; }
+#messageCenter { transform: translate(calc(18px + 17vw), -211px) !important; width: min(97vw, 2560px) !important; min-height: 92px !important; margin-top: 0 !important; padding: 12px 27px !important; gap: 23px !important; }
 #bottomNav { transform: translate(18px, -275px) !important; height: 121px !important; margin-top: 0 !important; }
 #messageIconWrap { width: 65px !important; height: 65px !important; }
 #messageIcon { width: 57px !important; height: 57px !important; }
@@ -71,6 +53,25 @@
 .gaugeSvg--mini .gaugeNeedle { stroke: #ff3030 !important; stroke-width: 4px !important; }
 .gaugeNeedleTail { stroke: #8f0000 !important; opacity: 1 !important; }
 .gaugeNeedleGroup { opacity: 1 !important; }
+
+/* =========================================================
+   PHYSICAL FOXBODY DASH OPENING MASK
+   dashMask.svg is a black surround with a transparent opening.
+   It is drawn over the complete dashboard at the exact screen
+   size so the hidden areas match the real dash obstruction.
+   pointer-events:none keeps the touchscreen usable underneath.
+   ========================================================= */
+#dashboard::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: 10000;
+    pointer-events: none;
+    background-image: url("../assets/images/dashMask.svg");
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-size: 100% 100%;
+}
 
 @media (max-width: 2800px) { #cluster { transform: scale(.92) !important; transform-origin: top center !important; } }
 @media (max-width: 2400px) { #cluster { transform: scale(.84) !important; transform-origin: top center !important; } }
