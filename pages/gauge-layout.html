@@ -12,7 +12,7 @@
       <button id="backButton" type="button">HOME</button>
       <div>
         <h1>GAUGE LAYOUT EDITOR</h1>
-        <p>Drag gauges, change their size, and save the layout used by the live dash.</p>
+        <p>Drag gauges and dash elements anywhere. Their boxes now hug the actual component instead of filling fixed screen cells.</p>
       </div>
       <button id="resetButton" type="button">RESET</button>
     </header>
@@ -20,8 +20,8 @@
     <section class="layoutCard editorCard">
       <div class="cardHeading">
         <div>
-          <h2>Touchscreen Layout</h2>
-          <p>Press and drag a gauge to move it. Tap a gauge to select it, then choose its size.</p>
+          <h2>Freeform Touchscreen Layout</h2>
+          <p>Press and drag any element. Tap to select it, then choose a size. Positions are saved as percentages so the layout scales with the display.</p>
         </div>
         <div class="editorActions">
           <label class="switchLabel"><input id="customLayoutEnabled" type="checkbox" /><span>USE CUSTOM</span></label>
@@ -29,16 +29,16 @@
         </div>
       </div>
 
-      <div id="layoutEditor" class="layoutEditor" aria-label="Gauge layout editor"></div>
+      <div id="layoutEditor" class="layoutEditor" aria-label="Freeform dash layout editor"></div>
 
       <div class="editorToolbar">
         <div>
           <span class="toolbarLabel">SELECTED</span>
           <strong id="selectedGaugeLabel">RPM</strong>
         </div>
-        <div class="sizeButtons" role="group" aria-label="Gauge size">
+        <div class="sizeButtons" role="group" aria-label="Element size">
           <button type="button" data-size="small">SMALL</button>
-          <button type="button" data-size="wide">WIDE</button>
+          <button type="button" data-size="medium">MEDIUM</button>
           <button type="button" data-size="large">LARGE</button>
         </div>
       </div>
@@ -62,9 +62,8 @@
 
     <section class="layoutCard previewCard">
       <div>
-        <h2>Live behavior</h2>
-        <p>Your saved arrangement is loaded automatically on the dashboard when <strong>USE CUSTOM</strong> is enabled.</p>
-        <p>Oil pressure, coolant temperature, and charging warnings can temporarily take over the screen above it.</p>
+        <h2>Available layout elements</h2>
+        <p>RPM, speed, fuel, oil pressure, coolant, battery voltage, the driver information block, and the Mustang shift light can all be moved independently.</p>
       </div>
       <button id="openDashButton" type="button">OPEN DASH</button>
     </section>
