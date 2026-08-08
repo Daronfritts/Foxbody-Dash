@@ -40,18 +40,18 @@
 .warningTile img { width: 52px !important; height: 52px !important; }
 .warningTile span { font-size: 13px !important; line-height: 15px !important; }
 
-/* Update/live ribbon: another 5vw to the right, same vertical position. */
+/* Update/live ribbon: back left by 2vw. */
 #liveRibbon {
-    transform: translate(calc(18px + 22vw), -165px) !important;
+    transform: translate(calc(18px + 20vw), -165px) !important;
     width: min(97vw, 2560px) !important;
     height: 65px !important;
     margin-top: 0 !important;
     font-size: 25px !important;
 }
 
-/* Systems-good/message bar: keep horizontal position, move up about 20% of its 92px height (~18px). */
+/* Systems-good/message bar: another 30% of its 92px height upward (~28px). */
 #messageCenter {
-    transform: translate(calc(18px + 17vw), -183px) !important;
+    transform: translate(calc(18px + 17vw), -211px) !important;
     width: min(97vw, 2560px) !important;
     min-height: 92px !important;
     margin-top: 0 !important;
