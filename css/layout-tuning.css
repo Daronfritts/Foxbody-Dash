@@ -192,13 +192,13 @@
 }
 
 /*
-   Pull the lower information/navigation stack upward so it fits the
-   1024x600 touchscreen without the large dead gap seen in fullscreen.
+   Pull the lower information/navigation stack farther upward and slightly
+   right for the 1024x600 touchscreen fit.
 */
 #liveRibbon,
 #messageCenter,
 #bottomNav {
-    transform: translateY(-118px) !important;
+    transform: translate(18px, -165px) !important;
 }
 
 #liveRibbon,
