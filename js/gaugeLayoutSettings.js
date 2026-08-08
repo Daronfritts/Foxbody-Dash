@@ -1,23 +1,39 @@
 const STORAGE_KEY = "foxbodyDash.gaugeLayout";
 
 const DEFAULT_ITEMS = [
-  {gauge:"rpm",label:"RPM",row:1,col:1,w:2,h:2},
-  {gauge:"speed",label:"SPEED",row:1,col:3,w:2,h:2},
-  {gauge:"fuel",label:"FUEL",row:1,col:5,w:1,h:1},
-  {gauge:"oil",label:"OIL PSI",row:1,col:6,w:1,h:1},
-  {gauge:"coolant",label:"COOLANT",row:2,col:5,w:1,h:1},
-  {gauge:"battery",label:"VOLTS",row:2,col:6,w:1,h:1}
+  {id:"rpm",type:"gauge",label:"RPM",x:7,y:8,w:24,h:42,size:"large"},
+  {id:"speed",type:"gauge",label:"SPEED",x:69,y:8,w:24,h:42,size:"large"},
+  {id:"fuel",type:"gauge",label:"FUEL",x:12,y:58,w:14,h:24,size:"small"},
+  {id:"oil",type:"gauge",label:"OIL PSI",x:31,y:58,w:14,h:24,size:"small"},
+  {id:"coolant",type:"gauge",label:"COOLANT",x:55,y:58,w:14,h:24,size:"small"},
+  {id:"battery",type:"gauge",label:"VOLTS",x:74,y:58,w:14,h:24,size:"small"},
+  {id:"info",type:"info",label:"DRIVER INFO",x:40,y:13,w:20,h:40,size:"medium"},
+  {id:"shift",type:"shift",label:"SHIFT LIGHT",x:43,y:2,w:14,h:12,size:"medium"}
 ];
 
 const defaults = {
   focusGauge:"none",
   customLayoutEnabled:false,
   autoPromote:true,
-  layout:{columns:6,rows:3,items:DEFAULT_ITEMS},
+  layout:{mode:"freeform",items:DEFAULT_ITEMS},
   thresholds:{coolantHigh:230,oilLow:12,batteryLow:11.5,batteryHigh:16.0}
 };
 
 const clone = value => JSON.parse(JSON.stringify(value));
+
+function migrateItems(savedItems){
+  if(!Array.isArray(savedItems)) return clone(DEFAULT_ITEMS);
+  if(savedItems.some(item => typeof item.x === "number")){
+    const merged = clone(DEFAULT_ITEMS);
+    savedItems.forEach(saved => {
+      const id = saved.id || saved.gauge;
+      const target = merged.find(item => item.id === id);
+      if(target) Object.assign(target,saved,{id,type:saved.type || target.type});
+    });
+    return merged;
+  }
+  return clone(DEFAULT_ITEMS);
+}
 
 function loadSettings(){
   try{
@@ -26,7 +42,7 @@ function loadSettings(){
       ...clone(defaults),
       ...saved,
       thresholds:{...defaults.thresholds,...(saved.thresholds || {})},
-      layout:{...clone(defaults.layout),...(saved.layout || {}),items:Array.isArray(saved.layout?.items) ? saved.layout.items : clone(DEFAULT_ITEMS)}
+      layout:{mode:"freeform",items:migrateItems(saved.layout?.items)}
     };
   }catch(error){
     console.warn("Gauge layout settings could not be read:", error);
@@ -35,7 +51,7 @@ function loadSettings(){
 }
 
 let settings = loadSettings();
-let selectedGauge = settings.layout.items[0]?.gauge || "rpm";
+let selectedId = settings.layout.items[0]?.id || "rpm";
 let dragState = null;
 
 const editor = document.getElementById("layoutEditor");
@@ -59,77 +75,71 @@ function saveSettings(){
   flashSaved();
 }
 
-function itemFor(gauge){ return settings.layout.items.find(item => item.gauge === gauge); }
+function itemFor(id){ return settings.layout.items.find(item => item.id === id); }
+function clamp(value,min,max){ return Math.max(min,Math.min(max,value)); }
 
-function rectsOverlap(a,b){
-  return a.col < b.col + b.w && a.col + a.w > b.col && a.row < b.row + b.h && a.row + a.h > b.row;
+function sizeFor(item,size){
+  const presets = item.type === "gauge"
+    ? {small:{w:14,h:24},medium:{w:19,h:32},large:{w:25,h:43}}
+    : item.type === "info"
+      ? {small:{w:16,h:28},medium:{w:20,h:40},large:{w:27,h:50}}
+      : {small:{w:10,h:8},medium:{w:14,h:12},large:{w:20,h:16}};
+  return presets[size] || presets.medium;
 }
 
-function positionValid(candidate, ignoreGauge){
-  if(candidate.col < 1 || candidate.row < 1 || candidate.col + candidate.w - 1 > settings.layout.columns || candidate.row + candidate.h - 1 > settings.layout.rows) return false;
-  return !settings.layout.items.some(item => item.gauge !== ignoreGauge && rectsOverlap(candidate,item));
-}
-
-function findNearestOpen(item, targetCol, targetRow){
-  const candidates=[];
-  for(let row=1;row<=settings.layout.rows;row++){
-    for(let col=1;col<=settings.layout.columns;col++){
-      const candidate={...item,row,col};
-      if(positionValid(candidate,item.gauge)) candidates.push(candidate);
-    }
+function renderPreview(tile,item){
+  if(item.type === "info"){
+    tile.innerHTML = `<span class="dragGrip">⋮⋮</span><div class="infoPreview"><b>12:00 PM</b><strong>GEAR 3</strong><span>184,232 MI</span><span>TRIP 123.4</span></div>`;
+    return;
   }
-  candidates.sort((a,b)=>Math.hypot(a.col-targetCol,a.row-targetRow)-Math.hypot(b.col-targetCol,b.row-targetRow));
-  return candidates[0] || null;
-}
-
-function gaugeSizeName(item){
-  if(item.w===2 && item.h===2) return "large";
-  if(item.w===2 && item.h===1) return "wide";
-  return "small";
+  if(item.type === "shift"){
+    tile.innerHTML = `<span class="dragGrip">⋮⋮</span><div class="shiftPreview"><span>FOXBODY GT</span><img src="../assets/images/mustangWhite.svg" alt="" /></div>`;
+    return;
+  }
+  tile.innerHTML = `<span class="dragGrip">⋮⋮</span><div class="roundGaugePreview"><strong>${item.label}</strong><span>${item.size.toUpperCase()}</span></div>`;
 }
 
 function renderEditor(){
-  editor.style.setProperty("--cols", settings.layout.columns);
-  editor.style.setProperty("--rows", settings.layout.rows);
-  editor.innerHTML="";
-
-  settings.layout.items.forEach(item=>{
-    const tile=document.createElement("button");
-    tile.type="button";
-    tile.className="gaugeTile";
-    tile.dataset.gauge=item.gauge;
-    tile.style.gridColumn=`${item.col} / span ${item.w}`;
-    tile.style.gridRow=`${item.row} / span ${item.h}`;
-    tile.innerHTML=`<span class="dragGrip">⋮⋮</span><strong>${item.label}</strong><small>${gaugeSizeName(item).toUpperCase()}</small>`;
-    tile.classList.toggle("selected",item.gauge===selectedGauge);
-    tile.addEventListener("click",()=>{selectedGauge=item.gauge;renderEditor();});
+  editor.innerHTML = "";
+  settings.layout.items.forEach(item => {
+    const tile = document.createElement("button");
+    tile.type = "button";
+    tile.className = `freeItem freeItem--${item.type}`;
+    tile.dataset.id = item.id;
+    tile.style.left = `${item.x}%`;
+    tile.style.top = `${item.y}%`;
+    tile.style.width = `${item.w}%`;
+    tile.style.height = `${item.h}%`;
+    renderPreview(tile,item);
+    tile.classList.toggle("selected",item.id === selectedId);
+    tile.addEventListener("click",()=>{selectedId=item.id;renderEditor();});
     tile.addEventListener("pointerdown",beginDrag);
     editor.appendChild(tile);
   });
 
-  const selected=itemFor(selectedGauge);
-  selectedLabel.textContent=selected?.label || selectedGauge.toUpperCase();
-  document.querySelectorAll("[data-size]").forEach(button=>button.classList.toggle("active",button.dataset.size===gaugeSizeName(selected || {w:1,h:1})));
-  customLayoutEnabled.checked=settings.customLayoutEnabled;
-  autoPromote.checked=settings.autoPromote;
-  coolantHigh.value=settings.thresholds.coolantHigh;
-  oilLow.value=settings.thresholds.oilLow;
-  batteryLow.value=settings.thresholds.batteryLow;
-  batteryHigh.value=settings.thresholds.batteryHigh;
-}
-
-function editorCellFromPoint(x,y){
-  const rect=editor.getBoundingClientRect();
-  const col=Math.max(1,Math.min(settings.layout.columns,Math.floor(((x-rect.left)/rect.width)*settings.layout.columns)+1));
-  const row=Math.max(1,Math.min(settings.layout.rows,Math.floor(((y-rect.top)/rect.height)*settings.layout.rows)+1));
-  return {col,row};
+  const selected = itemFor(selectedId);
+  selectedLabel.textContent = selected?.label || selectedId.toUpperCase();
+  document.querySelectorAll("[data-size]").forEach(button=>button.classList.toggle("active",button.dataset.size === (selected?.size || "medium")));
+  customLayoutEnabled.checked = settings.customLayoutEnabled;
+  autoPromote.checked = settings.autoPromote;
+  coolantHigh.value = settings.thresholds.coolantHigh;
+  oilLow.value = settings.thresholds.oilLow;
+  batteryLow.value = settings.thresholds.batteryLow;
+  batteryHigh.value = settings.thresholds.batteryHigh;
 }
 
 function beginDrag(event){
   if(event.button !== undefined && event.button !== 0) return;
-  const tile=event.currentTarget;
-  selectedGauge=tile.dataset.gauge;
-  dragState={pointerId:event.pointerId,tile,gauge:tile.dataset.gauge,moved:false,startX:event.clientX,startY:event.clientY};
+  const tile = event.currentTarget;
+  selectedId = tile.dataset.id;
+  const item = itemFor(selectedId);
+  const editorRect = editor.getBoundingClientRect();
+  dragState = {
+    pointerId:event.pointerId,tile,item,
+    startX:event.clientX,startY:event.clientY,
+    originX:item.x,originY:item.y,
+    editorRect,moved:false
+  };
   tile.setPointerCapture?.(event.pointerId);
   tile.classList.add("dragging");
   tile.addEventListener("pointermove",dragMove);
@@ -138,43 +148,35 @@ function beginDrag(event){
 }
 
 function dragMove(event){
-  if(!dragState || event.pointerId!==dragState.pointerId) return;
-  if(Math.hypot(event.clientX-dragState.startX,event.clientY-dragState.startY)>8) dragState.moved=true;
+  if(!dragState || event.pointerId !== dragState.pointerId) return;
+  const dx = ((event.clientX-dragState.startX)/dragState.editorRect.width)*100;
+  const dy = ((event.clientY-dragState.startY)/dragState.editorRect.height)*100;
+  if(Math.hypot(dx,dy) > .5) dragState.moved = true;
   if(!dragState.moved) return;
   event.preventDefault();
-  const cell=editorCellFromPoint(event.clientX,event.clientY);
-  const item=itemFor(dragState.gauge);
-  const open=findNearestOpen(item,cell.col,cell.row);
-  document.querySelectorAll(".dropTarget").forEach(el=>el.classList.remove("dropTarget"));
-  if(open){
-    dragState.preview=open;
-    dragState.tile.style.gridColumn=`${open.col} / span ${open.w}`;
-    dragState.tile.style.gridRow=`${open.row} / span ${open.h}`;
-    dragState.tile.classList.add("dropTarget");
-  }
+  const item = dragState.item;
+  item.x = clamp(dragState.originX + dx,0,100-item.w);
+  item.y = clamp(dragState.originY + dy,0,100-item.h);
+  dragState.tile.style.left = `${item.x}%`;
+  dragState.tile.style.top = `${item.y}%`;
 }
 
-function endDrag(event){
+function endDrag(){
   if(!dragState) return;
-  const {tile,gauge,preview,moved}=dragState;
-  tile.classList.remove("dragging","dropTarget");
-  tile.removeEventListener("pointermove",dragMove);
-  if(moved && preview){
-    const item=itemFor(gauge);
-    item.col=preview.col; item.row=preview.row;
-    saveSettings();
-  }
-  dragState=null;
+  dragState.tile.classList.remove("dragging");
+  dragState.tile.removeEventListener("pointermove",dragMove);
+  if(dragState.moved) saveSettings();
+  dragState = null;
   renderEditor();
 }
 
 function setSelectedSize(size){
-  const item=itemFor(selectedGauge); if(!item) return;
-  const sizes={small:{w:1,h:1},wide:{w:2,h:1},large:{w:2,h:2}};
-  const next={...item,...sizes[size]};
-  let placed=positionValid(next,item.gauge) ? next : findNearestOpen(next,item.col,item.row);
-  if(!placed) return;
-  Object.assign(item,{w:placed.w,h:placed.h,col:placed.col,row:placed.row});
+  const item = itemFor(selectedId); if(!item) return;
+  const dims = sizeFor(item,size);
+  item.size = size;
+  item.w = dims.w; item.h = dims.h;
+  item.x = clamp(item.x,0,100-item.w);
+  item.y = clamp(item.y,0,100-item.h);
   saveSettings(); renderEditor();
 }
 
@@ -187,7 +189,7 @@ function bindNumber(input,key){
 }
 bindNumber(coolantHigh,"coolantHigh"); bindNumber(oilLow,"oilLow"); bindNumber(batteryLow,"batteryLow"); bindNumber(batteryHigh,"batteryHigh");
 
-document.getElementById("resetButton").addEventListener("click",()=>{settings=clone(defaults);selectedGauge="rpm";saveSettings();renderEditor();});
+document.getElementById("resetButton").addEventListener("click",()=>{settings=clone(defaults);selectedId="rpm";saveSettings();renderEditor();});
 document.getElementById("backButton").addEventListener("click",()=>window.location.href="../index.html");
 document.getElementById("openDashButton").addEventListener("click",()=>window.location.href="../index.html");
 
