@@ -55,12 +55,15 @@
 .gaugeNeedleGroup { opacity: 1 !important; }
 
 /* Physical Foxbody opening reference overlay.
-   Keep the SVG mapped directly to the actual display. Do not resize the
-   dashboard itself to the SVG's document aspect ratio. */
+   Stretch only the mask 4% horizontally and vertically around screen center.
+   The dashboard underneath is unchanged. */
 #dashboard::after {
     content: "";
     position: fixed;
-    inset: 0;
+    left: -2%;
+    top: -2%;
+    width: 104%;
+    height: 104%;
     z-index: 10000;
     pointer-events: none;
     background-image: url("../assets/images/dashMask.svg");
