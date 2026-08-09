@@ -2,92 +2,71 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>FoxbodyDash Designer</title>
-  <link rel="stylesheet" href="css/designer.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>FoxbodyDash Studio</title>
+  <link rel="stylesheet" href="css/app.css" />
 </head>
 <body>
-  <div id="appShell">
-    <header id="designerTopbar">
-      <div class="brandBlock">
-        <strong>FOXBODY DASH</strong>
-        <span id="modeLabel">RUN MODE</span>
-      </div>
-      <div class="topbarActions">
-        <button id="vehicleButton" type="button">VEHICLE</button>
-        <button id="editToggle" type="button">EDIT DASH</button>
-        <button id="saveButton" type="button">SAVE</button>
+  <div id="foxApp">
+    <header id="appBar">
+      <div class="brand"><strong>FOXBODY DASH</strong><span id="modeBadge">RUN</span></div>
+      <div class="appActions">
+        <button id="vehiclePageButton" type="button">VEHICLE</button>
+        <button id="editModeButton" type="button">EDIT</button>
+        <button id="saveLayoutButton" type="button">SAVE</button>
       </div>
     </header>
 
-    <main id="workspace">
-      <aside id="assetPanel" class="editorPanel" aria-label="Asset library">
-        <div class="panelTitle">ADD</div>
-        <div class="assetTabs">
-          <button class="assetTab active" data-tab="widgets" type="button">WIDGETS</button>
-          <button class="assetTab" data-tab="shapes" type="button">SHAPES</button>
-          <button class="assetTab" data-tab="materials" type="button">MATERIALS</button>
-          <button class="assetTab" data-tab="images" type="button">IMAGES</button>
+    <main id="studio">
+      <aside id="libraryPanel" class="studioPanel">
+        <div class="panelHeading">ADD ELEMENT</div>
+        <div id="libraryTabs" class="tabGrid">
+          <button class="tab active" data-library="widgets" type="button">WIDGETS</button>
+          <button class="tab" data-library="shapes" type="button">SHAPES</button>
+          <button class="tab" data-library="gaugeParts" type="button">GAUGE PARTS</button>
+          <button class="tab" data-library="icons" type="button">ICONS</button>
+          <button class="tab" data-library="materials" type="button">MATERIALS</button>
+          <button class="tab" data-library="images" type="button">IMAGES</button>
         </div>
-        <div id="assetLibrary"></div>
+        <div id="libraryItems"></div>
       </aside>
 
-      <section id="canvasStage">
-        <div id="dashboardCanvas" tabindex="0" aria-label="Custom dashboard canvas"></div>
-        <div id="safeAreaOverlay" aria-hidden="true"></div>
-      </section>
+      <section id="canvasWrap"><div id="dashCanvas" aria-label="Dashboard design canvas"></div></section>
 
-      <aside id="propertiesPanel" class="editorPanel" aria-label="Selected element properties">
-        <div class="panelTitle">PROPERTIES</div>
-        <div id="emptyProperties">Select an element.</div>
-        <form id="propertyForm" hidden>
-          <label>Name<input id="propName" type="text" /></label>
-          <label>Data Source<select id="propDataSource"></select></label>
-          <div class="propertyGrid">
-            <label>X<input id="propX" type="number" step="0.1" /></label>
-            <label>Y<input id="propY" type="number" step="0.1" /></label>
-            <label>W<input id="propW" type="number" step="0.1" min="1" /></label>
-            <label>H<input id="propH" type="number" step="0.1" min="1" /></label>
-            <label>Rotate<input id="propRotation" type="number" step="1" /></label>
-            <label>Opacity<input id="propOpacity" type="number" min="0" max="1" step="0.05" /></label>
+      <aside id="inspectorPanel" class="studioPanel">
+        <div class="panelHeading">PROPERTIES</div>
+        <div id="nothingSelected">Select an element.</div>
+        <form id="inspector" hidden>
+          <label>Name<input id="fieldName" type="text" /></label>
+          <label>Data<select id="fieldData"></select></label>
+          <div class="twoCol">
+            <label>X<input id="fieldX" type="number" step="0.1" /></label>
+            <label>Y<input id="fieldY" type="number" step="0.1" /></label>
+            <label>W<input id="fieldW" type="number" step="0.1" min="1" /></label>
+            <label>H<input id="fieldH" type="number" step="0.1" min="1" /></label>
+            <label>Rotate<input id="fieldRotate" type="number" step="1" /></label>
+            <label>Opacity<input id="fieldOpacity" type="number" min="0" max="1" step="0.05" /></label>
           </div>
-          <label>Material<select id="propMaterial"></select></label>
-          <label class="checkRow"><input id="propVisible" type="checkbox" /> Visible</label>
-          <label class="checkRow"><input id="propLockAspect" type="checkbox" /> Lock aspect ratio</label>
-          <div class="propertyActions">
-            <button id="duplicateButton" type="button">DUPLICATE</button>
-            <button id="frontButton" type="button">BRING FRONT</button>
-            <button id="backButton" type="button">SEND BACK</button>
-            <button id="deleteButton" class="danger" type="button">DELETE</button>
+          <label>Material<select id="fieldMaterial"></select></label>
+          <label>Scale mode<select id="fieldScaleMode"><option value="stretch">Stretch</option><option value="contain">Contain</option><option value="cover">Cover</option><option value="tile">Tile</option></select></label>
+          <label class="check"><input id="fieldVisible" type="checkbox" /> Visible</label>
+          <label class="check"><input id="fieldAspect" type="checkbox" /> Lock aspect ratio</label>
+          <div class="inspectorButtons">
+            <button id="duplicateElement" type="button">DUPLICATE</button>
+            <button id="bringForward" type="button">FRONT</button>
+            <button id="sendBackward" type="button">BACK</button>
+            <button id="deleteElement" class="danger" type="button">DELETE</button>
           </div>
         </form>
       </aside>
     </main>
 
-    <div id="designerFault" hidden></div>
-
-    <footer id="designerFooter">
-      <span id="saveState">READY</span>
-      <span id="selectionState">NO SELECTION</span>
-      <span id="canvasState">1024 × 600 DESIGN SPACE</span>
-    </footer>
+    <footer id="statusBar"><span id="appStatus">READY</span><span id="selectionStatus">NO SELECTION</span><span>1024 × 600</span></footer>
   </div>
 
-  <script>
-    (function(){
-      var fault = document.getElementById('designerFault');
-      function showFault(message){
-        if(!fault) return;
-        fault.hidden = false;
-        fault.textContent = 'DESIGNER ERROR: ' + message;
-      }
-      window.addEventListener('error', function(e){ showFault(e.message + (e.filename ? ' — ' + e.filename.split('/').pop() + ':' + e.lineno : '')); });
-      window.addEventListener('unhandledrejection', function(e){ showFault(String(e.reason || 'Unhandled promise rejection')); });
-      window.__foxbodyShowFault = showFault;
-    })();
-  </script>
-  <script src="js/gaugeEngine.js?v=designer2"></script>
-  <script src="js/widgetLibrary.js?v=designer2"></script>
-  <script src="js/dashboardDesigner.js?v=designer2"></script>
+  <div id="fatalError" hidden></div>
+  <script src="js/app/catalog.js"></script>
+  <script src="js/app/gaugeRenderer.js"></script>
+  <script src="js/app/main.js"></script>
 </body>
 </html>
