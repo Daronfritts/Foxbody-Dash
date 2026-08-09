@@ -11,9 +11,9 @@
 .canvasTools input,.canvasTools select,.canvasTools button{width:100%;padding:8px;border:1px solid #343434;border-radius:6px;background:#171717;color:#fff}
 .canvasTools input[type="color"]{height:38px;padding:2px}
 .dashNode{container-type:size}
-.textNode{font-size:min(58cqh,18cqw);line-height:1;overflow:visible!important;text-align:center}
+.textNode{font-size:22cqw;line-height:1;overflow:visible!important;text-align:center;white-space:nowrap}
 .assemblyPart{container-type:size}
-.assemblyPart .textNode{font-size:min(58cqh,18cqw)}
+.assemblyPart .textNode{font-size:22cqw}
 .systemIconSvg{width:100%;height:100%;display:block;overflow:visible}
 .nodeSurface.transparentSurface{background:transparent!important}
 .gaugeSvg{width:100%;height:100%;display:block;overflow:visible}
