@@ -13,6 +13,7 @@ ASSET_GROUPS = {
     "materials": ROOT / "assets" / "designer" / "materials",
     "images": ROOT / "assets" / "designer" / "images",
     "gaugeParts": ROOT / "assets" / "designer" / "gauge-parts",
+    "icons": ROOT / "assets" / "icons" / "dashboard",
 }
 SUPPORTED_ASSET_SUFFIXES = {".svg", ".png", ".jpg", ".jpeg", ".webp"}
 
@@ -36,14 +37,17 @@ def _scan_asset_folder(group_name: str, folder: Path):
         if not path.is_file() or path.suffix.lower() not in SUPPORTED_ASSET_SUFFIXES:
             continue
 
-        relative = path.relative_to(ROOT).as_posix()
+        relative_from_root = path.relative_to(ROOT).as_posix()
+        relative_from_group = path.relative_to(folder).as_posix()
         assets.append(
             {
-                "id": f"custom:{group_name}:{path.relative_to(folder).as_posix()}",
+                "id": f"asset:{group_name}:{relative_from_group}",
                 "name": path.stem.replace("_", " ").replace("-", " ").title(),
                 "file": path.name,
-                "url": f"/{relative}",
+                "url": f"/{relative_from_root}",
                 "format": path.suffix.lower().lstrip("."),
+                "group": group_name,
+                "path": relative_from_group,
             }
         )
     return assets
