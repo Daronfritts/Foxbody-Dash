@@ -5,6 +5,13 @@ window.FoxGaugeRenderer = (() => {
   const valueAngle=(value,min,max,start,end)=>{const pct=(Math.max(min,Math.min(max,value))-min)/(max-min||1);return start+(end-start)*pct;};
   const arc=(cx,cy,r,start,end)=>{const a=polar(cx,cy,r,start),b=polar(cx,cy,r,end);return `M ${a.x} ${a.y} A ${r} ${r} 0 ${Math.abs(end-start)>180?1:0} 1 ${b.x} ${b.y}`;};
 
+  function needleGroup(cx,cy,length,angle){
+    const g=svg("g",{class:"gaugeNeedleGroup",transform:`rotate(${angle} ${cx} ${cy})`});
+    g.dataset.angle=String(angle);
+    g.appendChild(svg("line",{x1:cx,y1:cy+25,x2:cx,y2:cy-length,class:"gaugeNeedle"}));
+    return g;
+  }
+
   function render(host,item,value){
     const c=item.config||{};const min=Number(c.min??0),max=Number(c.max??100),start=Number(c.startAngle??225),end=Number(c.endAngle??495);const major=Math.max(1,Number(c.majorTicks??5)),minor=Math.max(major,Number(c.minorTicks??25));
     const numeric=Number.isFinite(Number(value))?Number(value):min;
@@ -22,7 +29,7 @@ window.FoxGaugeRenderer = (() => {
     }
     const title=svg("text",{x:cx,y:150,class:"gaugeTitle"});title.textContent=c.title||item.name||"GAUGE";root.appendChild(title);
     const unit=svg("text",{x:cx,y:174,class:"gaugeNumber"});unit.textContent=c.unit||"";root.appendChild(unit);
-    const ang=valueAngle(numeric,min,max,start,end),tip=polar(cx,cy,133,ang),tail=polar(cx,cy,25,ang+180);root.appendChild(svg("line",{x1:tail.x,y1:tail.y,x2:tip.x,y2:tip.y,class:"gaugeNeedle"}));
+    const ang=valueAngle(numeric,min,max,start,end);root.appendChild(needleGroup(cx,cy,133,ang));
     root.appendChild(svg("circle",{cx,cy,r:17,class:"gaugeHub"}));
     const val=svg("text",{x:cx,y:280,class:"gaugeValue"});val.textContent=Number.isFinite(Number(value))?String(Math.round(Number(value))):"--";root.appendChild(val);
     host.replaceChildren(root);
@@ -30,11 +37,30 @@ window.FoxGaugeRenderer = (() => {
 
   function renderPart(host,item,value){
     const part=item.part;const root=svg("svg",{viewBox:"0 0 430 430",class:"gaugeSvg"});const cx=215,cy=215,r=176;
-    if(part==="ticks"){for(let i=0;i<=40;i++){const a=225+(270*i/40),p1=polar(cx,cy,r,a),p2=polar(cx,cy,r-(i%5===0?30:16),a);root.appendChild(svg("line",{x1:p1.x,y1:p1.y,x2:p2.x,y2:p2.y,class:i%5===0?"gaugeTick":"gaugeMinor","stroke-width":i%5===0?3:1.3}));}}
-    else if(part==="needle"){const a=valueAngle(Number(value)||0,0,8000,225,495),tip=polar(cx,cy,135,a);root.appendChild(svg("line",{x1:cx,y1:cy,x2:tip.x,y2:tip.y,class:"gaugeNeedle"}));}
+    if(part==="ticks"){
+      const c=item.config||{},start=Number(c.startAngle??225),end=Number(c.endAngle??495),minor=Math.max(1,Number(c.minorTicks??40)),majorEvery=Math.max(1,Math.round(minor/Math.max(1,Number(c.majorTicks??8))));
+      for(let i=0;i<=minor;i++){const a=start+(end-start)*i/minor,p1=polar(cx,cy,r,a),p2=polar(cx,cy,r-(i%majorEvery===0?30:16),a);root.appendChild(svg("line",{x1:p1.x,y1:p1.y,x2:p2.x,y2:p2.y,class:i%majorEvery===0?"gaugeTick":"gaugeMinor","stroke-width":i%majorEvery===0?3:1.3}));}
+    }
+    else if(part==="needle"){
+      const c=item.config||{},min=Number(c.min??0),max=Number(c.max??8000),start=Number(c.startAngle??225),end=Number(c.endAngle??495),a=valueAngle(Number(value)||min,min,max,start,end);root.appendChild(needleGroup(cx,cy,135,a));
+    }
     else if(part==="hub"){root.appendChild(svg("circle",{cx,cy,r:42,class:"gaugeHub"}));}
     else if(part==="label"){const t=svg("text",{x:cx,y:cy,class:"gaugeTitle"});t.textContent=item.config?.text||item.name||"LABEL";root.appendChild(t);}
     host.replaceChildren(root);
   }
-  return {render,renderPart};
+
+  function sweepAssembly(item,canvas){
+    requestAnimationFrame(()=>{
+      const node=canvas.querySelector(`[data-id="${CSS.escape(item.id)}"]`);
+      if(!node)return;
+      node.querySelectorAll(".gaugeNeedleGroup").forEach(g=>{
+        const base=Number(g.dataset.angle||225);
+        const from=`rotate(${base}deg)`;
+        g.style.transformBox="view-box";g.style.transformOrigin="215px 215px";
+        g.animate([{transform:from},{transform:"rotate(495deg)"},{transform:"rotate(225deg)"},{transform:from}],{duration:1050,easing:"ease-in-out"});
+      });
+    });
+  }
+
+  return {render,renderPart,sweepAssembly};
 })();
