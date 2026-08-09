@@ -19,10 +19,17 @@
 
   function renderAssembly(host,item){
     const parts=item.children||[];
+    const hasLooseGaugeParts=parts.some(child=>child.type==="gaugePart");
     parts.slice().sort((a,b)=>(a.z||0)-(b.z||0)).forEach(child=>{
       const n=document.createElement("div");n.className="assemblyPart";
       Object.assign(n.style,{left:`${child.x}%`,top:`${child.y}%`,width:`${child.w}%`,height:`${child.h}%`,transform:`rotate(${child.rotation||0}deg)`,opacity:String(child.opacity??1),zIndex:String(child.z||1)});
-      host.appendChild(n);renderContent(n,child);
+      host.appendChild(n);
+      if(child.type==="gauge"&&hasLooseGaugeParts){
+        const neutralBase={...clone(child),type:"shape",shape:"ellipse",dataSource:"none",config:undefined};
+        renderContent(n,neutralBase);
+      }else{
+        renderContent(n,child);
+      }
     });
   }
 
@@ -59,11 +66,14 @@
   function pointerUp(){window.removeEventListener("pointermove",pointerMove);if(gesture){gesture=null;save();render();}}
   function add(item){layout.items.push(item);selectedId=item.id;save();render();}
 
-  function overlaps(a,b){return a.x<a.x+a.w&&a.x<b.x+b.w&&a.x+a.w>b.x&&a.y<b.y+b.h&&a.y+a.h>b.y;}
   function containsCenter(base,item){const cx=item.x+item.w/2,cy=item.y+item.h/2;return cx>=base.x&&cx<=base.x+base.w&&cy>=base.y&&cy<=base.y+base.h;}
   function buildGauge(){
     const base=selected();
     if(!base){ui.status.textContent="SELECT BASE SHAPE";return;}
+    if(!["shape","image","icon"].includes(base.type)){
+      ui.status.textContent="USE SHAPE / IMAGE AS GAUGE BASE";
+      return;
+    }
     const parts=layout.items.filter(i=>i.id!==base.id&&i.type==="gaugePart"&&containsCenter(base,i));
     if(!parts.length){ui.status.textContent="NO GAUGE PARTS IN BASE";return;}
     const children=[base,...parts].map((item,index)=>({ ...clone(item),id:C.id("part"),x:(item.x-base.x)/base.w*100,y:(item.y-base.y)/base.h*100,w:item.w/base.w*100,h:item.h/base.h*100,z:index+1,transparentSurface:item.id===base.id?item.transparentSurface:true }));
