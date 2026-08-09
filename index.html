@@ -22,12 +22,13 @@
 
     <main id="studio">
       <aside id="libraryPanel" class="studioPanel">
-        <div class="panelHeading">ADD / DESIGN</div>
+        <div class="panelHeading panelHeadingRow"><span>ADD / DESIGN</span><button id="collapseLibrary" class="collapsePanelButton" type="button">◀</button></div>
         <div id="libraryTabs" class="tabGrid">
           <button class="tab active" data-library="widgets" type="button">WIDGETS</button>
           <button class="tab" data-library="shapes" type="button">SHAPES</button>
           <button class="tab" data-library="gaugeParts" type="button">GAUGE PARTS</button>
           <button class="tab" data-library="icons" type="button">ICONS</button>
+          <button class="tab" data-library="alerts" type="button">ALERTS</button>
           <button class="tab" data-library="materials" type="button">MATERIALS</button>
           <button class="tab" data-library="images" type="button">IMAGES</button>
           <button class="tab wideTab" data-library="canvas" type="button">CANVAS BACKGROUND</button>
@@ -38,11 +39,11 @@
       <section id="canvasWrap"><div id="dashCanvas" aria-label="Dashboard design canvas"></div></section>
 
       <aside id="inspectorPanel" class="studioPanel">
-        <div class="panelHeading">PROPERTIES</div>
+        <div class="panelHeading panelHeadingRow"><span>PROPERTIES</span><button id="collapseInspector" class="collapsePanelButton" type="button">▶</button></div>
         <div id="nothingSelected">Select an element.</div>
         <form id="inspector" hidden>
+          <label>Data / Gauge Type<select id="fieldData"></select></label>
           <label>Name<input id="fieldName" type="text" /></label>
-          <label>Data<select id="fieldData"></select></label>
           <div class="twoCol">
             <label>X<input id="fieldX" type="number" step="0.1" /></label>
             <label>Y<input id="fieldY" type="number" step="0.1" /></label>
@@ -83,8 +84,8 @@
   </div>
 
   <div id="fatalError" hidden></div>
-  <script src="js/app/catalog.js?v=studio5"></script>
-  <script src="js/app/gaugeRenderer.js?v=studio5"></script>
-  <script src="js/app/main.js?v=studio5"></script>
+  <script src="js/app/catalog.js?v=studio6"></script>
+  <script src="js/app/gaugeRenderer.js?v=studio6"></script>
+  <script src="js/app/main.js?v=studio6"></script>
 </body>
 </html>
