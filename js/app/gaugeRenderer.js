@@ -29,7 +29,7 @@ window.FoxGaugeRenderer = (() => {
   function drawTicks(root,item){
     const c=item.config||{},shape=shapeName(item),start=Number(c.startAngle??225),end=Number(c.endAngle??495),minor=Math.max(1,Number(c.minorTicks??40)),major=Math.max(1,Number(c.majorTicks??8)),every=Math.max(1,Math.round(minor/major)),tickColor=c.tickColor||"#eeeeee";
     for(let i=0;i<=minor;i++){
-      const a=start+(end-start)*i/minor,outer=boundary(shape,a,55),isMajor=i%every===0,inner=towardCenter(outer,isMajor?.82:.89);
+      const a=start+(end-start)*i/minor,outer=boundary(shape,a,55),isMajor=i%every===0,inner=towardCenter(outer,isMajor ? .82 : .89);
       root.appendChild(el("line",{x1:outer.x,y1:outer.y,x2:inner.x,y2:inner.y,stroke:tickColor,"stroke-width":isMajor?10:5,"stroke-linecap":"round"}));
     }
     for(let i=0;i<=major;i++){
