@@ -1,266 +1,99 @@
 (() => {
   "use strict";
 
-  const C = window.FoxDashCatalog;
-  const G = window.FoxGaugeRenderer;
-  const q = id => document.getElementById(id);
-  const clone = C.clone;
-  const read = (obj, path) => path && path !== "none" ? path.split(".").reduce((a, k) => a?.[k], obj) : undefined;
-
-  const ui = {
-    app:q("foxApp"), canvas:q("dashCanvas"), library:q("libraryItems"), inspector:q("inspector"), nothing:q("nothingSelected"),
-    mode:q("modeBadge"), status:q("appStatus"), selection:q("selectionStatus"), edit:q("editModeButton"), save:q("saveLayoutButton"),
-    build:q("buildGaugeButton"), vehicle:q("vehiclePageButton"), name:q("fieldName"), data:q("fieldData"), x:q("fieldX"), y:q("fieldY"),
-    w:q("fieldW"), h:q("fieldH"), rotate:q("fieldRotate"), opacity:q("fieldOpacity"), material:q("fieldMaterial"), scale:q("fieldScaleMode"),
-    transparent:q("fieldTransparent"), visible:q("fieldVisible"), aspect:q("fieldAspect"), gaugeFields:q("gaugeStyleFields"),
-    gaugeShape:q("fieldGaugeShape"), faceTransparent:q("fieldFaceTransparent"), faceColor:q("fieldFaceColor"), tickColor:q("fieldTickColor"),
-    needleColor:q("fieldNeedleColor"), hubColor:q("fieldHubColor"), duplicate:q("duplicateElement"), front:q("bringForward"),
-    back:q("sendBackward"), remove:q("deleteElement"), fatal:q("fatalError")
+  const C=window.FoxDashCatalog,G=window.FoxGaugeRenderer,q=id=>document.getElementById(id),clone=C.clone;
+  const read=(obj,path)=>path&&path!=="none"?path.split(".").reduce((a,k)=>a?.[k],obj):undefined;
+  const ui={
+    app:q("foxApp"),canvas:q("dashCanvas"),library:q("libraryItems"),inspector:q("inspector"),nothing:q("nothingSelected"),mode:q("modeBadge"),status:q("appStatus"),selection:q("selectionStatus"),
+    edit:q("editModeButton"),save:q("saveLayoutButton"),build:q("buildGaugeButton"),vehicle:q("vehiclePageButton"),panels:q("panelToggleButton"),collapseLibrary:q("collapseLibrary"),collapseInspector:q("collapseInspector"),
+    name:q("fieldName"),data:q("fieldData"),x:q("fieldX"),y:q("fieldY"),w:q("fieldW"),h:q("fieldH"),rotate:q("fieldRotate"),opacity:q("fieldOpacity"),material:q("fieldMaterial"),scale:q("fieldScaleMode"),transparent:q("fieldTransparent"),visible:q("fieldVisible"),aspect:q("fieldAspect"),
+    gaugeFields:q("gaugeStyleFields"),gaugeShape:q("fieldGaugeShape"),faceTransparent:q("fieldFaceTransparent"),faceColor:q("fieldFaceColor"),tickColor:q("fieldTickColor"),needleColor:q("fieldNeedleColor"),hubColor:q("fieldHubColor"),
+    duplicate:q("duplicateElement"),front:q("bringForward"),back:q("sendBackward"),remove:q("deleteElement"),fatal:q("fatalError")
   };
 
-  const STORAGE = "foxbodyDash.studio.v4";
-  const LEGACY_KEYS = ["foxbodyDash.studio.v3", "foxbodyDash.studio.v2"];
-  let edit = false, selectedId = null, gesture = null, live = {}, activeLibrary = "widgets";
-  let assets = {shapes:[], materials:[], images:[], gaugeParts:[], icons:[]};
+  const STORAGE="foxbodyDash.studio.v6",LEGACY=["foxbodyDash.studio.v4","foxbodyDash.studio.v3","foxbodyDash.studio.v2"];
+  let edit=false,selectedId=null,gesture=null,live={},activeLibrary="widgets",assets={shapes:[],materials:[],images:[],gaugeParts:[],icons:[]};
 
-  const defaultLayout = {
-    version:4,
-    canvas:{color:"#000000", material:"none", imageUrl:null, scaleMode:"cover"},
-    items:[
-      C.fromTemplate(C.templates.widgets[0], {name:"RPM", x:5, y:12, w:29, h:50}),
-      C.fromTemplate(C.templates.widgets[0], {name:"SPEED", x:66, y:12, w:29, h:50, dataSource:"engine.speed", config:{min:0,max:200,majorTicks:10,minorTicks:50,startAngle:225,endAngle:495,title:"MPH",unit:"",faceTransparent:true,faceColor:"#080808",tickColor:"#eeeeee",needleColor:"#e52b2b",hubColor:"#111111",labels:["0","20","40","60","80","100","120","140","160","180","200"]}}),
-      C.fromTemplate(C.templates.widgets[3], {x:38,y:16,w:24,h:40}),
-      C.fromTemplate(C.templates.widgets[6], {x:42,y:2,w:16,h:12}),
-      C.fromTemplate(C.templates.widgets[4], {x:5,y:80,w:90,h:8}),
-      C.fromTemplate(C.templates.widgets[5], {x:5,y:90,w:90,h:8})
-    ]
-  };
+  const defaultLayout={version:6,canvas:{color:"#000000",material:"none",imageUrl:null,scaleMode:"cover"},items:[
+    C.fromTemplate(C.templates.widgets[0],{name:"RPM",x:5,y:12,w:29,h:50}),
+    C.fromTemplate(C.templates.widgets[0],{name:"SPEED",x:66,y:12,w:29,h:50,dataSource:"engine.speed",config:{...C.profileFor("engine.speed"),startAngle:225,endAngle:495,faceTransparent:true,faceColor:"#080808",tickColor:"#eeeeee",needleColor:"#e52b2b",hubColor:"#111111",showIcon:true}}),
+    C.fromTemplate(C.templates.widgets[3],{x:38,y:16,w:24,h:40}),C.fromTemplate(C.templates.widgets[6],{x:42,y:2,w:16,h:12}),C.fromTemplate(C.templates.widgets[4],{x:5,y:80,w:90,h:8}),C.fromTemplate(C.templates.widgets[5],{x:5,y:90,w:90,h:8})
+  ]};
 
-  function fail(err){ console.error(err); ui.fatal.hidden=false; ui.fatal.textContent="DASH ERROR: "+(err?.stack||err?.message||String(err)); }
-  window.addEventListener("error", e => fail(e.error || e.message));
-  window.addEventListener("unhandledrejection", e => fail(e.reason));
+  function fail(err){console.error(err);ui.fatal.hidden=false;ui.fatal.textContent="DASH ERROR: "+(err?.stack||err?.message||String(err));}
+  window.addEventListener("error",e=>fail(e.error||e.message));window.addEventListener("unhandledrejection",e=>fail(e.reason));
+  function normalize(v){v.version=6;v.canvas={color:v.canvas?.color||v.canvas?.background||"#000000",material:v.canvas?.material||"none",imageUrl:v.canvas?.imageUrl||null,scaleMode:v.canvas?.scaleMode||"cover"};return v;}
+  function load(){try{const own=localStorage.getItem(STORAGE);if(own)return normalize(JSON.parse(own));for(const key of LEGACY){const raw=localStorage.getItem(key);if(raw){const v=JSON.parse(raw);if(v?.items)return normalize(v);}}}catch(e){console.warn("Layout load failed",e);}return clone(defaultLayout);}
+  let layout=load();
+  function save(){localStorage.setItem(STORAGE,JSON.stringify(layout));ui.status.textContent="SAVED";clearTimeout(save.t);save.t=setTimeout(()=>ui.status.textContent="READY",700);}
+  function selected(){return layout.items.find(i=>i.id===selectedId)||null;}
+  function isGaugeLike(i){return i&&(i.type==="gauge"||i.type==="gaugeAssembly");}
+  function assemblyBase(i){return (i?.children||[]).find(c=>c.isGaugeBase)||i?.children?.[0]||null;}
+  function builtMaterial(id){return C.materials.find(m=>m.id===id)?.css||null;}
+  function materialCss(id){const b=builtMaterial(id);if(b)return b;const a=assets.materials.find(m=>m.id===id);return a?`url('${a.url}') center/cover no-repeat`:"none";}
+  function surface(item){const s=document.createElement("div");s.className=`nodeSurface ${item.shape||""}`;if(item.transparentSurface)s.style.background="transparent";else if(item.surfaceColor)s.style.background=item.surfaceColor;else s.style.background=materialCss(item.material||"none");return s;}
 
-  function normalizeLayout(v){
-    v.version = 4;
-    v.canvas = {
-      color:v.canvas?.color || v.canvas?.background || "#000000",
-      material:v.canvas?.material || "none",
-      imageUrl:v.canvas?.imageUrl || null,
-      scaleMode:v.canvas?.scaleMode || "cover"
-    };
-    return v;
-  }
-  function load(){
-    try{
-      const own = localStorage.getItem(STORAGE);
-      if(own) return normalizeLayout(JSON.parse(own));
-      for(const key of LEGACY_KEYS){ const raw=localStorage.getItem(key); if(raw){ const v=JSON.parse(raw); if(v?.items) return normalizeLayout(v); } }
-    }catch(e){ console.warn("Layout load failed",e); }
-    return clone(defaultLayout);
-  }
-  let layout = load();
-  function save(){ localStorage.setItem(STORAGE,JSON.stringify(layout)); ui.status.textContent="SAVED"; clearTimeout(save.t); save.t=setTimeout(()=>ui.status.textContent="READY",700); }
-  function selected(){ return layout.items.find(i=>i.id===selectedId) || null; }
-  function isGaugeLike(i){ return i && (i.type==="gauge" || i.type==="gaugeAssembly"); }
-  function assemblyBase(i){ return (i?.children||[]).find(c=>c.isGaugeBase) || i?.children?.[0] || null; }
+  function applyCanvasBackground(){const c=layout.canvas;Object.assign(ui.canvas.style,{backgroundColor:c.color||"#000",backgroundImage:"none",backgroundRepeat:"no-repeat",backgroundPosition:"center",backgroundSize:"cover"});if(c.imageUrl){ui.canvas.style.backgroundImage=`url('${c.imageUrl}')`;ui.canvas.style.backgroundSize=c.scaleMode==="stretch"?"100% 100%":c.scaleMode==="tile"?"auto":c.scaleMode;ui.canvas.style.backgroundRepeat=c.scaleMode==="tile"?"repeat":"no-repeat";return;}const b=builtMaterial(c.material);if(b&&b!=="none")ui.canvas.style.backgroundImage=b;else{const a=assets.materials.find(m=>m.id===c.material);if(a){ui.canvas.style.backgroundImage=`url('${a.url}')`;ui.canvas.style.backgroundSize=c.scaleMode==="tile"?"auto":c.scaleMode;ui.canvas.style.backgroundRepeat=c.scaleMode==="tile"?"repeat":"no-repeat";}}}
 
-  function builtMaterial(id){ return C.materials.find(m=>m.id===id)?.css || null; }
-  function materialCss(id){
-    const built=builtMaterial(id); if(built) return built;
-    const a=assets.materials.find(m=>m.id===id); return a ? `url('${a.url}') center/cover no-repeat` : "none";
-  }
-  function surface(item){
-    const s=document.createElement("div"); s.className=`nodeSurface ${item.shape||""}`;
-    if(item.transparentSurface) s.style.background="transparent";
-    else if(item.surfaceColor) s.style.background=item.surfaceColor;
-    else s.style.background=materialCss(item.material||"none");
-    return s;
-  }
-  function applyCanvasBackground(){
-    const c=layout.canvas;
-    Object.assign(ui.canvas.style,{backgroundColor:c.color||"#000",backgroundImage:"none",backgroundRepeat:"no-repeat",backgroundPosition:"center",backgroundSize:"cover"});
-    if(c.imageUrl){
-      ui.canvas.style.backgroundImage=`url('${c.imageUrl}')`;
-      ui.canvas.style.backgroundSize=c.scaleMode==="stretch"?"100% 100%":c.scaleMode==="tile"?"auto":c.scaleMode;
-      ui.canvas.style.backgroundRepeat=c.scaleMode==="tile"?"repeat":"no-repeat";
-      return;
-    }
-    const built=builtMaterial(c.material);
-    if(built && built!=="none") ui.canvas.style.backgroundImage=built;
-    else {
-      const a=assets.materials.find(m=>m.id===c.material);
-      if(a){ ui.canvas.style.backgroundImage=`url('${a.url}')`; ui.canvas.style.backgroundSize=c.scaleMode==="tile"?"auto":c.scaleMode; ui.canvas.style.backgroundRepeat=c.scaleMode==="tile"?"repeat":"no-repeat"; }
+  function profileConfig(source,old={}){const p=C.profileFor(source);if(!p)return old;return {...old,...clone(p),startAngle:old.startAngle??225,endAngle:old.endAngle??495,tickColor:old.tickColor||"#eeeeee",needleColor:old.needleColor||"#e52b2b",hubColor:old.hubColor||"#111111",faceTransparent:old.faceTransparent??true,faceColor:old.faceColor||"#080808",showIcon:old.showIcon??true};}
+  function applyGaugeProfile(item,source){const p=C.profileFor(source);if(!p)return;item.dataSource=source;item.name=p.title;
+    if(item.type==="gauge"){item.config=profileConfig(source,item.config||{});return;}
+    if(item.type==="gaugeAssembly"){
+      item.config={...(item.config||{}),profileIcon:p.icon,profileTitle:p.title,profileUnit:p.unit};
+      (item.children||[]).forEach(c=>{
+        if(c.part==="ticks"){c.dataSource=source;c.config=profileConfig(source,c.config||{});}
+        if(c.part==="needle"){c.dataSource=source;c.config=profileConfig(source,c.config||{});}
+        if(c.part==="digital"){c.dataSource=source;c.config={...(c.config||{}),unit:p.unit||""};}
+        if(c.part==="label"){c.config={...(c.config||{}),text:p.title};}
+      });
     }
   }
 
-  function renderAssembly(host,item){
-    const shape=item.gaugeShape || assemblyBase(item)?.shape || "ellipse";
-    (item.children||[]).slice().sort((a,b)=>(a.z||0)-(b.z||0)).forEach(original=>{
-      const child=clone(original);
-      if(child.type==="gaugePart"){
-        child.geometry=shape; child.gaugeShape=shape;
-        if(["ticks","needle","hub"].includes(child.part)){ child.x=0; child.y=0; child.w=100; child.h=100; }
-      }
-      const n=document.createElement("div"); n.className="assemblyPart";
-      Object.assign(n.style,{left:`${child.x}%`,top:`${child.y}%`,width:`${child.w}%`,height:`${child.h}%`,transform:`rotate(${child.rotation||0}deg)`,opacity:String(child.opacity??1),zIndex:String(child.z||1)});
-      host.appendChild(n); renderContent(n,child);
-    });
-  }
+  function makeGaugeFace(host,item,value){host.style.background="transparent";const shape=item.gaugeShape||"ellipse",face=document.createElement("div");face.className=`gaugeFaceLayer ${shape}`;const cfg=item.config||{};face.style.background=cfg.faceTransparent===false?(cfg.faceColor||"#080808"):materialCss(item.material||"none");if(cfg.faceTransparent!==false&&(!item.material||item.material==="none"))face.style.background="transparent";const layer=document.createElement("div");layer.className="gaugeRenderLayer";host.append(face,layer);G.render(layer,item,value);renderGaugeAutoIcon(host,item,item.dataSource);}
+  function renderGaugeAutoIcon(host,item,source){const p=C.profileFor(source);if(!p||item.config?.showIcon===false)return;const wrap=document.createElement("div");wrap.className="gaugeAutoIcon";G.renderSystemIcon(wrap,{icon:p.icon,name:p.title,config:{inactiveColor:"#b9bdc2",activeColor:"#b9bdc2"}},false);host.appendChild(wrap);}
 
-  function renderContent(node,item){
-    const s=surface(item), value=read(live,item.dataSource); node.appendChild(s);
-    if(item.type==="gauge") return G.render(s,item,value);
-    if(item.type==="gaugePart") return G.renderPart(s,item,value);
-    if(item.type==="gaugeAssembly") return renderAssembly(s,item);
-    if(item.type==="systemIcon") return G.renderSystemIcon(s,item,Boolean(value));
-    if(item.type==="digital"){
-      s.classList.add("digitalValue"); const n=Number(value),d=item.config?.decimals??0;
-      s.innerHTML=`<strong>${Number.isFinite(n)?n.toFixed(d):"0"}</strong><span>${item.config?.unit||item.name||""}</span>`; return;
-    }
-    if(item.type==="bar"){
-      s.classList.add("barGauge"); const min=item.config?.min??0,max=item.config?.max??100,n=Number(value),pct=Number.isFinite(n)?Math.max(0,Math.min(100,(n-min)/(max-min)*100)):0;
-      s.innerHTML=`<div class="barGaugeFill" style="width:${pct}%"></div><div class="barGaugeText">${Number.isFinite(n)?Math.round(n):"0"} ${item.config?.unit||""}</div>`; return;
-    }
-    if(item.type==="info"){
-      s.classList.add("infoBox"); s.innerHTML=`<div class="infoTop"><span>${new Date().toLocaleTimeString([],{hour:"numeric",minute:"2-digit"})}</span><span>FOXBODY</span></div><div class="infoGear"><small>GEAR</small><strong>${live.vehicle?.gear??"N"}</strong></div><div class="infoBottom"><span>TRIP ${live.vehicle?.trip??"--"}</span><span>${live.vehicle?.outsideTemp??"--"}°F</span></div>`; return;
-    }
-    if(item.type==="status"){ s.classList.add("statusStrip"); return; }
-    if(item.type==="nav"){
-      s.classList.add("navStrip"); ["HOME","VEHICLE","DIAG","SETTINGS"].forEach(label=>{ const b=document.createElement("button"); b.type="button"; b.textContent=label; if(label==="VEHICLE") b.addEventListener("click",e=>{if(!edit){e.stopPropagation();location.href="pages/vehicle.html";}}); s.appendChild(b); }); return;
-    }
-    if(item.type==="shift"){
-      s.classList.add("shiftLight"); if(Number(value)>=Number(item.config?.hot??6000)) s.classList.add("hot"); const img=document.createElement("img"); img.src=item.assetUrl||"assets/images/mustangWhite.svg"; img.alt=""; s.appendChild(img); return;
-    }
-    if(item.type==="text"){ s.classList.add("textNode"); s.textContent=item.config?.text||item.name||"TEXT"; return; }
-    if(item.type==="image" || item.type==="icon"){
-      if(item.scaleMode==="tile"){ s.style.backgroundImage=`url('${item.assetUrl}')`; s.style.backgroundRepeat="repeat"; s.style.backgroundSize="auto"; }
-      else { const img=document.createElement("img"); img.src=item.assetUrl; img.alt=""; img.className=`nodeImage ${item.scaleMode||"stretch"}`; s.appendChild(img); }
-    }
-  }
+  function renderAssembly(host,item){const shape=item.gaugeShape||assemblyBase(item)?.shape||"ellipse";(item.children||[]).slice().sort((a,b)=>(a.z||0)-(b.z||0)).forEach(original=>{const child=clone(original);if(child.type==="gaugePart"){child.geometry=shape;child.gaugeShape=shape;if(["ticks","needle","hub"].includes(child.part)){child.x=0;child.y=0;child.w=100;child.h=100;}}const n=document.createElement("div");n.className="assemblyPart";Object.assign(n.style,{left:`${child.x}%`,top:`${child.y}%`,width:`${child.w}%`,height:`${child.h}%`,transform:`rotate(${child.rotation||0}deg)`,opacity:String(child.opacity??1),zIndex:String(child.z||1)});host.appendChild(n);renderContent(n,child);});renderGaugeAutoIcon(host,item,item.dataSource);}
 
-  function render(){
-    ui.canvas.replaceChildren(); applyCanvasBackground();
-    layout.items.slice().sort((a,b)=>(a.z||0)-(b.z||0)).forEach(item=>{
-      if(item.visible===false && !edit) return;
-      const n=document.createElement("div"); n.className="dashNode"; n.dataset.id=item.id;
-      if(item.visible===false) n.classList.add("hidden"); if(item.id===selectedId) n.classList.add("selected");
-      Object.assign(n.style,{left:`${item.x}%`,top:`${item.y}%`,width:`${item.w}%`,height:`${item.h}%`,transform:`rotate(${item.rotation||0}deg)`,opacity:String(item.opacity??1),zIndex:String(item.z||1)});
-      ui.canvas.appendChild(n); renderContent(n,item);
-      const grip=document.createElement("div"); grip.className="resizeGrip"; grip.dataset.resize="1"; n.appendChild(grip); n.addEventListener("pointerdown",pointerDown);
-    });
-    inspect();
-  }
+  function renderStatus(host,item){host.classList.add("statusStrip");const defs=item.alerts?.length?item.alerts:C.alertDataSources.map(([dataSource,label],i)=>({dataSource,label,icon:C.templates.icons.filter(t=>t.defaults.config.role==="alert")[i]?.icon,enabled:true}));defs.filter(a=>a.enabled!==false).forEach(a=>{const wrap=document.createElement("span");wrap.className="statusAlertIcon";const template=C.templates.icons.find(t=>t.icon===a.icon)||C.templates.icons.find(t=>t.defaults.dataSource===a.dataSource);if(template)G.renderSystemIcon(wrap,{...clone(template.defaults),icon:template.icon},Boolean(read(live,a.dataSource)));host.appendChild(wrap);});}
 
-  function setEdit(v){ edit=!!v; ui.app.classList.toggle("editing",edit); ui.mode.textContent=edit?"EDIT":"RUN"; ui.edit.textContent=edit?"DONE":"EDIT"; ui.edit.classList.toggle("active",edit); if(!edit)selectedId=null; render(); renderLibrary(activeLibrary); }
-  function pointerDown(e){
-    if(!edit) return; e.preventDefault(); selectedId=e.currentTarget.dataset.id; const item=selected(); if(!item)return;
-    const rect=ui.canvas.getBoundingClientRect(); gesture={pointerId:e.pointerId,mode:e.target.dataset.resize?"resize":"move",startX:e.clientX,startY:e.clientY,rect,item,origin:clone(item)};
-    window.addEventListener("pointermove",pointerMove); window.addEventListener("pointerup",pointerUp,{once:true}); render();
-  }
-  function pointerMove(e){
-    if(!gesture || e.pointerId!==gesture.pointerId)return; const g=gesture,dx=(e.clientX-g.startX)/g.rect.width*100,dy=(e.clientY-g.startY)/g.rect.height*100;
-    if(g.mode==="move"){ g.item.x=g.origin.x+dx; g.item.y=g.origin.y+dy; }
-    else { let w=Math.max(1,g.origin.w+dx),h=Math.max(1,g.origin.h+dy); if(g.item.lockAspect){const r=g.origin.w/g.origin.h;if(Math.abs(dx)>Math.abs(dy))h=w/r;else w=h*r;} g.item.w=w; g.item.h=h; }
-    render();
-  }
-  function pointerUp(){ window.removeEventListener("pointermove",pointerMove); if(gesture){gesture=null;save();render();} }
-  function add(item){ layout.items.push(item); selectedId=item.id; save(); render(); }
+  function renderContent(node,item){const s=surface(item),value=read(live,item.dataSource);node.appendChild(s);if(item.type==="gauge"){makeGaugeFace(s,item,value);return;}if(item.type==="gaugePart"){G.renderPart(s,item,value);return;}if(item.type==="gaugeAssembly"){renderAssembly(s,item);return;}if(item.type==="systemIcon"){G.renderSystemIcon(s,item,Boolean(value));return;}if(item.type==="digital"){s.classList.add("digitalValue");const n=Number(value),d=item.config?.decimals??0;s.innerHTML=`<strong>${Number.isFinite(n)?n.toFixed(d):"0"}</strong><span>${item.config?.unit||item.name||""}</span>`;return;}if(item.type==="bar"){s.classList.add("barGauge");const min=item.config?.min??0,max=item.config?.max??100,n=Number(value),pct=Number.isFinite(n)?Math.max(0,Math.min(100,(n-min)/(max-min)*100)):0;s.innerHTML=`<div class="barGaugeFill" style="width:${pct}%"></div><div class="barGaugeText">${Number.isFinite(n)?Math.round(n):"0"} ${item.config?.unit||""}</div>`;return;}if(item.type==="info"){s.classList.add("infoBox");s.innerHTML=`<div class="infoTop"><span>${new Date().toLocaleTimeString([],{hour:"numeric",minute:"2-digit"})}</span><span>FOXBODY</span></div><div class="infoGear"><small>GEAR</small><strong>${live.vehicle?.gear??"N"}</strong></div><div class="infoBottom"><span>TRIP ${live.vehicle?.trip??"--"}</span><span>${live.vehicle?.outsideTemp??"--"}°F</span></div>`;return;}if(item.type==="status"){renderStatus(s,item);return;}if(item.type==="nav"){s.classList.add("navStrip");["HOME","VEHICLE","DIAG","SETTINGS"].forEach(label=>{const b=document.createElement("button");b.type="button";b.textContent=label;if(label==="VEHICLE")b.addEventListener("click",e=>{if(!edit){e.stopPropagation();location.href="pages/vehicle.html";}});s.appendChild(b);});return;}if(item.type==="shift"){s.classList.add("shiftLight");if(Number(value)>=Number(item.config?.hot??6000))s.classList.add("hot");const img=document.createElement("img");img.src=item.assetUrl||"assets/images/mustangWhite.svg";img.alt="";s.appendChild(img);return;}if(item.type==="text"){s.classList.add("textNode");s.textContent=item.config?.text||item.name||"TEXT";return;}if(item.type==="image"||item.type==="icon"){if(item.scaleMode==="tile"){s.style.backgroundImage=`url('${item.assetUrl}')`;s.style.backgroundRepeat="repeat";s.style.backgroundSize="auto";}else{const img=document.createElement("img");img.src=item.assetUrl;img.alt="";img.className=`nodeImage ${item.scaleMode||"stretch"}`;s.appendChild(img);}}}
 
-  function intersectionArea(a,b){ const l=Math.max(a.x,b.x),r=Math.min(a.x+a.w,b.x+b.w),t=Math.max(a.y,b.y),bt=Math.min(a.y+a.h,b.y+b.h); return Math.max(0,r-l)*Math.max(0,bt-t); }
-  function findGaugeBase(start){
-    if(start && ["shape","image","icon"].includes(start.type)) return start;
-    if(start?.type==="gaugePart") return layout.items.filter(i=>["shape","image","icon"].includes(i.type)&&intersectionArea(i,start)>0).sort((a,b)=>intersectionArea(b,start)-intersectionArea(a,start))[0]||null;
-    return null;
-  }
-  function buildGauge(){
-    try{
-      const base=findGaugeBase(selected()); if(!base){ui.status.textContent="SELECT BASE OR GAUGE PART";return;}
-      const parts=layout.items.filter(i=>i.id!==base.id&&i.type==="gaugePart"&&intersectionArea(base,i)>0);
-      if(!parts.length){ui.status.textContent="NO OVERLAPPING GAUGE PARTS";return;}
-      const shape=base.gaugeShape||base.shape||"ellipse";
-      const baseChild={...clone(base),id:C.id("base"),x:0,y:0,w:100,h:100,rotation:0,z:1,isGaugeBase:true};
-      const children=[baseChild,...parts.map((p,index)=>{
-        const c={...clone(p),id:C.id("part"),x:(p.x-base.x)/base.w*100,y:(p.y-base.y)/base.h*100,w:p.w/base.w*100,h:p.h/base.h*100,z:index+2,geometry:shape,gaugeShape:shape,transparentSurface:true};
-        if(["ticks","needle","hub"].includes(c.part)){c.x=0;c.y=0;c.w=100;c.h=100;} return c;
-      })];
-      const dataPart=parts.find(p=>p.dataSource&&p.dataSource!=="none");
-      const assembly={id:C.id("gauge"),type:"gaugeAssembly",name:(base.name||"Custom")+" Gauge",x:base.x,y:base.y,w:base.w,h:base.h,rotation:base.rotation||0,opacity:1,visible:true,lockAspect:false,transparentSurface:true,material:"none",gaugeShape:shape,dataSource:dataPart?.dataSource||"engine.rpm",children,z:Math.max(1,...layout.items.map(i=>i.z||0))+1,config:{}};
-      const remove=new Set([base.id,...parts.map(p=>p.id)]); layout.items=layout.items.filter(i=>!remove.has(i.id)); layout.items.push(assembly); selectedId=assembly.id; save(); render();
-      ui.status.textContent=`GAUGE BUILT (${parts.length} PARTS) — SWEEP`; G.sweepAssembly(assembly,render);
-    }catch(e){ fail(e); ui.status.textContent="BUILD GAUGE ERROR"; }
-  }
+  function render(){ui.canvas.replaceChildren();applyCanvasBackground();layout.items.slice().sort((a,b)=>(a.z||0)-(b.z||0)).forEach(item=>{if(item.visible===false&&!edit)return;const n=document.createElement("div");n.className="dashNode";n.dataset.id=item.id;if(item.visible===false)n.classList.add("hidden");if(item.id===selectedId)n.classList.add("selected");Object.assign(n.style,{left:`${item.x}%`,top:`${item.y}%`,width:`${item.w}%`,height:`${item.h}%`,transform:`rotate(${item.rotation||0}deg)`,opacity:String(item.opacity??1),zIndex:String(item.z||1)});ui.canvas.appendChild(n);renderContent(n,item);const grip=document.createElement("div");grip.className="resizeGrip";grip.dataset.resize="1";n.appendChild(grip);n.addEventListener("pointerdown",pointerDown);});inspect();}
 
-  function card(label,detail,fn){ const b=document.createElement("button"); b.type="button"; b.className="libraryCard"; b.innerHTML=`<span>${label}</span><small>${detail}</small>`; b.addEventListener("click",fn); return b; }
-  function renderCanvasLibrary(){
-    ui.library.innerHTML=`<div class="canvasTools"><label>Canvas color<input id="canvasColor" type="color" value="${layout.canvas.color}"></label><label>Image scale<select id="canvasScale"><option value="cover">Cover</option><option value="contain">Contain</option><option value="stretch">Stretch</option><option value="tile">Tile</option></select></label><button id="clearCanvasImage" type="button">CLEAR IMAGE / DESIGN</button></div><div class="librarySubhead">DESIGNS</div>`;
-    q("canvasScale").value=layout.canvas.scaleMode;
-    q("canvasColor").addEventListener("input",e=>{layout.canvas.color=e.target.value;layout.canvas.material="none";layout.canvas.imageUrl=null;save();render();});
-    q("canvasScale").addEventListener("change",e=>{layout.canvas.scaleMode=e.target.value;save();render();renderLibrary("canvas");});
-    q("clearCanvasImage").addEventListener("click",()=>{layout.canvas.material="none";layout.canvas.imageUrl=null;save();render();renderLibrary("canvas");});
-    C.materials.filter(m=>m.id!=="none").forEach(m=>ui.library.appendChild(card(m.label,"CANVAS",()=>{layout.canvas.material=m.id;layout.canvas.imageUrl=null;save();render();})));
-    assets.materials.forEach(a=>ui.library.appendChild(card(a.name,"DESIGN",()=>{layout.canvas.material=a.id;layout.canvas.imageUrl=null;save();render();})));
-    assets.images.forEach(a=>ui.library.appendChild(card(a.name,"IMAGE",()=>{layout.canvas.imageUrl=a.url;layout.canvas.material="none";save();render();})));
-  }
-  function renderLibrary(group){
-    activeLibrary=group; ui.library.replaceChildren(); document.querySelectorAll("[data-library]").forEach(b=>b.classList.toggle("active",b.dataset.library===group));
-    if(group==="canvas") return renderCanvasLibrary();
-    if(["widgets","shapes","gaugeParts"].includes(group)) C.templates[group].forEach(t=>ui.library.appendChild(card(t.label,t.type.toUpperCase(),()=>add(C.fromTemplate(t)))));
-    if(group==="icons"){
-      C.templates.icons.forEach(t=>ui.library.appendChild(card(t.label,t.defaults.config.role.toUpperCase(),()=>add(C.fromTemplate(t)))));
-      assets.icons.forEach(a=>ui.library.appendChild(card(a.name,"CUSTOM",()=>add({id:C.id("icon"),type:"icon",name:a.name,assetUrl:a.url,x:10,y:10,w:8,h:10,z:Date.now(),visible:true,opacity:1,rotation:0,lockAspect:true,transparentSurface:true,material:"none",scaleMode:"contain"}))));
-      return;
-    }
-    if(group==="materials"){
-      C.materials.filter(m=>m.id!=="none").forEach(m=>ui.library.appendChild(card(m.label,"APPLY",()=>applyMaterial(m.id))));
-      assets.materials.forEach(a=>ui.library.appendChild(card(a.name,"CUSTOM",()=>applyMaterial(a.id))));
-      return;
-    }
-    if(group==="images") assets.images.forEach(a=>ui.library.appendChild(card(a.name,"IMAGE",()=>add({id:C.id("image"),type:"image",name:a.name,assetUrl:a.url,x:10,y:10,w:22,h:18,z:Date.now(),visible:true,opacity:1,rotation:0,lockAspect:false,transparentSurface:true,material:"none",scaleMode:"stretch"}))));
-  }
-  function applyMaterial(id){
-    const item=selected(); if(!item)return;
-    if(item.type==="gaugeAssembly"){const b=assemblyBase(item);if(b){b.material=id;b.transparentSurface=false;b.surfaceColor=null;}}
-    else {item.material=id;item.transparentSurface=false;if(item.type==="gauge"){item.config??={};item.config.faceTransparent=true;}}
-    save(); render();
-  }
+  function setEdit(v){edit=!!v;ui.app.classList.toggle("editing",edit);ui.mode.textContent=edit?"EDIT":"RUN";ui.edit.textContent=edit?"DONE":"EDIT";ui.edit.classList.toggle("active",edit);if(!edit){selectedId=null;ui.app.classList.remove("libraryCollapsed","inspectorCollapsed");}render();renderLibrary(activeLibrary);}
+  function pointerDown(e){if(!edit)return;e.preventDefault();selectedId=e.currentTarget.dataset.id;const item=selected();if(!item)return;if(item.type==="status")renderLibrary("alerts");const rect=ui.canvas.getBoundingClientRect();gesture={pointerId:e.pointerId,mode:e.target.dataset.resize?"resize":"move",startX:e.clientX,startY:e.clientY,rect,item,origin:clone(item)};window.addEventListener("pointermove",pointerMove);window.addEventListener("pointerup",pointerUp,{once:true});render();}
+  function pointerMove(e){if(!gesture||e.pointerId!==gesture.pointerId)return;const g=gesture,dx=(e.clientX-g.startX)/g.rect.width*100,dy=(e.clientY-g.startY)/g.rect.height*100;if(g.mode==="move"){g.item.x=g.origin.x+dx;g.item.y=g.origin.y+dy;}else{let w=Math.max(1,g.origin.w+dx),h=Math.max(1,g.origin.h+dy);if(g.item.lockAspect){const r=g.origin.w/g.origin.h;if(Math.abs(dx)>Math.abs(dy))h=w/r;else w=h*r;}g.item.w=w;g.item.h=h;}render();}
+  function pointerUp(){window.removeEventListener("pointermove",pointerMove);if(gesture){gesture=null;save();render();}}
+  function add(item){layout.items.push(item);selectedId=item.id;save();render();}
 
+  function intersectionArea(a,b){const l=Math.max(a.x,b.x),r=Math.min(a.x+a.w,b.x+b.w),t=Math.max(a.y,b.y),bt=Math.min(a.y+a.h,b.y+b.h);return Math.max(0,r-l)*Math.max(0,bt-t);}
+  function findGaugeBase(start){if(start&&["shape","image","icon"].includes(start.type))return start;if(start?.type==="gaugePart")return layout.items.filter(i=>["shape","image","icon"].includes(i.type)&&intersectionArea(i,start)>0).sort((a,b)=>intersectionArea(b,start)-intersectionArea(a,start))[0]||null;return null;}
+  function buildGauge(){try{const base=findGaugeBase(selected());if(!base){ui.status.textContent="SELECT BASE OR GAUGE PART";return;}const parts=layout.items.filter(i=>i.id!==base.id&&i.type==="gaugePart"&&intersectionArea(base,i)>0);if(!parts.length){ui.status.textContent="NO OVERLAPPING GAUGE PARTS";return;}const shape=base.gaugeShape||base.shape||"ellipse",baseChild={...clone(base),id:C.id("base"),x:0,y:0,w:100,h:100,rotation:0,z:1,isGaugeBase:true};const children=[baseChild,...parts.map((p,index)=>{const c={...clone(p),id:C.id("part"),x:(p.x-base.x)/base.w*100,y:(p.y-base.y)/base.h*100,w:p.w/base.w*100,h:p.h/base.h*100,z:index+2,geometry:shape,gaugeShape:shape,transparentSurface:true};if(["ticks","needle","hub"].includes(c.part)){c.x=0;c.y=0;c.w=100;c.h=100;}return c;})];const dataPart=parts.find(p=>C.profileFor(p.dataSource));const source=dataPart?.dataSource||"engine.rpm",assembly={id:C.id("gauge"),type:"gaugeAssembly",name:(C.profileFor(source)?.title||base.name||"Custom")+" Gauge",x:base.x,y:base.y,w:base.w,h:base.h,rotation:base.rotation||0,opacity:1,visible:true,lockAspect:false,transparentSurface:true,material:"none",gaugeShape:shape,dataSource:source,children,z:Math.max(1,...layout.items.map(i=>i.z||0))+1,config:{}};applyGaugeProfile(assembly,source);const remove=new Set([base.id,...parts.map(p=>p.id)]);layout.items=layout.items.filter(i=>!remove.has(i.id));layout.items.push(assembly);selectedId=assembly.id;save();render();ui.status.textContent=`GAUGE BUILT (${parts.length} PARTS) — SWEEP`;G.sweepAssembly(assembly,render);}catch(e){fail(e);ui.status.textContent="BUILD GAUGE ERROR";}}
+
+  function card(label,detail,fn){const b=document.createElement("button");b.type="button";b.className="libraryCard";b.innerHTML=`<span>${label}</span><small>${detail}</small>`;b.addEventListener("click",fn);return b;}
+  function renderCanvasLibrary(){ui.library.innerHTML=`<div class="canvasTools"><label>Canvas color<input id="canvasColor" type="color" value="${layout.canvas.color}"></label><label>Image scale<select id="canvasScale"><option value="cover">Cover</option><option value="contain">Contain</option><option value="stretch">Stretch</option><option value="tile">Tile</option></select></label><button id="clearCanvasImage" type="button">CLEAR IMAGE / DESIGN</button></div><div class="librarySubhead">DESIGNS</div>`;q("canvasScale").value=layout.canvas.scaleMode;q("canvasColor").addEventListener("input",e=>{layout.canvas.color=e.target.value;layout.canvas.material="none";layout.canvas.imageUrl=null;save();render();});q("canvasScale").addEventListener("change",e=>{layout.canvas.scaleMode=e.target.value;save();render();renderLibrary("canvas");});q("clearCanvasImage").addEventListener("click",()=>{layout.canvas.material="none";layout.canvas.imageUrl=null;save();render();renderLibrary("canvas");});C.materials.filter(m=>m.id!=="none").forEach(m=>ui.library.appendChild(card(m.label,"CANVAS",()=>{layout.canvas.material=m.id;layout.canvas.imageUrl=null;save();render();})));assets.materials.forEach(a=>ui.library.appendChild(card(a.name,"DESIGN",()=>{layout.canvas.material=a.id;layout.canvas.imageUrl=null;save();render();})));assets.images.forEach(a=>ui.library.appendChild(card(a.name,"IMAGE",()=>{layout.canvas.imageUrl=a.url;layout.canvas.material="none";save();render();})));}
+  function renderAlertsLibrary(){ui.library.innerHTML='<div class="alertPickerNote">Status-bar alerts. Click an alert to add another standalone icon; the status bar itself shows all enabled alerts in subtle grey until active.</div>';C.templates.icons.filter(t=>t.defaults.config.role==="alert").forEach(t=>ui.library.appendChild(card(t.label,"ALERT",()=>add(C.fromTemplate(t)))));}
+  function renderLibrary(group){activeLibrary=group;ui.library.replaceChildren();document.querySelectorAll("[data-library]").forEach(b=>b.classList.toggle("active",b.dataset.library===group));if(group==="canvas")return renderCanvasLibrary();if(group==="alerts")return renderAlertsLibrary();if(["widgets","shapes","gaugeParts"].includes(group))C.templates[group].forEach(t=>ui.library.appendChild(card(t.label,t.type.toUpperCase(),()=>add(C.fromTemplate(t)))));if(group==="icons"){C.templates.icons.filter(t=>t.defaults.config.role==="indicator").forEach(t=>ui.library.appendChild(card(t.label,"INDICATOR",()=>add(C.fromTemplate(t)))));assets.icons.forEach(a=>ui.library.appendChild(card(a.name,"CUSTOM",()=>add({id:C.id("icon"),type:"icon",name:a.name,assetUrl:a.url,x:10,y:10,w:8,h:10,z:Date.now(),visible:true,opacity:1,rotation:0,lockAspect:true,transparentSurface:true,material:"none",scaleMode:"contain"}))));return;}if(group==="materials"){C.materials.filter(m=>m.id!=="none").forEach(m=>ui.library.appendChild(card(m.label,"APPLY",()=>applyMaterial(m.id))));assets.materials.forEach(a=>ui.library.appendChild(card(a.name,"CUSTOM",()=>applyMaterial(a.id))));return;}if(group==="images")assets.images.forEach(a=>ui.library.appendChild(card(a.name,"IMAGE",()=>add({id:C.id("image"),type:"image",name:a.name,assetUrl:a.url,x:10,y:10,w:22,h:18,z:Date.now(),visible:true,opacity:1,rotation:0,lockAspect:false,transparentSurface:true,material:"none",scaleMode:"stretch"}))));}
+  function applyMaterial(id){const item=selected();if(!item)return;if(item.type==="gaugeAssembly"){const b=assemblyBase(item);if(b){b.material=id;b.transparentSurface=false;b.surfaceColor=null;}}else if(item.type==="gauge"){item.material=id;item.transparentSurface=true;item.config??={};item.config.faceTransparent=true;}else{item.material=id;item.transparentSurface=false;}save();render();}
+
+  function setDataOptions(item){const groups=[];if(isGaugeLike(item)||item.type==="digital"||item.type==="bar"||item.type==="gaugePart")groups.push(["GAUGES / LIVE DATA",C.gaugeDataSources]);else if(item.type==="systemIcon")groups.push(["ALERTS",C.alertDataSources],["INDICATOR LIGHTS",C.indicatorDataSources]);else if(item.type==="status")groups.push(["STATUS BAR ALERTS",[["none","Click status bar to view alerts"]]]);else groups.push(["LIVE DATA",C.gaugeDataSources],["BODY",C.bodyDataSources]);ui.data.replaceChildren();groups.forEach(([label,items])=>{const g=document.createElement("optgroup");g.label=label;items.forEach(([v,l])=>{const o=document.createElement("option");o.value=v;o.textContent=l;g.appendChild(o);});ui.data.appendChild(g);});ui.data.value=item.dataSource||"none";}
   function colorOr(v,f){return /^#[0-9a-f]{6}$/i.test(v||"")?v:f;}
-  function inspect(){
-    const item=selected(); ui.nothing.hidden=!!item; ui.inspector.hidden=!item; ui.selection.textContent=item?item.name||item.type:"NO SELECTION"; if(!item)return;
-    ui.name.value=item.name||"";ui.data.value=item.dataSource||"none";ui.x.value=Number(item.x).toFixed(1);ui.y.value=Number(item.y).toFixed(1);ui.w.value=Number(item.w).toFixed(1);ui.h.value=Number(item.h).toFixed(1);ui.rotate.value=item.rotation||0;ui.opacity.value=item.opacity??1;ui.material.value=item.material||assemblyBase(item)?.material||"none";ui.scale.value=item.scaleMode||"stretch";ui.transparent.checked=!!item.transparentSurface;ui.visible.checked=item.visible!==false;ui.aspect.checked=!!item.lockAspect;
-    const show=isGaugeLike(item); ui.gaugeFields.hidden=!show;
-    if(show){
-      const c=item.config||{},base=assemblyBase(item),parts=item.children||[];
-      ui.gaugeShape.value=item.gaugeShape||base?.shape||"ellipse";
-      ui.faceTransparent.checked=item.type==="gaugeAssembly"?!!base?.transparentSurface:c.faceTransparent!==false;
-      ui.faceColor.value=colorOr(item.type==="gaugeAssembly"?base?.surfaceColor:c.faceColor,"#080808");
-      ui.tickColor.value=colorOr(parts.find(x=>x.part==="ticks")?.config?.tickColor||c.tickColor,"#eeeeee");
-      ui.needleColor.value=colorOr(parts.find(x=>x.part==="needle")?.config?.needleColor||c.needleColor,"#e52b2b");
-      ui.hubColor.value=colorOr(parts.find(x=>x.part==="hub")?.config?.hubColor||c.hubColor,"#111111");
-    }
-  }
+  function inspect(){const item=selected();ui.nothing.hidden=!!item;ui.inspector.hidden=!item;ui.selection.textContent=item?item.name||item.type:"NO SELECTION";if(!item)return;setDataOptions(item);ui.name.value=item.name||"";ui.x.value=Number(item.x).toFixed(1);ui.y.value=Number(item.y).toFixed(1);ui.w.value=Number(item.w).toFixed(1);ui.h.value=Number(item.h).toFixed(1);ui.rotate.value=item.rotation||0;ui.opacity.value=item.opacity??1;ui.material.value=item.material||assemblyBase(item)?.material||"none";ui.scale.value=item.scaleMode||"stretch";ui.transparent.checked=!!item.transparentSurface;ui.visible.checked=item.visible!==false;ui.aspect.checked=!!item.lockAspect;ui.gaugeFields.hidden=!isGaugeLike(item);if(isGaugeLike(item)){const c=item.config||{},base=assemblyBase(item),parts=item.children||[];ui.gaugeShape.value=item.gaugeShape||base?.shape||"ellipse";ui.faceTransparent.checked=item.type==="gaugeAssembly"?!!base?.transparentSurface:c.faceTransparent!==false;ui.faceColor.value=colorOr(item.type==="gaugeAssembly"?base?.surfaceColor:c.faceColor,"#080808");ui.tickColor.value=colorOr(parts.find(x=>x.part==="ticks")?.config?.tickColor||c.tickColor,"#eeeeee");ui.needleColor.value=colorOr(parts.find(x=>x.part==="needle")?.config?.needleColor||c.needleColor,"#e52b2b");ui.hubColor.value=colorOr(parts.find(x=>x.part==="hub")?.config?.hubColor||c.hubColor,"#111111");}}
   function bindSimple(control,key,parse=v=>v){control.addEventListener("change",()=>{const item=selected();if(!item)return;item[key]=parse(control.type==="checkbox"?control.checked:control.value);save();render();});}
-  function bindGaugeControls(){
-    ui.gaugeShape.addEventListener("change",()=>{const i=selected();if(!isGaugeLike(i))return;i.gaugeShape=ui.gaugeShape.value;if(i.type==="gaugeAssembly"){const b=assemblyBase(i);if(b?.type==="shape")b.shape=i.gaugeShape;(i.children||[]).filter(c=>c.type==="gaugePart").forEach(c=>{c.geometry=i.gaugeShape;c.gaugeShape=i.gaugeShape;});}save();render();});
-    ui.faceTransparent.addEventListener("change",()=>{const i=selected();if(!isGaugeLike(i))return;if(i.type==="gaugeAssembly"){const b=assemblyBase(i);if(b)b.transparentSurface=ui.faceTransparent.checked;}else{i.config??={};i.config.faceTransparent=ui.faceTransparent.checked;}save();render();});
-    const wire=(control,key,part)=>control.addEventListener("input",()=>{const i=selected();if(!isGaugeLike(i))return;if(i.type==="gaugeAssembly"){if(key==="faceColor"){const b=assemblyBase(i);if(b){b.surfaceColor=control.value;b.transparentSurface=false;}}else{const p=(i.children||[]).find(x=>x.part===part);if(p){p.config??={};p.config[key]=control.value;}}}else{i.config??={};i.config[key]=control.value;}save();render();});
-    wire(ui.faceColor,"faceColor",null);wire(ui.tickColor,"tickColor","ticks");wire(ui.needleColor,"needleColor","needle");wire(ui.hubColor,"hubColor","hub");
-  }
-  function options(){ui.data.innerHTML=C.dataSources.map(([v,l])=>`<option value="${v}">${l}</option>`).join("");ui.material.innerHTML=C.materials.map(m=>`<option value="${m.id}">${m.label}</option>`).join("")+assets.materials.map(a=>`<option value="${a.id}">${a.name}</option>`).join("");}
+  function bindGaugeControls(){ui.gaugeShape.addEventListener("change",()=>{const i=selected();if(!isGaugeLike(i))return;i.gaugeShape=ui.gaugeShape.value;if(i.type==="gaugeAssembly"){const b=assemblyBase(i);if(b?.type==="shape")b.shape=i.gaugeShape;(i.children||[]).filter(c=>c.type==="gaugePart").forEach(c=>{c.geometry=i.gaugeShape;c.gaugeShape=i.gaugeShape;});}save();render();});ui.faceTransparent.addEventListener("change",()=>{const i=selected();if(!isGaugeLike(i))return;if(i.type==="gaugeAssembly"){const b=assemblyBase(i);if(b)b.transparentSurface=ui.faceTransparent.checked;}else{i.config??={};i.config.faceTransparent=ui.faceTransparent.checked;}save();render();});const wire=(control,key,part)=>control.addEventListener("input",()=>{const i=selected();if(!isGaugeLike(i))return;if(i.type==="gaugeAssembly"){if(key==="faceColor"){const b=assemblyBase(i);if(b){b.surfaceColor=control.value;b.transparentSurface=false;}}else{const p=(i.children||[]).find(x=>x.part===part);if(p){p.config??={};p.config[key]=control.value;}}}else{i.config??={};i.config[key]=control.value;}save();render();});wire(ui.faceColor,"faceColor",null);wire(ui.tickColor,"tickColor","ticks");wire(ui.needleColor,"needleColor","needle");wire(ui.hubColor,"hubColor","hub");}
+  function options(){ui.material.innerHTML=C.materials.map(m=>`<option value="${m.id}">${m.label}</option>`).join("")+assets.materials.map(a=>`<option value="${a.id}">${a.name}</option>`).join("");}
   async function loadAssets(){try{const r=await fetch("/api/assets");if(r.ok)assets=await r.json();}catch(e){console.warn("Asset API unavailable",e);}options();renderLibrary(activeLibrary);}
   async function poll(){try{const r=await fetch("/api/vehicle");if(r.ok){live=await r.json();if(!gesture)render();}}catch{}}
 
   try{
-    options();
-    document.querySelectorAll("[data-library]").forEach(b=>b.addEventListener("click",()=>renderLibrary(b.dataset.library)));
+    options();document.querySelectorAll("[data-library]").forEach(b=>b.addEventListener("click",()=>renderLibrary(b.dataset.library)));
     ui.edit.addEventListener("click",()=>setEdit(!edit));ui.save.addEventListener("click",save);ui.build.addEventListener("click",buildGauge);ui.vehicle.addEventListener("click",()=>location.href="pages/vehicle.html");
-    bindSimple(ui.name,"name");bindSimple(ui.data,"dataSource");bindSimple(ui.x,"x",Number);bindSimple(ui.y,"y",Number);bindSimple(ui.w,"w",Number);bindSimple(ui.h,"h",Number);bindSimple(ui.rotate,"rotation",Number);bindSimple(ui.opacity,"opacity",Number);bindSimple(ui.scale,"scaleMode");bindSimple(ui.transparent,"transparentSurface",Boolean);bindSimple(ui.visible,"visible",Boolean);bindSimple(ui.aspect,"lockAspect",Boolean);
+    ui.panels.addEventListener("click",()=>{if(!edit)return;const both=ui.app.classList.contains("libraryCollapsed")&&ui.app.classList.contains("inspectorCollapsed");ui.app.classList.toggle("libraryCollapsed",!both);ui.app.classList.toggle("inspectorCollapsed",!both);ui.panels.textContent=both?"PANELS":"SHOW PANELS";});
+    ui.collapseLibrary.addEventListener("click",()=>ui.app.classList.toggle("libraryCollapsed"));ui.collapseInspector.addEventListener("click",()=>ui.app.classList.toggle("inspectorCollapsed"));
+    bindSimple(ui.name,"name");bindSimple(ui.x,"x",Number);bindSimple(ui.y,"y",Number);bindSimple(ui.w,"w",Number);bindSimple(ui.h,"h",Number);bindSimple(ui.rotate,"rotation",Number);bindSimple(ui.opacity,"opacity",Number);bindSimple(ui.scale,"scaleMode");bindSimple(ui.transparent,"transparentSurface",Boolean);bindSimple(ui.visible,"visible",Boolean);bindSimple(ui.aspect,"lockAspect",Boolean);
+    ui.data.addEventListener("change",()=>{const i=selected();if(!i)return;const source=ui.data.value;if(isGaugeLike(i)){applyGaugeProfile(i,source);}else{i.dataSource=source;if(i.type==="gaugePart"&&C.profileFor(source)){i.config=profileConfig(source,i.config||{});if(i.part==="label")i.config.text=C.profileFor(source).title;if(i.part==="digital")i.config.unit=C.profileFor(source).unit||"";}}save();render();});
     ui.material.addEventListener("change",()=>applyMaterial(ui.material.value));bindGaugeControls();
-    ui.duplicate.addEventListener("click",()=>{const item=selected();if(!item)return;const c=clone(item);c.id=C.id(item.type);c.name=(item.name||item.type)+" Copy";c.x=item.x+2;c.y=item.y+2;c.z=Date.now();add(c);});
-    ui.remove.addEventListener("click",()=>{if(!selectedId)return;layout.items=layout.items.filter(i=>i.id!==selectedId);selectedId=null;save();render();});
-    ui.front.addEventListener("click",()=>{const i=selected();if(i){i.z=Math.max(0,...layout.items.map(x=>x.z||0))+1;save();render();}});
-    ui.back.addEventListener("click",()=>{const i=selected();if(i){i.z=Math.min(0,...layout.items.map(x=>x.z||0))-1;save();render();}});
-    ui.canvas.addEventListener("pointerdown",e=>{if(edit&&e.target===ui.canvas){selectedId=null;render();}});
+    ui.duplicate.addEventListener("click",()=>{const item=selected();if(!item)return;const c=clone(item);c.id=C.id(item.type);c.name=(item.name||item.type)+" Copy";c.x=item.x+2;c.y=item.y+2;c.z=Date.now();add(c);});ui.remove.addEventListener("click",()=>{if(!selectedId)return;layout.items=layout.items.filter(i=>i.id!==selectedId);selectedId=null;save();render();});ui.front.addEventListener("click",()=>{const i=selected();if(i){i.z=Math.max(0,...layout.items.map(x=>x.z||0))+1;save();render();}});ui.back.addEventListener("click",()=>{const i=selected();if(i){i.z=Math.min(0,...layout.items.map(x=>x.z||0))-1;save();render();}});ui.canvas.addEventListener("pointerdown",e=>{if(edit&&e.target===ui.canvas){selectedId=null;render();}});
     renderLibrary("widgets");render();loadAssets();poll();setInterval(poll,500);
   }catch(e){fail(e);}
 })();
