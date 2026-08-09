@@ -13,6 +13,7 @@
       <div class="appActions">
         <button id="vehiclePageButton" type="button">VEHICLE</button>
         <button id="editModeButton" type="button">EDIT</button>
+        <button id="buildGaugeButton" type="button">BUILD GAUGE</button>
         <button id="saveLayoutButton" type="button">SAVE</button>
       </div>
     </header>
@@ -49,6 +50,7 @@
           </div>
           <label>Material<select id="fieldMaterial"></select></label>
           <label>Scale mode<select id="fieldScaleMode"><option value="stretch">Stretch</option><option value="contain">Contain</option><option value="cover">Cover</option><option value="tile">Tile</option></select></label>
+          <label class="check"><input id="fieldTransparent" type="checkbox" /> Transparent surface</label>
           <label class="check"><input id="fieldVisible" type="checkbox" /> Visible</label>
           <label class="check"><input id="fieldAspect" type="checkbox" /> Lock aspect ratio</label>
           <div class="inspectorButtons">
@@ -65,8 +67,8 @@
   </div>
 
   <div id="fatalError" hidden></div>
-  <script src="js/app/catalog.js"></script>
-  <script src="js/app/gaugeRenderer.js"></script>
-  <script src="js/app/main.js"></script>
+  <script src="js/app/catalog.js?v=studio3"></script>
+  <script src="js/app/gaugeRenderer.js?v=studio3"></script>
+  <script src="js/app/main.js?v=studio3"></script>
 </body>
 </html>
