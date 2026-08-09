@@ -1,0 +1,22 @@
+/* FoxbodyDash Studio 5 overrides */
+.wideTab{grid-column:1/-1}
+.propertySection{border-top:1px solid #2d2d2d;margin-top:3px;padding-top:9px}
+.propertySection[hidden]{display:none}
+.propertySectionTitle,.librarySubhead{font-size:10px;letter-spacing:1.5px;color:#8fd2ff;margin:3px 0 8px}
+.colorGrid{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.colorGrid label{min-width:0}
+.colorGrid input[type="color"]{height:34px;padding:2px;cursor:pointer}
+.canvasTools{display:flex;flex-direction:column;gap:8px;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid #292929}
+.canvasTools label{display:flex;flex-direction:column;gap:4px;font-size:11px;color:#ccc}
+.canvasTools input,.canvasTools select,.canvasTools button{width:100%;padding:8px;border:1px solid #343434;border-radius:6px;background:#171717;color:#fff}
+.canvasTools input[type="color"]{height:38px;padding:2px}
+.dashNode{container-type:size}
+.textNode{font-size:min(58cqh,18cqw);line-height:1;overflow:visible!important;text-align:center}
+.assemblyPart{container-type:size}
+.assemblyPart .textNode{font-size:min(58cqh,18cqw)}
+.systemIconSvg{width:100%;height:100%;display:block;overflow:visible}
+.nodeSurface.transparentSurface{background:transparent!important}
+.gaugeSvg{width:100%;height:100%;display:block;overflow:visible}
+#buildGaugeButton{border-color:#326c3b}
+.editing #buildGaugeButton{background:#173d1f;border-color:#49a75a}
+@media(max-width:900px){.colorGrid{grid-template-columns:1fr}.propertySectionTitle{font-size:9px}}
