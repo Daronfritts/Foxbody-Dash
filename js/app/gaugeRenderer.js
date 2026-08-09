@@ -1,245 +1,99 @@
 window.FoxGaugeRenderer = (() => {
-  const NS = "http://www.w3.org/2000/svg";
-  const SIZE = 1000;
-  const CX = SIZE / 2;
-  const CY = SIZE / 2;
+  const NS="http://www.w3.org/2000/svg",SIZE=1000,CX=500,CY=500;
+  const el=(tag,attrs={})=>{const n=document.createElementNS(NS,tag);for(const [k,v] of Object.entries(attrs))n.setAttribute(k,v);return n;};
+  const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+  const angleFor=(value,min,max,start,end)=>start+(end-start)*((clamp(Number(value),min,max)-min)/(max-min||1));
+  const dir=a=>{const r=(a-90)*Math.PI/180;return{x:Math.cos(r),y:Math.sin(r)}};
 
-  const svg = (tag, attrs = {}) => {
-    const el = document.createElementNS(NS, tag);
-    Object.entries(attrs).forEach(([k, v]) => el.setAttribute(k, v));
-    return el;
-  };
-
-  const valueAngle = (value, min, max, start, end) => {
-    const pct = (Math.max(min, Math.min(max, value)) - min) / (max - min || 1);
-    return start + (end - start) * pct;
-  };
-
-  function direction(angle) {
-    const rad = (angle - 90) * Math.PI / 180;
-    return { x: Math.cos(rad), y: Math.sin(rad) };
-  }
-
-  function geometryOf(item, host = null) {
-    let type = item?.geometry?.type || item?.shape || null;
-
-    if (!type && host) {
-      const assembly = host.parentElement?.parentElement;
-      if (assembly) {
-        if (assembly.querySelector(".nodeSurface.rectangle,.nodeSurface.rounded")) type = "rectangle";
-        else if (assembly.querySelector(".nodeSurface.ellipse")) type = "ellipse";
-      }
+  function boundary(shape,angle,inset=0){
+    const d=dir(angle),halfW=450-inset,halfH=450-inset;
+    if(shape==="rectangle"||shape==="rounded"){
+      const tx=Math.abs(d.x)>1e-6?halfW/Math.abs(d.x):Infinity;
+      const ty=Math.abs(d.y)>1e-6?halfH/Math.abs(d.y):Infinity;
+      const t=Math.min(tx,ty);return{x:CX+d.x*t,y:CY+d.y*t};
     }
+    const rx=halfW,ry=halfH;
+    const t=1/Math.sqrt((d.x*d.x)/(rx*rx)+(d.y*d.y)/(ry*ry));
+    return{x:CX+d.x*t,y:CY+d.y*t};
+  }
+  function towardCenter(p,f){return{x:CX+(p.x-CX)*f,y:CY+(p.y-CY)*f};}
+  function shapeName(item){return item.gaugeShape||item.geometry||item.shape||"ellipse";}
+  function rootSvg(){return el("svg",{viewBox:"0 0 1000 1000",preserveAspectRatio:"none",class:"gaugeSvg"});}
 
-    type ||= "ellipse";
-    return {
-      type: type === "rectangle" || type === "rounded" || type === "rect" ? "rectangle" : "ellipse",
-      padding: Number(item?.geometry?.padding ?? 42)
-    };
+  function drawFace(root,item){
+    const c=item.config||{},shape=shapeName(item),fill=c.faceTransparent===false?(c.faceColor||"#080808"):"none";
+    if(shape==="ellipse")root.appendChild(el("ellipse",{cx:500,cy:500,rx:470,ry:470,fill,stroke:"rgba(255,255,255,.26)","stroke-width":10}));
+    else root.appendChild(el("rect",{x:30,y:30,width:940,height:940,rx:shape==="rounded"?90:0,fill,stroke:"rgba(255,255,255,.26)","stroke-width":10}));
   }
 
-  function boundaryPoint(angle, geometry, inset = 0) {
-    const d = direction(angle);
-    const pad = Math.max(0, geometry.padding + inset);
-    const halfW = Math.max(20, CX - pad);
-    const halfH = Math.max(20, CY - pad);
-
-    if (geometry.type === "rectangle") {
-      const tx = Math.abs(d.x) > 0.00001 ? halfW / Math.abs(d.x) : Infinity;
-      const ty = Math.abs(d.y) > 0.00001 ? halfH / Math.abs(d.y) : Infinity;
-      const t = Math.min(tx, ty);
-      return { x: CX + d.x * t, y: CY + d.y * t };
+  function drawTicks(root,item){
+    const c=item.config||{},shape=shapeName(item),start=Number(c.startAngle??225),end=Number(c.endAngle??495),minor=Math.max(1,Number(c.minorTicks??40)),major=Math.max(1,Number(c.majorTicks??8)),every=Math.max(1,Math.round(minor/major)),tickColor=c.tickColor||"#eeeeee";
+    for(let i=0;i<=minor;i++){
+      const a=start+(end-start)*i/minor,outer=boundary(shape,a,55),isMajor=i%every===0,inner=towardCenter(outer,isMajor?.82:.89);
+      root.appendChild(el("line",{x1:outer.x,y1:outer.y,x2:inner.x,y2:inner.y,stroke:tickColor,"stroke-width":isMajor?10:5,"stroke-linecap":"round"}));
     }
-
-    const denom = Math.sqrt((d.x * d.x) / (halfW * halfW) + (d.y * d.y) / (halfH * halfH)) || 1;
-    const t = 1 / denom;
-    return { x: CX + d.x * t, y: CY + d.y * t };
-  }
-
-  function needlePoints(angle, geometry, tipInset = 72, tailLength = 70) {
-    const d = direction(angle);
-    const tip = boundaryPoint(angle, geometry, tipInset);
-    return {
-      x1: CX - d.x * tailLength,
-      y1: CY - d.y * tailLength,
-      x2: tip.x,
-      y2: tip.y
-    };
-  }
-
-  function drawNeedle(root, angle, geometry, config = {}) {
-    const p = needlePoints(angle, geometry, Number(config.tipInset ?? 72), Number(config.tailLength ?? 70));
-    const line = svg("line", {
-      x1: p.x1, y1: p.y1, x2: p.x2, y2: p.y2,
-      class: "gaugeNeedle gaugeNeedleLine"
-    });
-    line.dataset.angle = String(angle);
-    line.dataset.geometry = geometry.type;
-    line.dataset.padding = String(geometry.padding);
-    line.dataset.tipInset = String(Number(config.tipInset ?? 72));
-    line.dataset.tailLength = String(Number(config.tailLength ?? 70));
-    root.appendChild(line);
-    return line;
-  }
-
-  function updateNeedleLine(line, angle) {
-    const geometry = {
-      type: line.dataset.geometry === "rectangle" ? "rectangle" : "ellipse",
-      padding: Number(line.dataset.padding || 42)
-    };
-    const p = needlePoints(
-      angle,
-      geometry,
-      Number(line.dataset.tipInset || 72),
-      Number(line.dataset.tailLength || 70)
-    );
-    line.setAttribute("x1", p.x1);
-    line.setAttribute("y1", p.y1);
-    line.setAttribute("x2", p.x2);
-    line.setAttribute("y2", p.y2);
-    line.dataset.angle = String(angle);
-  }
-
-  function gaugeRoot() {
-    return svg("svg", {
-      viewBox: `0 0 ${SIZE} ${SIZE}`,
-      preserveAspectRatio: "none",
-      class: "gaugeSvg"
-    });
-  }
-
-  function drawTicks(root, config, geometry) {
-    const start = Number(config.startAngle ?? 225);
-    const end = Number(config.endAngle ?? 495);
-    const minor = Math.max(1, Number(config.minorTicks ?? 40));
-    const major = Math.max(1, Number(config.majorTicks ?? 8));
-    const majorEvery = Math.max(1, Math.round(minor / major));
-
-    for (let i = 0; i <= minor; i++) {
-      const angle = start + (end - start) * i / minor;
-      const isMajor = i % majorEvery === 0;
-      const outerInset = Number(config.tickOuterInset ?? 28);
-      const outer = boundaryPoint(angle, geometry, outerInset);
-      const inner = boundaryPoint(angle, geometry, outerInset + (isMajor ? 76 : 42));
-      root.appendChild(svg("line", {
-        x1: outer.x, y1: outer.y, x2: inner.x, y2: inner.y,
-        class: isMajor ? "gaugeTick" : "gaugeMinor",
-        "stroke-width": isMajor ? 7 : 3.2
-      }));
+    for(let i=0;i<=major;i++){
+      const a=start+(end-start)*i/major,p=towardCenter(boundary(shape,a,55),.68),t=el("text",{x:p.x,y:p.y,fill:tickColor,"text-anchor":"middle","dominant-baseline":"middle","font-size":"45","font-weight":"600"});
+      t.textContent=Array.isArray(c.labels)&&c.labels[i]!=null?c.labels[i]:Math.round(Number(c.min??0)+(Number(c.max??100)-Number(c.min??0))*i/major);root.appendChild(t);
     }
   }
 
-  function render(host, item, value) {
-    const c = item.config || {};
-    const min = Number(c.min ?? 0), max = Number(c.max ?? 100);
-    const start = Number(c.startAngle ?? 225), end = Number(c.endAngle ?? 495);
-    const major = Math.max(1, Number(c.majorTicks ?? 5));
-    const numeric = Number.isFinite(Number(value)) ? Number(value) : min;
-    const geometry = geometryOf(item, host);
-    const root = gaugeRoot();
+  function drawNeedle(root,item,value){
+    const c=item.config||{},shape=shapeName(item),min=Number(c.min??0),max=Number(c.max??8000),start=Number(c.startAngle??225),end=Number(c.endAngle??495),v=c.previewValue??value??min,a=angleFor(v,min,max,start,end),tip=towardCenter(boundary(shape,a,75),.93),back=towardCenter(boundary(shape,a+180,75),.16),g=el("g",{class:"gaugeNeedleGroup"});
+    g.appendChild(el("line",{x1:back.x,y1:back.y,x2:tip.x,y2:tip.y,stroke:c.needleColor||"#e52b2b","stroke-width":14,"stroke-linecap":"round"}));root.appendChild(g);
+  }
+  function drawHub(root,item){const c=item.config||{};root.appendChild(el("circle",{cx:500,cy:500,r:54,fill:c.hubColor||"#111111",stroke:c.hubStroke||"#777777","stroke-width":8}));}
 
-    if (geometry.type === "rectangle") {
-      root.appendChild(svg("rect", {x:34,y:34,width:932,height:932,rx:55,fill:"none",stroke:"rgba(255,255,255,.28)","stroke-width":8}));
-      root.appendChild(svg("rect", {x:52,y:52,width:896,height:896,rx:42,fill:"#080808",stroke:"rgba(255,255,255,.08)","stroke-width":4}));
-    } else {
-      root.appendChild(svg("ellipse", {cx:CX,cy:CY,rx:466,ry:466,fill:"none",stroke:"rgba(255,255,255,.28)","stroke-width":8}));
-      root.appendChild(svg("ellipse", {cx:CX,cy:CY,rx:448,ry:448,fill:"#080808",stroke:"rgba(255,255,255,.08)","stroke-width":4}));
+  function render(host,item,value){
+    const root=rootSvg(),c=item.config||{};drawFace(root,item);drawTicks(root,item);drawNeedle(root,item,value);drawHub(root,item);
+    const title=el("text",{x:500,y:350,fill:c.textColor||"#ffffff","text-anchor":"middle","font-size":"55","font-weight":"700"});title.textContent=c.title||item.name||"GAUGE";root.appendChild(title);
+    const unit=el("text",{x:500,y:410,fill:c.textColor||"#ffffff","text-anchor":"middle","font-size":"34"});unit.textContent=c.unit||"";root.appendChild(unit);
+    const val=el("text",{x:500,y:650,fill:c.textColor||"#ffffff","text-anchor":"middle","font-size":"62","font-weight":"700"});val.textContent=Number.isFinite(Number(value))?Math.round(Number(value)):"0";root.appendChild(val);host.replaceChildren(root);
+  }
+
+  function renderPart(host,item,value){
+    const root=rootSvg();
+    if(item.part==="ticks")drawTicks(root,item);
+    else if(item.part==="needle")drawNeedle(root,item,value);
+    else if(item.part==="hub")drawHub(root,item);
+    else if(item.part==="label"){
+      const t=el("text",{x:500,y:500,fill:item.config?.textColor||"#ffffff","text-anchor":"middle","dominant-baseline":"middle","font-size":"150","font-weight":"700"});t.textContent=item.config?.text||item.name||"LABEL";root.appendChild(t);
+    }else if(item.part==="digital"){
+      const v=value==null||value===""?(item.config?.defaultValue??0):Number(value),dec=item.config?.decimals??0,t=el("text",{x:500,y:500,fill:item.config?.textColor||"#ffffff","text-anchor":"middle","dominant-baseline":"middle","font-size":"310","font-weight":"700"});
+      t.textContent=Number.isFinite(Number(v))?Number(v).toFixed(dec):"0";root.appendChild(t);
     }
-
-    drawTicks(root, c, geometry);
-
-    for (let i = 0; i <= major; i++) {
-      const v = min + (max - min) * i / major;
-      const angle = valueAngle(v, min, max, start, end);
-      const p = boundaryPoint(angle, geometry, 145);
-      const t = svg("text", {x:p.x,y:p.y,class:"gaugeNumber"});
-      t.textContent = Array.isArray(c.labels) && c.labels[i] != null ? c.labels[i] : Math.round(v);
-      root.appendChild(t);
-    }
-
-    const title = svg("text", {x:CX,y:365,class:"gaugeTitle"});
-    title.textContent = c.title || item.name || "GAUGE";
-    root.appendChild(title);
-    const unit = svg("text", {x:CX,y:415,class:"gaugeNumber"});
-    unit.textContent = c.unit || "";
-    root.appendChild(unit);
-
-    drawNeedle(root, valueAngle(numeric,min,max,start,end), geometry, c);
-    root.appendChild(svg("circle", {cx:CX,cy:CY,r:38,class:"gaugeHub"}));
-    const val = svg("text", {x:CX,y:650,class:"gaugeValue"});
-    val.textContent = Number.isFinite(Number(value)) ? String(Math.round(Number(value))) : "--";
-    root.appendChild(val);
     host.replaceChildren(root);
   }
 
-  function fitAssemblyPartToContainer(host, part) {
-    const wrapper = host.parentElement;
-    if (!wrapper?.classList.contains("assemblyPart")) return false;
-    if (!["ticks", "needle", "hub"].includes(part)) return true;
-
-    wrapper.style.left = "0%";
-    wrapper.style.top = "0%";
-    wrapper.style.width = "100%";
-    wrapper.style.height = "100%";
-    wrapper.style.transform = "none";
-    return true;
-  }
-
-  function renderPart(host, item, value) {
-    const part = item.part;
-    fitAssemblyPartToContainer(host, part);
-    const root = gaugeRoot();
-    const c = item.config || {};
-    const geometry = geometryOf(item, host);
-
-    if (part === "ticks") {
-      drawTicks(root, c, geometry);
-    } else if (part === "needle") {
-      const min = Number(c.min ?? 0), max = Number(c.max ?? 8000);
-      const start = Number(c.startAngle ?? 225), end = Number(c.endAngle ?? 495);
-      const angle = valueAngle(Number(value) || min, min, max, start, end);
-      drawNeedle(root, angle, geometry, c);
-    } else if (part === "hub") {
-      root.appendChild(svg("circle", {cx:CX,cy:CY,r:Number(c.radius ?? 75),class:"gaugeHub"}));
-    } else if (part === "label") {
-      const t = svg("text", {x:CX,y:CY,class:"gaugeTitle"});
-      t.textContent = c.text || item.name || "LABEL";
-      root.appendChild(t);
+  function renderSystemIcon(host,item,active){
+    const root=el("svg",{viewBox:"0 0 100 100",class:"systemIconSvg"}),c=item.config||{},color=active?(c.activeColor||"#ff4545"):(c.inactiveColor||"#70757a"),stroke={fill:"none",stroke:color,"stroke-width":7,"stroke-linecap":"round","stroke-linejoin":"round"};
+    const path=d=>root.appendChild(el("path",{d,...stroke})),line=(x1,y1,x2,y2)=>root.appendChild(el("line",{x1,y1,x2,y2,...stroke}));
+    switch(item.icon){
+      case"check-engine":path("M15 35 H25 L32 25 H68 L75 35 H87 V70 H78 L70 78 H30 L22 70 H15 Z");line(87,45,94,45);break;
+      case"oil":path("M15 55 H58 L70 43 L85 57 L72 70 H28 Z");path("M78 31 C84 39 88 43 88 50");break;
+      case"washer":path("M18 65 Q50 78 82 65 L73 42 H27 Z");line(36,30,42,20);line(50,28,50,16);line(64,30,58,20);break;
+      case"battery":path("M18 32 H82 V72 H18 Z");line(30,25,42,25);line(58,25,70,25);line(30,52,44,52);line(37,45,37,59);line(58,52,72,52);break;
+      case"brake":root.appendChild(el("circle",{cx:50,cy:50,r:30,...stroke}));line(50,32,50,55);root.appendChild(el("circle",{cx:50,cy:67,r:3,fill:color}));path("M14 32 Q5 50 14 68 M86 32 Q95 50 86 68");break;
+      case"coolant":path("M48 20 V58 Q34 67 48 80 Q62 67 52 58 V20 Z");path("M18 82 Q28 74 38 82 T58 82 T78 82");break;
+      case"fuel":path("M24 18 H58 V82 H24 Z M58 30 H68 L78 40 V72 Q78 80 70 80");break;
+      case"seatbelt":root.appendChild(el("circle",{cx:32,cy:24,r:8,fill:color}));path("M30 36 L42 54 L58 72 M42 54 L28 78 M52 24 L78 78");break;
+      case"abs":case"tpms":case"traction":case"airbag":{const t=el("text",{x:50,y:58,fill:color,"text-anchor":"middle","font-size":item.icon==="traction"?24:30,"font-weight":"700"});t.textContent=item.icon==="traction"?"TC":item.icon.toUpperCase();root.appendChild(t);root.appendChild(el("circle",{cx:50,cy:50,r:38,...stroke}));break;}
+      case"door":path("M25 18 H70 L82 82 H18 Z M40 35 H58 V67 H40 Z");break;
+      case"left-turn":path("M12 50 L48 20 V38 H88 V62 H48 V80 Z");break;
+      case"right-turn":path("M88 50 L52 20 V38 H12 V62 H52 V80 Z");break;
+      case"headlights":path("M22 25 Q50 50 22 75");line(48,28,82,18);line(48,43,86,38);line(48,58,86,58);line(48,73,82,82);break;
+      case"high-beam":path("M22 25 Q50 50 22 75");line(48,25,88,25);line(48,42,88,42);line(48,59,88,59);line(48,76,88,76);break;
+      case"fog":path("M22 25 Q50 50 22 75");line(48,30,80,30);line(48,48,88,48);line(48,66,80,66);path("M42 82 Q58 72 74 82");break;
+      default:{const t=el("text",{x:50,y:58,fill:color,"text-anchor":"middle","font-size":24});t.textContent=item.name||"ICON";root.appendChild(t);}
     }
-
     host.replaceChildren(root);
   }
 
-  function sweepAssembly(item, canvas) {
-    requestAnimationFrame(() => {
-      const node = canvas.querySelector(`[data-id="${CSS.escape(item.id)}"]`);
-      if (!node) return;
-      node.querySelectorAll(".gaugeNeedleLine").forEach(line => {
-        const start = Number(line.dataset.angle || 225);
-        const needle = item.children?.find(c => c.part === "needle");
-        const high = Number(needle?.config?.endAngle ?? 495);
-        const low = Number(needle?.config?.startAngle ?? 225);
-        const frames = [start, high, low, start];
-        const segmentMs = 280;
-        let segment = 0;
-        let segmentStart = performance.now();
-
-        function step(now) {
-          const from = frames[segment], to = frames[segment + 1];
-          const p = Math.min(1, (now - segmentStart) / segmentMs);
-          const eased = p < .5 ? 2*p*p : 1 - Math.pow(-2*p + 2, 2) / 2;
-          updateNeedleLine(line, from + (to - from) * eased);
-          if (p < 1) return requestAnimationFrame(step);
-          segment++;
-          if (segment < frames.length - 1) {
-            segmentStart = now;
-            requestAnimationFrame(step);
-          }
-        }
-        requestAnimationFrame(step);
-      });
-    });
+  function sweepAssembly(item,render){
+    const needles=(item.children||[]).filter(c=>c.type==="gaugePart"&&c.part==="needle");if(!needles.length)return;
+    const originals=needles.map(n=>n.config?.previewValue);let start=null;
+    function frame(ts){start??=ts;const p=Math.min(1,(ts-start)/1100),phase=p<.5?p*2:(1-p)*2;needles.forEach(n=>{n.config??={};const min=Number(n.config.min??0),max=Number(n.config.max??8000);n.config.previewValue=min+(max-min)*phase;});render();if(p<1)requestAnimationFrame(frame);else{needles.forEach((n,i)=>{if(originals[i]==null)delete n.config.previewValue;else n.config.previewValue=originals[i];});render();}}
+    requestAnimationFrame(frame);
   }
-
-  return {render, renderPart, sweepAssembly};
+  return {render,renderPart,renderSystemIcon,sweepAssembly};
 })();
