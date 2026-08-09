@@ -21,7 +21,7 @@
 
     <main id="studio">
       <aside id="libraryPanel" class="studioPanel">
-        <div class="panelHeading">ADD ELEMENT</div>
+        <div class="panelHeading">ADD / DESIGN</div>
         <div id="libraryTabs" class="tabGrid">
           <button class="tab active" data-library="widgets" type="button">WIDGETS</button>
           <button class="tab" data-library="shapes" type="button">SHAPES</button>
@@ -29,6 +29,7 @@
           <button class="tab" data-library="icons" type="button">ICONS</button>
           <button class="tab" data-library="materials" type="button">MATERIALS</button>
           <button class="tab" data-library="images" type="button">IMAGES</button>
+          <button class="tab wideTab" data-library="canvas" type="button">CANVAS BACKGROUND</button>
         </div>
         <div id="libraryItems"></div>
       </aside>
@@ -51,6 +52,19 @@
           </div>
           <label>Material<select id="fieldMaterial"></select></label>
           <label>Scale mode<select id="fieldScaleMode"><option value="stretch">Stretch</option><option value="contain">Contain</option><option value="cover">Cover</option><option value="tile">Tile</option></select></label>
+
+          <div id="gaugeStyleFields" class="propertySection" hidden>
+            <div class="propertySectionTitle">GAUGE STYLE</div>
+            <label>Gauge shape<select id="fieldGaugeShape"><option value="ellipse">Ellipse / Round</option><option value="rectangle">Rectangle</option><option value="rounded">Rounded rectangle</option></select></label>
+            <label class="check"><input id="fieldFaceTransparent" type="checkbox" /> Transparent gauge face</label>
+            <div class="colorGrid">
+              <label>Face<input id="fieldFaceColor" type="color" value="#080808" /></label>
+              <label>Ticks<input id="fieldTickColor" type="color" value="#eeeeee" /></label>
+              <label>Needle<input id="fieldNeedleColor" type="color" value="#e52b2b" /></label>
+              <label>Hub<input id="fieldHubColor" type="color" value="#111111" /></label>
+            </div>
+          </div>
+
           <label class="check"><input id="fieldTransparent" type="checkbox" /> Transparent surface</label>
           <label class="check"><input id="fieldVisible" type="checkbox" /> Visible</label>
           <label class="check"><input id="fieldAspect" type="checkbox" /> Lock aspect ratio</label>
@@ -68,8 +82,8 @@
   </div>
 
   <div id="fatalError" hidden></div>
-  <script src="js/app/catalog.js?v=studio3"></script>
-  <script src="js/app/gaugeRenderer.js?v=studio3"></script>
-  <script src="js/app/main.js?v=studio3"></script>
+  <script src="js/app/catalog.js?v=studio5"></script>
+  <script src="js/app/gaugeRenderer.js?v=studio5"></script>
+  <script src="js/app/main.js?v=studio5"></script>
 </body>
 </html>
