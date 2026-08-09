@@ -64,6 +64,8 @@
       </aside>
     </main>
 
+    <div id="designerFault" hidden></div>
+
     <footer id="designerFooter">
       <span id="saveState">READY</span>
       <span id="selectionState">NO SELECTION</span>
@@ -71,8 +73,21 @@
     </footer>
   </div>
 
-  <script src="js/gaugeEngine.js"></script>
-  <script src="js/widgetLibrary.js"></script>
-  <script src="js/dashboardDesigner.js"></script>
+  <script>
+    (function(){
+      var fault = document.getElementById('designerFault');
+      function showFault(message){
+        if(!fault) return;
+        fault.hidden = false;
+        fault.textContent = 'DESIGNER ERROR: ' + message;
+      }
+      window.addEventListener('error', function(e){ showFault(e.message + (e.filename ? ' — ' + e.filename.split('/').pop() + ':' + e.lineno : '')); });
+      window.addEventListener('unhandledrejection', function(e){ showFault(String(e.reason || 'Unhandled promise rejection')); });
+      window.__foxbodyShowFault = showFault;
+    })();
+  </script>
+  <script src="js/gaugeEngine.js?v=designer2"></script>
+  <script src="js/widgetLibrary.js?v=designer2"></script>
+  <script src="js/dashboardDesigner.js?v=designer2"></script>
 </body>
 </html>
