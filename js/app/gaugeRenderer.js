@@ -20,8 +20,18 @@ window.FoxGaugeRenderer = (() => {
     return { x: Math.cos(rad), y: Math.sin(rad) };
   }
 
-  function geometryOf(item) {
-    const type = item?.geometry?.type || item?.shape || "ellipse";
+  function geometryOf(item, host = null) {
+    let type = item?.geometry?.type || item?.shape || null;
+
+    if (!type && host) {
+      const assembly = host.parentElement?.parentElement;
+      if (assembly) {
+        if (assembly.querySelector(".nodeSurface.rectangle,.nodeSurface.rounded")) type = "rectangle";
+        else if (assembly.querySelector(".nodeSurface.ellipse")) type = "ellipse";
+      }
+    }
+
+    type ||= "ellipse";
     return {
       type: type === "rectangle" || type === "rounded" || type === "rect" ? "rectangle" : "ellipse",
       padding: Number(item?.geometry?.padding ?? 42)
@@ -108,8 +118,9 @@ window.FoxGaugeRenderer = (() => {
     for (let i = 0; i <= minor; i++) {
       const angle = start + (end - start) * i / minor;
       const isMajor = i % majorEvery === 0;
-      const outer = boundaryPoint(angle, geometry, Number(config.tickOuterInset ?? 28));
-      const inner = boundaryPoint(angle, geometry, Number(config.tickOuterInset ?? 28) + (isMajor ? 76 : 42));
+      const outerInset = Number(config.tickOuterInset ?? 28);
+      const outer = boundaryPoint(angle, geometry, outerInset);
+      const inner = boundaryPoint(angle, geometry, outerInset + (isMajor ? 76 : 42));
       root.appendChild(svg("line", {
         x1: outer.x, y1: outer.y, x2: inner.x, y2: inner.y,
         class: isMajor ? "gaugeTick" : "gaugeMinor",
@@ -124,7 +135,7 @@ window.FoxGaugeRenderer = (() => {
     const start = Number(c.startAngle ?? 225), end = Number(c.endAngle ?? 495);
     const major = Math.max(1, Number(c.majorTicks ?? 5));
     const numeric = Number.isFinite(Number(value)) ? Number(value) : min;
-    const geometry = geometryOf(item);
+    const geometry = geometryOf(item, host);
     const root = gaugeRoot();
 
     if (geometry.type === "rectangle") {
@@ -161,11 +172,25 @@ window.FoxGaugeRenderer = (() => {
     host.replaceChildren(root);
   }
 
+  function fitAssemblyPartToContainer(host, part) {
+    const wrapper = host.parentElement;
+    if (!wrapper?.classList.contains("assemblyPart")) return false;
+    if (!["ticks", "needle", "hub"].includes(part)) return true;
+
+    wrapper.style.left = "0%";
+    wrapper.style.top = "0%";
+    wrapper.style.width = "100%";
+    wrapper.style.height = "100%";
+    wrapper.style.transform = "none";
+    return true;
+  }
+
   function renderPart(host, item, value) {
     const part = item.part;
+    fitAssemblyPartToContainer(host, part);
     const root = gaugeRoot();
     const c = item.config || {};
-    const geometry = geometryOf(item);
+    const geometry = geometryOf(item, host);
 
     if (part === "ticks") {
       drawTicks(root, c, geometry);
@@ -191,8 +216,9 @@ window.FoxGaugeRenderer = (() => {
       if (!node) return;
       node.querySelectorAll(".gaugeNeedleLine").forEach(line => {
         const start = Number(line.dataset.angle || 225);
-        const high = Number(item.children?.find(c => c.part === "needle")?.config?.endAngle ?? 495);
-        const low = Number(item.children?.find(c => c.part === "needle")?.config?.startAngle ?? 225);
+        const needle = item.children?.find(c => c.part === "needle");
+        const high = Number(needle?.config?.endAngle ?? 495);
+        const low = Number(needle?.config?.startAngle ?? 225);
         const frames = [start, high, low, start];
         const segmentMs = 280;
         let segment = 0;
