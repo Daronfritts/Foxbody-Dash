@@ -28,8 +28,7 @@
           <button class="tab active" data-library="widgets" type="button">WIDGETS</button>
           <button class="tab" data-library="shapes" type="button">SHAPES</button>
           <button class="tab" data-library="gaugeParts" type="button">GAUGE PARTS</button>
-          <button class="tab" data-library="icons" type="button">ICONS</button>
-          <button class="tab" data-library="alerts" type="button">ALERTS</button>
+          <button class="tab" data-library="icons" type="button">ALERTS</button>
           <button class="tab" data-library="materials" type="button">MATERIALS</button>
           <button class="tab" data-library="images" type="button">IMAGES</button>
           <button class="tab wideTab" data-library="canvas" type="button">CANVAS BACKGROUND</button>
@@ -81,6 +80,12 @@
               <label>Needle<input id="fieldNeedleColor" type="color" value="#e52b2b" /></label>
               <label>Hub<input id="fieldHubColor" type="color" value="#111111" /></label>
             </div>
+            <div class="propertySectionTitle">TICK SIZE</div>
+            <div class="twoCol">
+              <button id="tickSizeDown" type="button">− SMALLER</button>
+              <button id="tickSizeUp" type="button">+ LARGER</button>
+            </div>
+            <div id="tickSizeValue">100%</div>
           </div>
 
           <label class="check"><input id="fieldTransparent" type="checkbox" /> Transparent surface</label>
@@ -100,8 +105,8 @@
   </div>
 
   <div id="fatalError" hidden></div>
-  <script src="js/app/catalog.js?v=studio7"></script>
-  <script src="js/app/gaugeRenderer.js?v=studio7"></script>
-  <script src="js/app/main.js?v=studio7"></script>
+  <script src="js/app/catalog.js?v=studio8"></script>
+  <script src="js/app/gaugeRenderer.js?v=studio8"></script>
+  <script src="js/app/main.js?v=studio8"></script>
 </body>
 </html>
