@@ -9,7 +9,6 @@ function miniSvg(type, attrs = {}) {
     }
 
     return el;
-
 }
 
 function miniPolar(cx, cy, radius, angle) {
@@ -41,6 +40,7 @@ function drawMiniGaugeFace(svg, options = {}) {
 
     const warningStart = options.warningStart ?? null;
     const warningEnd = options.warningEnd ?? null;
+
     // Background
     svg.appendChild(miniSvg("circle",{
         cx,
@@ -89,6 +89,7 @@ function drawMiniGaugeFace(svg, options = {}) {
         stroke:"#3A3A3A",
         "stroke-width":"2"
     }));
+
     // -----------------------------
     // Major ticks and labels
     // -----------------------------
@@ -98,7 +99,7 @@ function drawMiniGaugeFace(svg, options = {}) {
         const angle = startAngle + (sweepAngle / majorTicks) * i;
 
         const outer = miniPolar(cx, cy, 82, angle);
-        const inner = miniPolar(cx, cy, 66, angle);
+        const inner = miniPolar(cx, cy, 62, angle);
 
         svg.appendChild(miniSvg("line",{
             x1:outer.x,
@@ -106,13 +107,13 @@ function drawMiniGaugeFace(svg, options = {}) {
             x2:inner.x,
             y2:inner.y,
             stroke:"#FFFFFF",
-            "stroke-width":"3",
+            "stroke-width":"4",
             "stroke-linecap":"round"
         }));
 
         if(majorLabels[i] !== undefined){
 
-            const pos = miniPolar(cx, cy, 56, angle);
+            const pos = miniPolar(cx, cy, 53, angle);
 
             const text = miniSvg("text",{
                 x:pos.x,
@@ -142,7 +143,7 @@ function drawMiniGaugeFace(svg, options = {}) {
         const angle = startAngle + (sweepAngle / minorTicks) * i;
 
         const outer = miniPolar(cx, cy, 82, angle);
-        const inner = miniPolar(cx, cy, 74, angle);
+        const inner = miniPolar(cx, cy, 71, angle);
 
         svg.appendChild(miniSvg("line",{
             x1:outer.x,
@@ -150,11 +151,12 @@ function drawMiniGaugeFace(svg, options = {}) {
             x2:inner.x,
             y2:inner.y,
             stroke:"#AFC8D8",
-            "stroke-width":"2",
+            "stroke-width":"3",
             "stroke-linecap":"round"
         }));
 
     }
+
     // -----------------------------
     // Warning arc
     // -----------------------------
