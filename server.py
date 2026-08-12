@@ -13,7 +13,7 @@ ASSET_GROUPS = {
     "materials": ROOT / "assets" / "designer" / "materials",
     "images": ROOT / "assets" / "designer" / "images",
     "gaugeParts": ROOT / "assets" / "designer" / "gauge-parts",
-    "icons": ROOT / "assets" / "icons" / "dashboard",
+    "icons": ROOT / "assets" / "icons" / "dashboard" / "warnings",
 }
 SUPPORTED_ASSET_SUFFIXES = {".svg", ".png", ".jpg", ".jpeg", ".webp"}
 
