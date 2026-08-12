@@ -14,6 +14,7 @@ ASSET_GROUPS = {
     "images": ROOT / "assets" / "designer" / "images",
     "gaugeParts": ROOT / "assets" / "designer" / "gauge-parts",
     "icons": ROOT / "assets" / "icons" / "dashboard" / "warnings",
+    "indicators": ROOT / "assets" / "icons" / "dashboard" / "indicators",
 }
 SUPPORTED_ASSET_SUFFIXES = {".svg", ".png", ".jpg", ".jpeg", ".webp"}
 
