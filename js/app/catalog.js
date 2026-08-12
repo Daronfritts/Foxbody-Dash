@@ -12,9 +12,20 @@ window.FoxDashCatalog = (() => {
   };
 
   const gaugeDataSources = [["none","None"], ...Object.entries(gaugeProfiles).map(([key,p])=>[key,p.label])];
-  const alertDataSources = [
-    ["warnings.checkEngine","Check Engine"],["warnings.oil","Oil Pressure"],["warnings.washer","Washer Fluid"],["warnings.battery","Battery"],["warnings.brake","Brake"],["warnings.coolant","Coolant"],["warnings.lowFuel","Low Fuel"],["warnings.seatbelt","Seatbelt"],["warnings.abs","ABS"],["warnings.tpms","TPMS"],["warnings.traction","Traction Control"],["warnings.airbag","Airbag"],["warnings.doorAjar","Door Ajar"]
+  const alertDefinitions = [
+    ["warnings.abs","ABS","abs"],
+    ["warnings.battery","Battery","battery"],
+    ["warnings.brake","Brake","brake"],
+    ["warnings.checkEngine","Check Engine","check-engine"],
+    ["warnings.coolant","Coolant","coolant"],
+    ["warnings.doorAjar","Door Ajar","door-ajar"],
+    ["warnings.lowFuel","Low Fuel","low-fuel"],
+    ["warnings.oil","Oil Pressure","oil"],
+    ["warnings.seatbelt","Seatbelt","seatbelt"],
+    ["warnings.security","Security","security"],
+    ["warnings.tpms","TPMS","tpms"]
   ];
+  const alertDataSources = alertDefinitions.map(([source,label])=>[source,label]);
   const indicatorDataSources = [["lights.left_turn","Left Turn"],["lights.right_turn","Right Turn"],["lights.headlights","Headlights"],["lights.high_beams","High Beams"],["lights.fog","Fog Lights"]];
   const bodyDataSources = [["doors.driver","Driver Door"],["doors.passenger","Passenger Door"],["doors.hatch","Hatch"]];
   const dataSources = [...gaugeDataSources,...alertDataSources,...indicatorDataSources,...bodyDataSources];
@@ -29,17 +40,16 @@ window.FoxDashCatalog = (() => {
   ];
 
   const iconTemplates = [
-    ["check-engine","Check Engine","warnings.checkEngine","alert"],["oil","Oil Pressure","warnings.oil","alert"],["washer","Washer Fluid","warnings.washer","alert"],["battery","Battery","warnings.battery","alert"],["brake","Brake","warnings.brake","alert"],["coolant","Coolant Temp","warnings.coolant","alert"],["fuel","Low Fuel","warnings.lowFuel","alert"],["seatbelt","Seatbelt","warnings.seatbelt","alert"],["abs","ABS","warnings.abs","alert"],["tpms","TPMS","warnings.tpms","alert"],["traction","Traction Control","warnings.traction","alert"],["airbag","Airbag","warnings.airbag","alert"],["door","Door Ajar","warnings.doorAjar","alert"],
     ["left-turn","Left Turn","lights.left_turn","indicator"],["right-turn","Right Turn","lights.right_turn","indicator"],["headlights","Headlights","lights.headlights","indicator"],["high-beam","High Beams","lights.high_beams","indicator"],["fog","Fog Lights","lights.fog","indicator"]
-  ].map(([icon,label,dataSource,role])=>({type:"systemIcon",icon,label,defaults:{name:label,x:10,y:10,w:6,h:8,dataSource,material:"none",transparentSurface:true,scaleMode:"contain",config:{role,inactiveColor:"#6f7378",activeColor:role==="indicator"?"#40d7ff":"#ff4545"}}}));
+  ].map(([icon,label,dataSource,role])=>({type:"systemIcon",icon,label,defaults:{name:label,x:10,y:10,w:6,h:8,dataSource,material:"none",transparentSurface:true,scaleMode:"contain",config:{role,inactiveColor:"#6f7378",activeColor:"#40d7ff"}}}));
 
   const templates = {
     widgets:[
-      {type:"gauge",label:"Analog Gauge",defaults:{name:"RPM",x:8,y:10,w:28,h:48,dataSource:"engine.rpm",material:"black-glass",transparentSurface:true,scaleMode:"stretch",gaugeShape:"ellipse",config:{...gaugeProfiles["engine.rpm"],startAngle:225,endAngle:495,faceTransparent:true,faceColor:"#080808",tickColor:"#eeeeee",needleColor:"#e52b2b",hubColor:"#111111",showIcon:true}}},
+      {type:"gauge",label:"Analog Gauge",defaults:{name:"RPM",x:8,y:10,w:28,h:48,dataSource:"engine.rpm",material:"black-glass",transparentSurface:true,scaleMode:"stretch",gaugeShape:"ellipse",config:{...gaugeProfiles["engine.rpm"],startAngle:225,endAngle:495,faceTransparent:true,faceColor:"#080808",tickColor:"#eeeeee",tickScale:1,needleColor:"#e52b2b",hubColor:"#111111",showIcon:true}}},
       {type:"digital",label:"Digital Value",defaults:{name:"Digital Value",x:38,y:12,w:20,h:12,dataSource:"engine.speed",material:"black-glass",transparentSurface:false,scaleMode:"stretch",config:{unit:"MPH",decimals:0}}},
       {type:"bar",label:"Bar Gauge",defaults:{name:"Bar Gauge",x:36,y:30,w:30,h:9,dataSource:"engine.coolant",material:"black-glass",transparentSurface:false,scaleMode:"stretch",config:{min:100,max:260,unit:"°F"}}},
       {type:"info",label:"Info Box",defaults:{name:"Driver Info",x:38,y:14,w:24,h:42,dataSource:"none",material:"black-glass",transparentSurface:false,scaleMode:"stretch"}},
-      {type:"status",label:"Status Bar",defaults:{name:"Status Bar",x:5,y:80,w:90,h:8,dataSource:"none",material:"black-glass",transparentSurface:false,scaleMode:"stretch",alerts:alertDataSources.map(([dataSource,label],i)=>({dataSource,label,icon:iconTemplates[i].icon,enabled:true}))}},
+      {type:"status",label:"Status Bar",defaults:{name:"Status Bar",x:5,y:80,w:90,h:8,dataSource:"none",material:"black-glass",transparentSurface:false,scaleMode:"stretch",alerts:alertDefinitions.map(([dataSource,label,icon])=>({dataSource,label,icon,enabled:true}))}},
       {type:"nav",label:"Navigation Bar",defaults:{name:"Navigation",x:5,y:90,w:90,h:8,dataSource:"none",material:"black-glass",transparentSurface:false,scaleMode:"stretch"}},
       {type:"shift",label:"Mustang Shift Light",defaults:{name:"Shift Light",x:42,y:2,w:16,h:12,dataSource:"engine.rpm",material:"none",transparentSurface:true,scaleMode:"contain",assetUrl:"assets/images/mustangWhite.svg",config:{on:5500,hot:6000}}},
       {type:"text",label:"Text",defaults:{name:"Text",x:40,y:45,w:20,h:8,dataSource:"none",material:"none",transparentSurface:true,scaleMode:"stretch",config:{text:"FOXBODY"}}}
@@ -51,7 +61,7 @@ window.FoxDashCatalog = (() => {
       {type:"shape",shape:"line",label:"Line",defaults:{name:"Line",x:10,y:10,w:35,h:2,material:"blue-metal",transparentSurface:false,scaleMode:"stretch"}}
     ],
     gaugeParts:[
-      {type:"gaugePart",part:"ticks",label:"Tick Scale",defaults:{name:"Ticks",x:20,y:20,w:25,h:25,dataSource:"engine.rpm",material:"none",transparentSurface:true,scaleMode:"stretch",config:{...gaugeProfiles["engine.rpm"],startAngle:225,endAngle:495,tickColor:"#eeeeee"}}},
+      {type:"gaugePart",part:"ticks",label:"Tick Scale",defaults:{name:"Ticks",x:20,y:20,w:25,h:25,dataSource:"engine.rpm",material:"none",transparentSurface:true,scaleMode:"stretch",config:{...gaugeProfiles["engine.rpm"],startAngle:225,endAngle:495,tickColor:"#eeeeee",tickScale:1}}},
       {type:"gaugePart",part:"needle",label:"Needle",defaults:{name:"Needle",x:20,y:20,w:25,h:25,dataSource:"engine.rpm",material:"none",transparentSurface:true,scaleMode:"stretch",config:{...gaugeProfiles["engine.rpm"],startAngle:225,endAngle:495,needleColor:"#e52b2b"}}},
       {type:"gaugePart",part:"hub",label:"Needle Hub",defaults:{name:"Hub",x:20,y:20,w:10,h:10,dataSource:"none",material:"none",transparentSurface:true,scaleMode:"stretch",config:{hubColor:"#111111"}}},
       {type:"gaugePart",part:"digital",label:"Digital Readout",defaults:{name:"Digital Readout",x:20,y:20,w:16,h:8,dataSource:"none",material:"none",transparentSurface:true,scaleMode:"stretch",config:{defaultValue:0,decimals:0,unit:""}}},
@@ -61,9 +71,10 @@ window.FoxDashCatalog = (() => {
   };
 
   function profileFor(source){return gaugeProfiles[source]||null;}
+  function alertForFile(file){const stem=String(file||"").replace(/\.[^.]+$/,"");const found=alertDefinitions.find(([, ,icon])=>icon===stem);return found?{dataSource:found[0],label:found[1],icon:found[2]}:null;}
   function id(prefix="item"){return `${prefix}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2,7)}`;}
   function clone(v){return JSON.parse(JSON.stringify(v));}
   function fromTemplate(t,extra={}){const item={...clone(t.defaults||{}),...clone(extra)};item.id=item.id||id(t.type||"item");item.type=t.type;if(t.shape)item.shape=t.shape;if(t.part)item.part=t.part;if(t.icon)item.icon=t.icon;item.x??=10;item.y??=10;item.w??=20;item.h??=20;item.rotation??=0;item.opacity??=1;item.visible??=true;item.lockAspect??=false;item.z??=Date.now();item.scaleMode??="stretch";item.transparentSurface??=false;return item;}
 
-  return {gaugeProfiles,gaugeDataSources,alertDataSources,indicatorDataSources,bodyDataSources,dataSources,materials,templates,profileFor,id,clone,fromTemplate};
+  return {gaugeProfiles,gaugeDataSources,alertDefinitions,alertDataSources,indicatorDataSources,bodyDataSources,dataSources,materials,templates,profileFor,alertForFile,id,clone,fromTemplate};
 })();
