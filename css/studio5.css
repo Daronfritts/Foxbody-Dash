@@ -1,0 +1,52 @@
+/* FoxbodyDash Studio overrides */
+.wideTab{grid-column:1/-1}
+.propertySection{border-top:1px solid #2d2d2d;margin-top:3px;padding-top:9px}
+.propertySection[hidden]{display:none}
+.propertySectionTitle,.librarySubhead{font-size:10px;letter-spacing:1.5px;color:#8fd2ff;margin:3px 0 8px}
+.colorGrid{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.colorGrid label{min-width:0}
+.colorGrid input[type="color"]{height:34px;padding:2px;cursor:pointer}
+.canvasTools{display:flex;flex-direction:column;gap:8px;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid #292929}
+.canvasTools label{display:flex;flex-direction:column;gap:4px;font-size:11px;color:#ccc}
+.canvasTools input,.canvasTools select,.canvasTools button{width:100%;padding:8px;border:1px solid #343434;border-radius:6px;background:#171717;color:#fff}
+.canvasTools input[type="color"]{height:38px;padding:2px}
+.panelHeadingRow{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.collapsePanelButton{border:1px solid #343434;background:#151515;color:#a8dfff;border-radius:5px;min-width:28px;height:26px;padding:0}
+.editing.libraryCollapsed #studio{grid-template-columns:0 1fr 245px}
+.editing.inspectorCollapsed #studio{grid-template-columns:220px 1fr 0}
+.editing.libraryCollapsed.inspectorCollapsed #studio{grid-template-columns:0 1fr 0}
+.libraryCollapsed #libraryPanel,.inspectorCollapsed #inspectorPanel{opacity:0!important;pointer-events:none!important;padding:0!important;border:0!important}
+#collapseLibrary,#collapseInspector{position:relative;z-index:4}
+.dashNode{container-type:size}
+.textNode{font-size:22cqw;line-height:1;overflow:visible!important;white-space:nowrap;background:transparent!important;padding:0 2%;display:flex;align-items:center;width:100%;height:100%;text-shadow:0 1px 2px rgba(0,0,0,.55)}
+.assemblyPart{container-type:size}
+.assemblyPart .textNode{font-size:22cqw}
+.systemIconSvg{width:100%;height:100%;display:block;overflow:visible}
+.nodeSurface.transparentSurface{background:transparent!important}
+.gaugeSvg{width:100%;height:100%;display:block;overflow:visible}
+.gaugeFaceLayer{position:absolute;inset:3%;pointer-events:none;overflow:hidden;z-index:0}
+.gaugeFaceLayer.ellipse{border-radius:50%}
+.gaugeFaceLayer.rounded{border-radius:9%}
+.gaugeRenderLayer{position:absolute;inset:0;z-index:1;background:transparent!important}
+.gaugeAutoIcon{position:absolute;left:50%;top:58%;transform:translate(-50%,-50%);width:15%;height:15%;z-index:2;opacity:.78;pointer-events:none}
+.gaugeAutoIcon .systemIconSvg{width:100%;height:100%}
+.statusStrip{gap:1.2%;padding:0 1.5%}
+.statusAlertIcon{height:72%;aspect-ratio:1/1;flex:0 0 auto;opacity:.72}
+.statusAlertIcon img{width:100%;height:100%;object-fit:contain;display:block}
+.alertPickerNote{font-size:10px;color:#8f8f8f;margin:0 0 9px}
+#textStyleFields input[type="text"],#textStyleFields input[type="number"],#textStyleFields select{width:100%}
+#textStyleFields input[type="color"]{height:34px;padding:2px}
+#buildGaugeButton{border-color:#326c3b}
+.editing #buildGaugeButton{background:#173d1f;border-color:#49a75a}
+
+/* Keep the tab/header area stationary and make the actual folder contents scroll. */
+#libraryPanel,#inspectorPanel{min-height:0;overflow:hidden;display:flex;flex-direction:column}
+#libraryPanel .panelHeading,#libraryTabs,#inspectorPanel .panelHeading{flex:0 0 auto}
+#libraryItems,#inspector{min-height:0;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;scrollbar-gutter:stable;padding-right:3px;touch-action:pan-y}
+#libraryItems{flex:1 1 auto}
+#inspector{flex:1 1 auto}
+#libraryItems::-webkit-scrollbar,#inspector::-webkit-scrollbar{width:8px}
+#libraryItems::-webkit-scrollbar-thumb,#inspector::-webkit-scrollbar-thumb{background:#3b3b3b;border-radius:999px}
+#libraryItems::-webkit-scrollbar-track,#inspector::-webkit-scrollbar-track{background:#111}
+
+@media(max-width:900px){.colorGrid{grid-template-columns:1fr}.propertySectionTitle{font-size:9px}.editing.libraryCollapsed #studio{grid-template-columns:0 1fr 205px}.editing.inspectorCollapsed #studio{grid-template-columns:185px 1fr 0}.editing.libraryCollapsed.inspectorCollapsed #studio{grid-template-columns:0 1fr 0}}

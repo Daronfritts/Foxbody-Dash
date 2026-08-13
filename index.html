@@ -2,157 +2,113 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Foxbody Dash</title>
-  <link rel="stylesheet" href="css/style.css" />
-  <link rel="stylesheet" href="css/gauges.css" />
-  <link rel="stylesheet" href="css/layout-tuning.css" />
-  <link rel="stylesheet" href="css/dynamic-gauge-layout.css" />
-  <style>
-    body { margin: 0; background: #000; }
-  </style>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>FoxbodyDash Studio</title>
+  <link rel="stylesheet" href="css/app.css?v=studio9" />
+  <link rel="stylesheet" href="css/assembly.css?v=studio9" />
+  <link rel="stylesheet" href="css/studio5.css?v=studio9" />
 </head>
 <body>
-  <div id="dashboard">
-    <header id="topBar">
-      <div id="leftIndicators">
-        <div class="indicator placeholder" aria-hidden="true"></div>
-        <div class="indicator placeholder" aria-hidden="true"></div>
-      </div>
-
-      <div id="clusterLogo">
-        <div id="foxbodyTitle">FOXBODY GT</div>
-        <img id="mustangLogo" src="assets/images/mustangWhite.svg" alt="Mustang shift light" />
-      </div>
-
-      <div id="rightIndicators">
-        <div class="indicator placeholder" aria-hidden="true"></div>
+  <div id="foxApp">
+    <header id="appBar">
+      <div class="brand"><strong>FOXBODY DASH</strong><span id="modeBadge">RUN</span></div>
+      <div class="appActions">
+        <button id="vehiclePageButton" type="button">VEHICLE</button>
+        <button id="editModeButton" type="button">EDIT</button>
+        <button id="panelToggleButton" type="button">PANELS</button>
+        <button id="buildGaugeButton" type="button">BUILD GAUGE</button>
+        <button id="saveLayoutButton" type="button">SAVE</button>
       </div>
     </header>
 
-    <main id="mainView">
-      <section id="cluster" aria-label="Foxbody instrument cluster">
-        <div class="clusterScrew screwTL"></div>
-        <div class="clusterScrew screwTR"></div>
-        <div class="clusterScrew screwBL"></div>
-        <div class="clusterScrew screwBR"></div>
-
-        <svg id="tach" viewBox="0 0 430 430" aria-label="Tachometer"></svg>
-
-        <section id="driverInfoCenter" aria-label="Driver information center">
-          <div id="clusterHeader">
-            <div id="clockDisplay">12:00 PM</div>
-            <div id="outsideTemp">74°F</div>
-          </div>
-          <div id="gearRow">
-            <span class="label">GEAR</span>
-            <span id="gearDisplay">3</span>
-            <span id="gearType">N</span>
-          </div>
-          <div class="clusterDivider"></div>
-          <div class="clusterInfo">
-            <div class="infoLabel">ODOMETER</div>
-            <div id="odometer">184,232 MI</div>
-          </div>
-          <div class="clusterDivider"></div>
-          <div class="clusterInfo">
-            <div class="infoLabel">TRIP A</div>
-            <div id="tripA">123.4 MI</div>
-          </div>
-          <div class="clusterDivider"></div>
-          <div id="cruiseStatus">READY</div>
-        </section>
-
-        <svg id="speed" viewBox="0 0 430 430" aria-label="Speedometer"></svg>
-
-        <div id="fuelGauge" class="smallGauge" aria-label="Fuel gauge"></div>
-        <div id="oilGauge" class="smallGauge" aria-label="Oil pressure gauge"></div>
-        <div id="coolantGauge" class="smallGauge" aria-label="Coolant temperature gauge"></div>
-        <div id="batteryGauge" class="smallGauge" aria-label="Battery voltage gauge"></div>
-
-        <section id="statusBar" aria-label="Warning indicator strip">
-          <div class="warningTile" id="warning-oil" data-warning="oil">
-            <img src="assets/icons/dashboard/warnings/oil.svg" alt="" />
-            <span>OIL</span>
-          </div>
-          <div class="warningTile" id="warning-battery" data-warning="battery">
-            <img src="assets/icons/dashboard/warnings/battery.svg" alt="" />
-            <span>BATTERY</span>
-          </div>
-          <div class="warningTile" id="warning-check-engine" data-warning="checkEngine">
-            <img src="assets/icons/dashboard/warnings/check-engine.svg" alt="" />
-            <span>CHECK ENGINE</span>
-          </div>
-          <div class="warningTile" id="warning-brake" data-warning="brake">
-            <img src="assets/icons/dashboard/warnings/brake.svg" alt="" />
-            <span>BRAKE</span>
-          </div>
-          <div class="warningTile" id="warning-abs" data-warning="abs">
-            <img src="assets/icons/dashboard/warnings/abs.svg" alt="" />
-            <span>ABS</span>
-          </div>
-          <div class="warningTile" id="warning-seatbelt" data-warning="seatbelt">
-            <img src="assets/icons/dashboard/warnings/seatbelt.svg" alt="" />
-            <span>SEATBELT</span>
-          </div>
-          <div class="warningTile" id="warning-tpms" data-warning="tpms">
-            <img src="assets/icons/dashboard/warnings/tpms.svg" alt="" />
-            <span>LOW TIRE</span>
-          </div>
-          <div class="warningTile" id="warning-coolant" data-warning="coolant">
-            <img src="assets/icons/dashboard/warnings/coolant.svg" alt="" />
-            <span>COOLANT</span>
-          </div>
-          <div class="warningTile" id="warning-low-fuel" data-warning="lowFuel">
-            <img src="assets/icons/dashboard/warnings/low-fuel.svg" alt="" />
-            <span>LOW FUEL</span>
-          </div>
-          <div class="warningTile" id="warning-door" data-warning="doorAjar">
-            <img src="assets/icons/dashboard/warnings/door-ajar.svg" alt="" />
-            <span>DOOR AJAR</span>
-          </div>
-          <div class="warningTile" id="warning-security" data-warning="security">
-            <img src="assets/icons/dashboard/warnings/security.svg" alt="" />
-            <span>SECURITY</span>
-          </div>
-        </section>
-      </section>
-
-      <section id="liveRibbon" aria-label="Live vehicle data">
-        <span id="liveOil">Oil -- PSI</span>
-        <span id="liveAfr">AFR --</span>
-        <span id="liveMap">MAP -- kPa</span>
-        <span id="liveBattery">Battery -- V</span>
-        <span id="liveFuelPressure">Fuel -- PSI</span>
-        <span id="liveEct">ECT --°</span>
-      </section>
-
-      <section id="messageCenter" class="messageNormal" aria-live="polite" aria-atomic="true">
-        <div id="messageIconWrap">
-          <span id="messageNormalIcon">✓</span>
-          <img id="messageIcon" src="assets/icons/dashboard/warnings/check-engine.svg" alt="" hidden />
+    <main id="studio">
+      <aside id="libraryPanel" class="studioPanel">
+        <div class="panelHeading panelHeadingRow"><span>ADD / DESIGN</span><button id="collapseLibrary" class="collapsePanelButton" type="button">◀</button></div>
+        <div id="libraryTabs" class="tabGrid">
+          <button class="tab active" data-library="widgets" type="button">WIDGETS</button>
+          <button class="tab" data-library="shapes" type="button">SHAPES</button>
+          <button class="tab" data-library="gaugeParts" type="button">GAUGE PARTS</button>
+          <button class="tab" data-library="icons" type="button">ALERTS</button>
+          <button class="tab" data-library="indicators" type="button">INDICATORS</button>
+          <button class="tab" data-library="materials" type="button">MATERIALS</button>
+          <button class="tab" data-library="images" type="button">IMAGES</button>
+          <button class="tab wideTab" data-library="canvas" type="button">CANVAS BACKGROUND</button>
         </div>
-        <div id="messageCopy">
-          <div id="messageTitle">SYSTEMS NORMAL</div>
-          <div id="messageText">No active vehicle warnings.</div>
-        </div>
-      </section>
+        <div id="libraryItems"></div>
+      </aside>
+
+      <section id="canvasWrap"><div id="dashCanvas" aria-label="Dashboard design canvas"></div></section>
+
+      <aside id="inspectorPanel" class="studioPanel">
+        <div class="panelHeading panelHeadingRow"><span>PROPERTIES</span><button id="collapseInspector" class="collapsePanelButton" type="button">▶</button></div>
+        <div id="nothingSelected">Select an element.</div>
+        <form id="inspector" hidden>
+          <label>Data / Gauge Type<select id="fieldData"></select></label>
+          <label>Name<input id="fieldName" type="text" /></label>
+          <div class="twoCol">
+            <label>X<input id="fieldX" type="number" step="0.1" /></label>
+            <label>Y<input id="fieldY" type="number" step="0.1" /></label>
+            <label>W<input id="fieldW" type="number" step="0.1" min="1" /></label>
+            <label>H<input id="fieldH" type="number" step="0.1" min="1" /></label>
+            <label>Rotate<input id="fieldRotate" type="number" step="1" /></label>
+            <label>Opacity<input id="fieldOpacity" type="number" min="0" max="1" step="0.05" /></label>
+          </div>
+          <label id="materialField">Material<select id="fieldMaterial"></select></label>
+          <label id="scaleModeField">Scale mode<select id="fieldScaleMode"><option value="stretch">Stretch</option><option value="contain">Contain</option><option value="cover">Cover</option><option value="tile">Tile</option></select></label>
+
+          <div id="textStyleFields" class="propertySection" hidden>
+            <div class="propertySectionTitle">TEXT STYLE</div>
+            <label>Text<input id="fieldTextContent" type="text" /></label>
+            <label>Font<select id="fieldTextFont"><option value="Arial, Helvetica, sans-serif">Arial</option><option value="Arial Black, Arial, sans-serif">Arial Black</option><option value="Impact, Haettenschweiler, sans-serif">Impact</option><option value="Verdana, Geneva, sans-serif">Verdana</option><option value="Trebuchet MS, sans-serif">Trebuchet</option><option value="Georgia, serif">Georgia</option><option value="Courier New, monospace">Courier New</option></select></label>
+            <div class="colorGrid">
+              <label>Letters<input id="fieldTextColor" type="color" value="#ffffff" /></label>
+              <label>Weight<select id="fieldTextWeight"><option value="400">Regular</option><option value="600">Semi Bold</option><option value="700">Bold</option><option value="900">Heavy</option></select></label>
+            </div>
+            <div class="twoCol">
+              <label>Spacing<input id="fieldTextSpacing" type="number" step="0.5" min="-5" max="30" /></label>
+              <label>Align<select id="fieldTextAlign"><option value="left">Left</option><option value="center">Center</option><option value="right">Right</option></select></label>
+            </div>
+          </div>
+
+          <div id="gaugeStyleFields" class="propertySection" hidden>
+            <div class="propertySectionTitle">GAUGE STYLE</div>
+            <label>Gauge shape<select id="fieldGaugeShape"><option value="ellipse">Ellipse / Round</option><option value="rectangle">Rectangle</option><option value="rounded">Rounded rectangle</option></select></label>
+            <label>Needle design<select id="fieldNeedleStyle"><option value="classic">Classic</option><option value="tapered">Tapered</option><option value="wedge">Modern Wedge</option><option value="race">Race</option><option value="slim">Slim Pointer</option></select></label>
+            <label class="check"><input id="fieldFaceTransparent" type="checkbox" /> Transparent gauge face</label>
+            <div class="colorGrid">
+              <label>Face<input id="fieldFaceColor" type="color" value="#080808" /></label>
+              <label>Ticks<input id="fieldTickColor" type="color" value="#eeeeee" /></label>
+              <label>Needle<input id="fieldNeedleColor" type="color" value="#e52b2b" /></label>
+              <label>Hub<input id="fieldHubColor" type="color" value="#111111" /></label>
+            </div>
+            <div class="propertySectionTitle">TICK SIZE</div>
+            <div class="twoCol">
+              <button id="tickSizeDown" type="button">− SMALLER</button>
+              <button id="tickSizeUp" type="button">+ LARGER</button>
+            </div>
+            <div id="tickSizeValue">100%</div>
+          </div>
+
+          <label class="check"><input id="fieldTransparent" type="checkbox" /> Transparent surface</label>
+          <label class="check"><input id="fieldVisible" type="checkbox" /> Visible</label>
+          <label class="check"><input id="fieldAspect" type="checkbox" /> Lock aspect ratio</label>
+          <div class="inspectorButtons">
+            <button id="duplicateElement" type="button">DUPLICATE</button>
+            <button id="bringForward" type="button">FRONT</button>
+            <button id="sendBackward" type="button">BACK</button>
+            <button id="deleteElement" class="danger" type="button">DELETE</button>
+          </div>
+        </form>
+      </aside>
     </main>
 
-    <footer id="bottomNav">
-      <button class="active" type="button" onclick="window.location.href='index.html'">Home</button>
-      <button type="button" onclick="window.location.href='pages/vehicle.html'">Vehicle</button>
-      <button type="button">Music</button>
-      <button type="button">Diagnostics</button>
-      <button type="button" onclick="window.location.href='pages/gauge-layout.html'">Layouts</button>
-      <button type="button">Settings</button>
-    </footer>
+    <footer id="statusBar"><span id="appStatus">READY</span><span id="selectionStatus">NO SELECTION</span><span>1024 × 600</span></footer>
   </div>
 
-  <script src="js/gaugeEngine.js"></script>
-  <script src="js/dashboard.js"></script>
-  <script src="js/shiftLightThresholds.js"></script>
-  <script src="js/gaugeLayoutMigration.js"></script>
-  <script src="js/dynamicGaugeLayout.js"></script>
+  <div id="fatalError" hidden></div>
+  <script src="js/app/catalog.js?v=studio9"></script>
+  <script src="js/app/gaugeRenderer.js?v=studio9"></script>
+  <script src="js/app/main.js?v=studio9"></script>
+  <script src="js/app/indicatorLibrary.js?v=studio9"></script>
 </body>
 </html>
