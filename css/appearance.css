@@ -1,0 +1,77 @@
+:root {
+    --small-gauge-tick-color: #f3f3f3;
+    --shift-base-color: #ffffff;
+}
+
+/* Keep every visible mini-gauge tick on the same configurable color.
+   This prevents the major white ticks from appearing over a selected color. */
+.gaugeSvg--mini .gaugeMajorTick,
+.gaugeSvg--mini .gaugeMinorTick {
+    stroke: var(--small-gauge-tick-color) !important;
+}
+
+/* Render the Mustang as a mask so its actual body color can be changed,
+   instead of being locked to the white fill inside the SVG file. */
+#mustangLogo {
+    display: block;
+    width: 180px;
+    height: 72px;
+    margin-top: 6px;
+    transform: translateY(14px);
+    background-color: var(--shift-base-color);
+    -webkit-mask: url("../assets/images/mustangWhite.svg") center / contain no-repeat;
+    mask: url("../assets/images/mustangWhite.svg") center / contain no-repeat;
+    opacity: .35;
+    transition: opacity .20s, filter .20s, transform .20s, background-color .20s;
+}
+
+#mustangLogo.shiftYellow {
+    background-color: #ffd400;
+    opacity: 1;
+    transform: translateY(14px) scale(1.03);
+    filter: drop-shadow(0 0 8px #ffd400) drop-shadow(0 0 18px #ffd400);
+}
+
+#mustangLogo.shiftRed {
+    background-color: #ff2a2a;
+    opacity: 1;
+    transform: translateY(14px) scale(1.05);
+    filter: drop-shadow(0 0 10px #ff2a2a) drop-shadow(0 0 20px #ff2a2a) drop-shadow(0 0 38px #ff2a2a);
+}
+
+/* The freeform/custom-layout shift light still contains the original img.
+   Hide that white artwork and render the same configurable mask in its place. */
+.customShiftCell {
+    position: relative;
+}
+
+.customShiftCell img {
+    opacity: 0 !important;
+}
+
+.customShiftCell::after {
+    content: "";
+    display: block;
+    width: 78%;
+    height: 70%;
+    margin: 0 auto;
+    background-color: var(--shift-base-color);
+    -webkit-mask: url("../assets/images/mustangWhite.svg") center / contain no-repeat;
+    mask: url("../assets/images/mustangWhite.svg") center / contain no-repeat;
+    opacity: .35;
+    transition: opacity .20s, filter .20s, transform .20s, background-color .20s;
+}
+
+.customShiftCell:has(img.shiftYellow)::after {
+    background-color: #ffd400;
+    opacity: 1;
+    transform: scale(1.03);
+    filter: drop-shadow(0 0 8px #ffd400) drop-shadow(0 0 18px #ffd400);
+}
+
+.customShiftCell:has(img.shiftRed)::after {
+    background-color: #ff2a2a;
+    opacity: 1;
+    transform: scale(1.05);
+    filter: drop-shadow(0 0 10px #ff2a2a) drop-shadow(0 0 20px #ff2a2a) drop-shadow(0 0 38px #ff2a2a);
+}
