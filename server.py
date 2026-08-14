@@ -21,7 +21,7 @@ SUPPORTED_ASSET_SUFFIXES = {".svg", ".png", ".jpg", ".jpeg", ".webp"}
 
 @app.route("/")
 def index():
-    return send_from_directory(".", "index.html")
+    return send_from_directory(".", "startup.html")
 
 
 @app.route("/api/vehicle")
