@@ -1,0 +1,53 @@
+/* FoxbodyDash Studio appearance compatibility patch.
+   Keeps the existing Studio layout intact while allowing the Mustang shift light
+   to use a configurable base color with RPM-based yellow/red overrides. */
+
+.shiftLight {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  --shift-base-color: #ffffff;
+  --shift-active-color: var(--shift-base-color);
+  --shift-opacity: .35;
+}
+
+.shiftLight > img {
+  opacity: 0 !important;
+  pointer-events: none;
+}
+
+.shiftLight::after {
+  content: "";
+  position: absolute;
+  inset: 4% 3%;
+  background: var(--shift-active-color);
+  -webkit-mask: url("../assets/images/mustangWhite.svg") center / contain no-repeat;
+  mask: url("../assets/images/mustangWhite.svg") center / contain no-repeat;
+  opacity: var(--shift-opacity);
+  transition: background-color .16s ease, opacity .16s ease, filter .16s ease, transform .16s ease;
+}
+
+.shiftLight.shiftYellow {
+  --shift-active-color: #ffd400;
+  --shift-opacity: 1;
+}
+
+.shiftLight.shiftYellow::after {
+  filter: drop-shadow(0 0 7px #ffd400) drop-shadow(0 0 16px #ffd400);
+  transform: scale(1.03);
+}
+
+.shiftLight.shiftRed {
+  --shift-active-color: #ff2a2a;
+  --shift-opacity: 1;
+}
+
+.shiftLight.shiftRed::after {
+  filter: drop-shadow(0 0 9px #ff2a2a) drop-shadow(0 0 20px #ff2a2a) drop-shadow(0 0 34px #ff2a2a);
+  transform: scale(1.05);
+}
+
+#shiftAppearanceFields[hidden] {
+  display: none;
+}
