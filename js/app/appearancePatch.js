@@ -30,15 +30,10 @@
   function applyTickColor(node, color) {
     if (!node || !color) return;
     node.querySelectorAll(".gaugeSvg line").forEach(line => {
+      if (line.closest(".gaugeNeedleGroup")) return;
       const group = line.closest(".gaugeRenderLayer, .assemblyPart");
       if (!group) return;
       line.setAttribute("stroke", color);
-    });
-    node.querySelectorAll(".gaugeSvg text").forEach(text => {
-      const group = text.closest(".gaugeRenderLayer, .assemblyPart");
-      if (!group) return;
-      const cls = text.getAttribute("class") || "";
-      if (!cls || /tick|label|number/i.test(cls)) text.setAttribute("fill", color);
     });
   }
 
