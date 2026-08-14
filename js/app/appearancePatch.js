@@ -1,16 +1,22 @@
 (() => {
   "use strict";
   const TICK_KEY = "foxbodyDash.appearance.tickColors";
+  const TEXT_KEY = "foxbodyDash.appearance.gaugeTextColors";
   const SHIFT_KEY = "foxbodyDash.appearance.shiftBaseColors";
   const YELLOW_RPM = 5000;
   const RED_RPM = 6000;
   const readMap = key => { try { return JSON.parse(localStorage.getItem(key) || "{}") || {}; } catch { return {}; } };
   const writeMap = (key, value) => localStorage.setItem(key, JSON.stringify(value));
-  let tickColors = readMap(TICK_KEY), shiftColors = readMap(SHIFT_KEY), currentRpm = 0, refreshQueued = false;
+  let tickColors = readMap(TICK_KEY), textColors = readMap(TEXT_KEY), shiftColors = readMap(SHIFT_KEY), currentRpm = 0, refreshQueued = false;
   const selectedNode = () => document.querySelector(".dashNode.selected");
   const selectedId = () => selectedNode()?.dataset?.id || null;
   function isGaugeNode(node) { return Boolean(node?.querySelector(".gaugeRenderLayer, .assemblyPart .gaugeSvg")); }
   function isShiftNode(node) { return Boolean(node?.querySelector(".shiftLight")); }
+  function fallbackTickColor(id) { return tickColors[id] || document.getElementById("fieldTickColor")?.value || "#eeeeee"; }
+  function colorsFor(id) {
+    const fallback = fallbackTickColor(id);
+    return { scale:fallback, title:fallback, unit:fallback, value:fallback, ...(textColors[id] || {}) };
+  }
   function applyTickColor(node, color) {
     if (!node || !color) return;
     node.querySelectorAll(".gaugeSvg line").forEach(line => {
@@ -18,14 +24,21 @@
       const group = line.closest(".gaugeRenderLayer, .assemblyPart");
       if (group) line.setAttribute("stroke", color);
     });
-    // Keep every gauge text element (scale numbers, title/unit, live value,
-    // and assembly label/digital parts) tied to the selected tick color.
-    node.querySelectorAll(".gaugeSvg text").forEach(text => text.setAttribute("fill", color));
   }
-  function applySavedTickColors() {
+  function applyTextColors(node, colors) {
+    if (!node || !colors) return;
+    node.querySelectorAll(".gaugeScaleNumber").forEach(el => el.setAttribute("fill", colors.scale));
+    node.querySelectorAll(".gaugeTitleText").forEach(el => el.setAttribute("fill", colors.title));
+    node.querySelectorAll(".gaugeUnitText").forEach(el => el.setAttribute("fill", colors.unit));
+    node.querySelectorAll(".gaugeLiveValue").forEach(el => el.setAttribute("fill", colors.value));
+  }
+  function applySavedGaugeAppearance() {
     document.querySelectorAll(".dashNode[data-id]").forEach(node => {
-      const color = tickColors[node.dataset.id];
-      if (color && isGaugeNode(node)) applyTickColor(node, color);
+      if (!isGaugeNode(node)) return;
+      const id = node.dataset.id;
+      const tick = tickColors[id];
+      if (tick) applyTickColor(node, tick);
+      applyTextColors(node, colorsFor(id));
     });
   }
   function applyShiftState() {
@@ -38,6 +51,41 @@
       shift.classList.remove("hot");
     });
   }
+  function ensureGaugeTextControls() {
+    const inspector = document.getElementById("inspector");
+    if (!inspector || document.getElementById("gaugeTextColorFields")) return;
+    const section = document.createElement("div");
+    section.id = "gaugeTextColorFields";
+    section.className = "propertySection";
+    section.hidden = true;
+    section.innerHTML = `
+      <div class="propertySectionTitle">GAUGE TEXT COLORS</div>
+      <div class="colorGrid">
+        <label>Scale numbers<input id="fieldGaugeScaleColor" type="color" value="#eeeeee" /></label>
+        <label>Name / title<input id="fieldGaugeTitleColor" type="color" value="#eeeeee" /></label>
+        <label>Unit<input id="fieldGaugeUnitColor" type="color" value="#eeeeee" /></label>
+        <label>Live value<input id="fieldGaugeValueColor" type="color" value="#eeeeee" /></label>
+      </div>`;
+    const gaugeFields = document.getElementById("gaugeStyleFields");
+    gaugeFields?.appendChild(section);
+    const bindings = [
+      ["fieldGaugeScaleColor","scale"],
+      ["fieldGaugeTitleColor","title"],
+      ["fieldGaugeUnitColor","unit"],
+      ["fieldGaugeValueColor","value"]
+    ];
+    bindings.forEach(([inputId,key]) => {
+      document.getElementById(inputId)?.addEventListener("input", e => {
+        const id = selectedId(), node = selectedNode();
+        if (!id || !isGaugeNode(node)) return;
+        const current = colorsFor(id);
+        current[key] = e.target.value;
+        textColors[id] = current;
+        writeMap(TEXT_KEY, textColors);
+        applyTextColors(node, current);
+      });
+    });
+  }
   function ensureShiftControls() {
     const inspector = document.getElementById("inspector");
     if (!inspector || document.getElementById("shiftAppearanceFields")) return;
@@ -46,12 +94,37 @@
     const buttons=inspector.querySelector(".inspectorButtons"); inspector.insertBefore(section,buttons||null);
     const input=section.querySelector("#fieldShiftBaseColor"); input.addEventListener("input",()=>{const id=selectedId(),node=selectedNode();if(!id||!isShiftNode(node))return;shiftColors[id]=input.value;writeMap(SHIFT_KEY,shiftColors);applyShiftState();});
   }
-  function syncInspectorPatch(){ensureShiftControls();const node=selectedNode(),id=selectedId(),section=document.getElementById("shiftAppearanceFields"),input=document.getElementById("fieldShiftBaseColor");if(section)section.hidden=!isShiftNode(node);if(input&&id&&isShiftNode(node))input.value=shiftColors[id]||"#ffffff";}
-  function bindTickPicker(){const picker=document.getElementById("fieldTickColor");if(!picker||picker.dataset.appearancePatchBound)return;picker.dataset.appearancePatchBound="1";picker.addEventListener("input",()=>{const node=selectedNode(),id=selectedId();if(!id||!isGaugeNode(node))return;tickColors[id]=picker.value;writeMap(TICK_KEY,tickColors);applyTickColor(node,picker.value);},true);}
-  function refreshAppearance(){refreshQueued=false;bindTickPicker();syncInspectorPatch();applySavedTickColors();applyShiftState();}
+  function syncInspectorPatch(){
+    ensureGaugeTextControls(); ensureShiftControls();
+    const node=selectedNode(),id=selectedId();
+    const gaugeSection=document.getElementById("gaugeTextColorFields");
+    if(gaugeSection) gaugeSection.hidden=!isGaugeNode(node);
+    if(id&&isGaugeNode(node)){
+      const c=colorsFor(id);
+      const pairs=[["fieldGaugeScaleColor",c.scale],["fieldGaugeTitleColor",c.title],["fieldGaugeUnitColor",c.unit],["fieldGaugeValueColor",c.value]];
+      pairs.forEach(([elId,value])=>{const el=document.getElementById(elId);if(el)el.value=value;});
+    }
+    const shiftSection=document.getElementById("shiftAppearanceFields"),shiftInput=document.getElementById("fieldShiftBaseColor");
+    if(shiftSection)shiftSection.hidden=!isShiftNode(node);
+    if(shiftInput&&id&&isShiftNode(node))shiftInput.value=shiftColors[id]||"#ffffff";
+  }
+  function bindTickPicker(){
+    const picker=document.getElementById("fieldTickColor");
+    if(!picker||picker.dataset.appearancePatchBound)return;
+    picker.dataset.appearancePatchBound="1";
+    picker.addEventListener("input",()=>{
+      const node=selectedNode(),id=selectedId();
+      if(!id||!isGaugeNode(node))return;
+      tickColors[id]=picker.value;
+      writeMap(TICK_KEY,tickColors);
+      applyTickColor(node,picker.value);
+      if(!textColors[id]) applyTextColors(node,colorsFor(id));
+    },true);
+  }
+  function refreshAppearance(){refreshQueued=false;bindTickPicker();syncInspectorPatch();applySavedGaugeAppearance();applyShiftState();}
   function queueRefresh(){if(refreshQueued)return;refreshQueued=true;requestAnimationFrame(refreshAppearance);}
   async function pollRpm(){try{const response=await fetch("/api/vehicle",{cache:"no-store"});if(response.ok){const data=await response.json();currentRpm=Number(data?.engine?.rpm)||0;}}catch{}applyShiftState();}
   const observer=new MutationObserver(queueRefresh);
-  function start(){bindTickPicker();ensureShiftControls();refreshAppearance();observer.observe(document.body,{childList:true,subtree:true});pollRpm();setInterval(pollRpm,500);}
+  function start(){bindTickPicker();ensureGaugeTextControls();ensureShiftControls();refreshAppearance();observer.observe(document.body,{childList:true,subtree:true});pollRpm();setInterval(pollRpm,500);}
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",start,{once:true});else start();
 })();
