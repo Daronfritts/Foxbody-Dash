@@ -15,6 +15,7 @@
   let tickColors = readMap(TICK_KEY);
   let shiftColors = readMap(SHIFT_KEY);
   let currentRpm = 0;
+  let refreshQueued = false;
 
   const selectedNode = () => document.querySelector(".dashNode.selected");
   const selectedId = () => selectedNode()?.dataset?.id || null;
@@ -110,6 +111,20 @@
     }, true);
   }
 
+  function refreshAppearance() {
+    refreshQueued = false;
+    bindTickPicker();
+    syncInspectorPatch();
+    applySavedTickColors();
+    applyShiftState();
+  }
+
+  function queueRefresh() {
+    if (refreshQueued) return;
+    refreshQueued = true;
+    requestAnimationFrame(refreshAppearance);
+  }
+
   async function pollRpm() {
     try {
       const response = await fetch("/api/vehicle", { cache: "no-store" });
@@ -121,22 +136,19 @@
     applyShiftState();
   }
 
-  const observer = new MutationObserver(() => {
-    bindTickPicker();
-    syncInspectorPatch();
-    applySavedTickColors();
-    applyShiftState();
-  });
+  const observer = new MutationObserver(queueRefresh);
 
   function start() {
     bindTickPicker();
     ensureShiftControls();
-    syncInspectorPatch();
-    applySavedTickColors();
-    applyShiftState();
-    observer.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ["class"] });
+    refreshAppearance();
+
+    // Watch only DOM replacements from the studio renderer. Do NOT watch class
+    // attributes because the shift-light state itself changes classes.
+    observer.observe(document.body, { childList: true, subtree: true });
+
     pollRpm();
-    setInterval(pollRpm, 250);
+    setInterval(pollRpm, 500);
   }
 
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", start, { once: true });
