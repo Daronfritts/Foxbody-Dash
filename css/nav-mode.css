@@ -1,0 +1,43 @@
+/* Run/Edit navigation mode
+   Keeps the normal driving view clean. The editor toolbar only appears while editing. */
+
+#foxApp {
+  grid-template-rows: 1fr 26px;
+}
+
+#appBar {
+  display: none;
+}
+
+#foxApp.editing {
+  grid-template-rows: 58px 1fr 26px;
+}
+
+#foxApp.editing #appBar {
+  display: flex;
+}
+
+/* Vehicle navigation lives in the dashboard nav while running. */
+#vehiclePageButton {
+  display: none;
+}
+
+/* In editor mode the toolbar is only editor actions. */
+#foxApp.editing .brand span {
+  color: #49bfff;
+}
+
+#dashCanvas {
+  width: min(calc((100vh - 42px) * 1.7066667), calc(100vw - 16px));
+  max-height: calc(100vh - 42px);
+}
+
+#foxApp.editing #dashCanvas {
+  width: min(calc((100vh - 100px) * 1.7066667), calc(100vw - 16px));
+  max-height: calc(100vh - 100px);
+}
+
+.navStrip button:disabled {
+  opacity: .55;
+  cursor: default;
+}
