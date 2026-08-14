@@ -25,7 +25,7 @@
   -webkit-mask: url("../assets/images/mustangWhite.svg") center / contain no-repeat;
   mask: url("../assets/images/mustangWhite.svg") center / contain no-repeat;
   opacity: var(--shift-opacity);
-  transition: background-color .16s ease, opacity .16s ease, filter .16s ease, transform .16s ease;
+  transition: none;
 }
 
 .shiftLight.shiftYellow {
