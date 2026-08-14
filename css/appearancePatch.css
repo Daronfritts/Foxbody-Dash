@@ -48,6 +48,17 @@
   transform: scale(1.05);
 }
 
+/* In edit mode, an invisible shift-light drag rectangle can overlap the
+   driver-info box and steal pointer events. Keep info boxes above shift-light
+   nodes for editing only; RUN mode keeps the saved z-order untouched. */
+.editing .dashNode:has(.infoBox) {
+  z-index: 2147483000 !important;
+}
+
+.editing .dashNode:has(.shiftLight) {
+  z-index: 2147482000 !important;
+}
+
 #shiftAppearanceFields[hidden] {
   display: none;
 }
