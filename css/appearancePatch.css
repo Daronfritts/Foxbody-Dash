@@ -10,15 +10,15 @@
   stroke: var(--fox-gauge-tick-color, #eeeeee) !important;
 }
 
-/* Gauge position tuning. The two large RPM/speed gauges use an assembly
-   digital child, while the four smaller gauges use the normal title text.
-   Move only those visual elements; do not change their saved layout boxes. */
-.dashNode:has(.assemblyPart .gaugePartDigital) .assemblyPart:has(.gaugePartDigital) {
+/* Gauge position tuning using direct classes only.
+   Large RPM/speed assemblies render their live value as .gaugePartDigital.
+   Small simple gauges render their name/title inside .gaugeRenderLayer. */
+.assemblyPart .gaugePartDigital {
   transform: translateY(25px) !important;
 }
 
-.dashNode:not(:has(.assemblyPart .gaugePartDigital)) .gaugeTitleText {
-  transform: translateY(10px);
+.gaugeRenderLayer .gaugeTitleText {
+  transform: translateY(10px) !important;
 }
 
 .shiftLight {
