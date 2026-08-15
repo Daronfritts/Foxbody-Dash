@@ -29,6 +29,34 @@
     node.querySelectorAll(".gaugeUnitText").forEach(el => el.setAttribute("fill", colors.unit));
     node.querySelectorAll(".gaugeLiveValue").forEach(el => el.setAttribute("fill", colors.value));
   }
+  function applyGaugePositionTweaks() {
+    document.querySelectorAll(".dashNode[data-id]").forEach(node => {
+      if (!isGaugeNode(node)) return;
+      const rect = node.getBoundingClientRect();
+      const isLarge = rect.width >= 220 || rect.height >= 220;
+
+      if (isLarge) {
+        node.querySelectorAll(".gaugePartDigital").forEach(el => {
+          const part = el.closest(".assemblyPart");
+          if (!part || part.dataset.foxValueOffset === "1") return;
+          const top = part.style.top || "0%";
+          part.style.top = `calc(${top} + 25px)`;
+          part.dataset.foxValueOffset = "1";
+        });
+      } else {
+        node.querySelectorAll(".gaugePartLabel").forEach(el => {
+          const part = el.closest(".assemblyPart");
+          if (!part || part.dataset.foxLabelOffset === "1") return;
+          const top = part.style.top || "0%";
+          part.style.top = `calc(${top} + 10px)`;
+          part.dataset.foxLabelOffset = "1";
+        });
+        node.querySelectorAll(".gaugeRenderLayer .gaugeTitleText").forEach(el => {
+          el.setAttribute("transform", "translate(0 70)");
+        });
+      }
+    });
+  }
   function applySavedGaugeAppearance() {
     document.querySelectorAll(".dashNode[data-id]").forEach(node => {
       if (!isGaugeNode(node)) return;
@@ -117,7 +145,7 @@
       applyTickColor(node,picker.value);
     },true);
   }
-  function refreshAppearance(){refreshQueued=false;bindTickPicker();syncInspectorPatch();applySavedGaugeAppearance();applyShiftState();}
+  function refreshAppearance(){refreshQueued=false;bindTickPicker();syncInspectorPatch();applySavedGaugeAppearance();applyGaugePositionTweaks();applyShiftState();}
   function queueRefresh(){if(refreshQueued)return;refreshQueued=true;requestAnimationFrame(refreshAppearance);}
   async function pollRpm(){try{const response=await fetch("/api/vehicle",{cache:"no-store"});if(response.ok){const data=await response.json();currentRpm=Number(data?.engine?.rpm)||0;}}catch{}applyShiftState();}
   const observer=new MutationObserver(queueRefresh);
