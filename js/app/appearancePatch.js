@@ -19,11 +19,8 @@
   }
   function applyTickColor(node, color) {
     if (!node || !color) return;
-    node.querySelectorAll(".gaugeSvg line").forEach(line => {
-      if (line.closest(".gaugeNeedleGroup")) return;
-      const group = line.closest(".gaugeRenderLayer, .assemblyPart");
-      if (group) line.setAttribute("stroke", color);
-    });
+    node.style.setProperty("--fox-gauge-tick-color", color);
+    node.querySelectorAll(".gaugeTick, .gaugeMinor").forEach(line => line.setAttribute("stroke", color));
   }
   function applyTextColors(node, colors) {
     if (!node || !colors) return;
@@ -118,7 +115,6 @@
       tickColors[id]=picker.value;
       writeMap(TICK_KEY,tickColors);
       applyTickColor(node,picker.value);
-      if(!textColors[id]) applyTextColors(node,colorsFor(id));
     },true);
   }
   function refreshAppearance(){refreshQueued=false;bindTickPicker();syncInspectorPatch();applySavedGaugeAppearance();applyShiftState();}
