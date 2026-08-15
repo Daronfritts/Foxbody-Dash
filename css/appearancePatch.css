@@ -2,6 +2,14 @@
    Keeps the existing Studio layout intact while allowing the Mustang shift light
    to use a configurable base color with RPM-based yellow/red overrides. */
 
+/* app.css still has legacy .gaugeTick/.gaugeMinor stroke colors. Those CSS
+   rules override the SVG stroke attribute, so route tick color through a CSS
+   variable on the whole gauge node instead. */
+.dashNode .gaugeTick,
+.dashNode .gaugeMinor {
+  stroke: var(--fox-gauge-tick-color, #eeeeee) !important;
+}
+
 .shiftLight {
   position: relative;
   display: flex;
