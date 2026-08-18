@@ -1,48 +1,23 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<!-- Created with Inkscape (http://www.inkscape.org/) -->
-
 <svg
    width="270.93335mm"
    height="158.75mm"
    viewBox="0 0 270.93335 158.75"
    version="1.1"
    id="svg1"
-   inkscape:version="1.4.4 (dcaf3e7, 2026-05-05)"
-   sodipodi:docname="screenMask.svg"
-   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
-   xmlns="http://www.w3.org/2000/svg"
-   xmlns:svg="http://www.w3.org/2000/svg">
-  <sodipodi:namedview
-     id="namedview1"
-     pagecolor="#ffffff"
-     bordercolor="#000000"
-     borderopacity="0.25"
-     inkscape:showpageshadow="2"
-     inkscape:pageopacity="0.0"
-     inkscape:pagecheckerboard="0"
-     inkscape:deskcolor="#d1d1d1"
-     inkscape:document-units="mm"
-     inkscape:zoom="0.49780559"
-     inkscape:cx="494.16881"
-     inkscape:cy="311.36653"
-     inkscape:window-width="1440"
-     inkscape:window-height="807"
-     inkscape:window-x="0"
-     inkscape:window-y="0"
-     inkscape:window-maximized="0"
-     inkscape:current-layer="layer1" />
-  <defs
-     id="defs1" />
-  <g
-     inkscape:label="Layer 1"
-     inkscape:groupmode="layer"
-     id="layer1"
-     transform="translate(6.5210542,-21.526889)">
+   xmlns="http://www.w3.org/2000/svg">
+  <g id="layer1" transform="translate(6.5210542,-21.526889)">
+    <!-- Top mask only: shifted upward by the SVG equivalent of 10px at the calibrated 1100px overlay height. -->
     <path
-       id="path2"
+       id="mask-top"
+       transform="translate(0,-1.44318)"
        style="opacity:0.99;fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:#1a1a1a;stroke-width:0.529167;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:2.3;stroke-opacity:1;paint-order:stroke fill markers"
-       d="M -6.2564707,21.791472 V 34.449126 C 41.598371,31.245574 80.969701,28.029935 128.5618,28.120299 c 45.59897,0.08658 93.30581,3.127797 135.58591,6.328827 V 21.791472 Z M 128.94593,157.83966 c -21.4812,0.0318 -43.195089,3.08938 -64.662209,12.65765 H -6.2564707 v 9.51499 H 264.14771 v -9.51499 h -70.54019 c -21.19396,-9.53272 -42.80875,-12.69002 -64.66159,-12.65765 z"
-       sodipodi:nodetypes="ccsccccccccccc" />
+       d="M -6.2564707,21.791472 V 34.449126 C 41.598371,31.245574 80.969701,28.029935 128.5618,28.120299 c 45.59897,0.08658 93.30581,3.127797 135.58591,6.328827 V 21.791472 Z" />
+
+    <!-- Bottom mask remains exactly where it was. -->
+    <path
+       id="mask-bottom"
+       style="opacity:0.99;fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:#1a1a1a;stroke-width:0.529167;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:2.3;stroke-opacity:1;paint-order:stroke fill markers"
+       d="M 128.94593,157.83966 c -21.4812,0.0318 -43.195089,3.08938 -64.662209,12.65765 H -6.2564707 v 9.51499 H 264.14771 v -9.51499 h -70.54019 c -21.19396,-9.53272 -42.80875,-12.69002 -64.66159,-12.65765 z" />
   </g>
 </svg>
