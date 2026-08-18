@@ -28,7 +28,7 @@ def get_rpm_override():
 
 @dataclass
 class EngineState:
-    rpm: int = 850
+    rpm: int = 0
     speed: int = 0
     coolant: int = 185
     fuel: int = 78
