@@ -4,7 +4,7 @@ import time
 
 import serial
 
-from vehicle_data import vehicle
+from vehicle_data import set_rpm_override, vehicle
 
 
 class PicoSimulatorReader:
@@ -62,14 +62,16 @@ class PicoSimulatorReader:
         key = key.strip().upper()
         value = value.strip()
 
-        # RPM is numeric instead of boolean. This lets Pico 2 test the
-        # dash shift-light thresholds without touching the real ECU code.
+        # RPM is numeric instead of boolean. Hold the simulated value for four
+        # seconds so the live MicroSquirt reader cannot immediately overwrite
+        # the Pico 2 bench-test value before the browser sees it.
         if key == "RPM":
             try:
                 rpm = max(0, int(float(value)))
             except ValueError:
                 return
 
+            set_rpm_override(rpm, seconds=4.0)
             vehicle.engine.rpm = rpm
             print(f"PICO SIM: RPM={rpm}")
             return
