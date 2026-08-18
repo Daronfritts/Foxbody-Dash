@@ -4,11 +4,26 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>FoxbodyDash Studio</title>
-  <link rel="stylesheet" href="css/app.css?v=mask2" />
+  <link rel="stylesheet" href="css/app.css?v=mask3" />
   <link rel="stylesheet" href="css/assembly.css?v=studio9" />
   <link rel="stylesheet" href="css/studio5.css?v=studio9" />
   <link rel="stylesheet" href="css/nav-mode.css?v=1" />
   <link rel="stylesheet" href="css/appearancePatch.css?v=1" />
+  <style>
+    /* Factory Foxbody opening calibration from the physical-screen mask test. */
+    body::after {
+      content: "";
+      position: fixed;
+      left: -100px;
+      top: -140px;
+      width: 1420px;
+      height: 1100px;
+      background: url("/assets/images/screenMask.svg?v=20260817-live-mask") 0 0 / 100% 100% no-repeat;
+      z-index: 999999;
+      pointer-events: none;
+      user-select: none;
+    }
+  </style>
 </head>
 <body>
   <div id="foxApp">
@@ -114,11 +129,5 @@
   <script src="js/app/indicatorLibrary.js?v=studio9"></script>
   <script src="js/app/navMode.js?v=1"></script>
   <script src="js/app/appearancePatch.js?v=1"></script>
-<img
-  id="screenMaskOverlay"
-  src="/assets/images/screenMask.svg?v=20260816-final"
-  alt=""
-  aria-hidden="true"
-/>
 </body>
 </html>
