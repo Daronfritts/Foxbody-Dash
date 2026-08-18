@@ -18,7 +18,7 @@ window.FoxDashCatalog = (() => {
     ["warnings.brake","Brake","brake"],
     ["warnings.checkEngine","Check Engine","check-engine"],
     ["warnings.coolant","Coolant","coolant"],
-    ["warnings.doorAjar","Door Ajar","door-ajar"],
+    ["warnings.doorAjar","Door Ajar","doorajar"],
     ["warnings.lowFuel","Low Fuel","low-fuel"],
     ["warnings.oil","Oil Pressure","oil"],
     ["warnings.seatbelt","Seatbelt","seatbelt"],
