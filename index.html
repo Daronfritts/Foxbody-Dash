@@ -10,6 +10,15 @@
   <link rel="stylesheet" href="css/nav-mode.css?v=1" />
   <link rel="stylesheet" href="css/appearancePatch.css?v=1" />
   <style>
+    /* Keep every dashboard node inside one stacking context so the physical
+       screen-opening mask always stays above gauges/icons, even when saved
+       layout items carry very large z-index values. */
+    #foxApp {
+      position: relative;
+      z-index: 0;
+      isolation: isolate;
+    }
+
     /* Factory Foxbody opening calibration from the physical-screen mask test. */
     body::after {
       content: "";
@@ -18,8 +27,8 @@
       top: -140px;
       width: 1420px;
       height: 1100px;
-      background: url("/assets/images/screenMask.svg?v=20260817-live-mask") 0 0 / 100% 100% no-repeat;
-      z-index: 999999;
+      background: url("/assets/images/screenMask.svg?v=20260817-live-mask2") 0 0 / 100% 100% no-repeat;
+      z-index: 2147483647;
       pointer-events: none;
       user-select: none;
     }
