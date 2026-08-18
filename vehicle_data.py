@@ -1,4 +1,29 @@
+import time
 from dataclasses import dataclass, field
+
+
+# Temporary test override used by Pico 2. It is intentionally kept outside the
+# VehicleState dataclasses so /api/vehicle stays clean and production data is
+# unchanged. MicroSquirt resumes control automatically when the override expires.
+_rpm_override = None
+_rpm_override_until = 0.0
+
+
+def set_rpm_override(rpm, seconds=4.0):
+    global _rpm_override, _rpm_override_until
+    _rpm_override = max(0, int(rpm))
+    _rpm_override_until = time.monotonic() + max(0.0, float(seconds))
+
+
+def get_rpm_override():
+    global _rpm_override, _rpm_override_until
+    if _rpm_override is None:
+        return None
+    if time.monotonic() >= _rpm_override_until:
+        _rpm_override = None
+        _rpm_override_until = 0.0
+        return None
+    return _rpm_override
 
 
 @dataclass
