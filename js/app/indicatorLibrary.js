@@ -11,6 +11,19 @@
     ["lights.fog", "Fog Lights"],
     ["lights.parking", "Parking Lights"],
   ];
+  const ALERT_OPTIONS = [
+    ["warnings.abs", "ABS"],
+    ["warnings.battery", "Battery"],
+    ["warnings.brake", "Brake"],
+    ["warnings.checkEngine", "Check Engine"],
+    ["warnings.coolant", "Coolant"],
+    ["warnings.doorAjar", "Door Ajar"],
+    ["warnings.lowFuel", "Low Fuel"],
+    ["warnings.oil", "Oil Pressure"],
+    ["warnings.seatbelt", "Seatbelt"],
+    ["warnings.security", "Security"],
+    ["warnings.tpms", "TPMS"],
+  ];
 
   let indicatorAssets = [];
   let live = {};
@@ -125,14 +138,17 @@
     }
   }
 
-  function customIndicatorItems() {
+  function dynamicIconItems() {
     const layout = loadLayout();
-    return (layout?.items || []).filter(item => item.type === "icon" && item.config?.role === "indicator");
+    return (layout?.items || []).filter(item =>
+      item.type === "icon" &&
+      (item.config?.role === "indicator" || item.config?.role === "alert")
+    );
   }
 
-  function syncIndicatorVisibility() {
+  function syncDynamicIconVisibility() {
     const editing = document.getElementById("foxApp")?.classList.contains("editing");
-    customIndicatorItems().forEach(item => {
+    dynamicIconItems().forEach(item => {
       const node = document.querySelector(`.dashNode[data-id="${CSS.escape(item.id)}"]`);
       if (!node) return;
       const surface = node.querySelector(".nodeSurface");
@@ -146,22 +162,24 @@
     });
   }
 
-  function syncSelectedIndicatorDataOptions() {
+  function syncSelectedDynamicDataOptions() {
     const selectedNode = document.querySelector(".dashNode.selected");
     const select = document.getElementById("fieldData");
     if (!selectedNode || !select) return;
 
-    const item = customIndicatorItems().find(candidate => candidate.id === selectedNode.dataset.id);
+    const item = dynamicIconItems().find(candidate => candidate.id === selectedNode.dataset.id);
     if (!item) return;
 
+    const isAlert = item.config?.role === "alert" || String(item.dataSource || "").startsWith("warnings.");
+    const options = isAlert ? [["none", "None / Always visible"], ...ALERT_OPTIONS] : SOURCE_OPTIONS;
     const current = item.dataSource || "none";
-    const signature = `indicator:${current}`;
-    if (select.dataset.indicatorSignature === signature) return;
+    const signature = `${isAlert ? "alert" : "indicator"}:${current}`;
+    if (select.dataset.dynamicIconSignature === signature) return;
 
     select.replaceChildren();
     const group = document.createElement("optgroup");
-    group.label = "INDICATOR LIGHTS";
-    SOURCE_OPTIONS.forEach(([value, label]) => {
+    group.label = isAlert ? "ALERTS" : "INDICATOR LIGHTS";
+    options.forEach(([value, label]) => {
       const option = document.createElement("option");
       option.value = value;
       option.textContent = label;
@@ -169,7 +187,7 @@
     });
     select.appendChild(group);
     select.value = current;
-    select.dataset.indicatorSignature = signature;
+    select.dataset.dynamicIconSignature = signature;
   }
 
   async function pollLive() {
@@ -177,7 +195,7 @@
       const response = await fetch("/api/vehicle");
       if (response.ok) live = await response.json();
     } catch (_) {}
-    syncIndicatorVisibility();
+    syncDynamicIconVisibility();
   }
 
   function init() {
@@ -185,8 +203,8 @@
     if (tab) tab.addEventListener("click", () => setTimeout(renderIndicatorLibrary, 0));
 
     const observer = new MutationObserver(() => {
-      syncSelectedIndicatorDataOptions();
-      syncIndicatorVisibility();
+      syncSelectedDynamicDataOptions();
+      syncDynamicIconVisibility();
     });
     const app = document.getElementById("foxApp");
     if (app) observer.observe(app, { childList: true, subtree: true, attributes: true, attributeFilter: ["class"] });
