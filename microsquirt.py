@@ -4,7 +4,7 @@ import time
 
 import serial
 
-from vehicle_data import vehicle
+from vehicle_data import get_rpm_override, vehicle
 
 
 class MicroSquirtReader:
@@ -43,7 +43,10 @@ class MicroSquirtReader:
         if tps < 0:
             tps = 0.0
 
-        vehicle.engine.rpm = int(rpm)
+        # During Pico 2 bench testing, let the temporary simulated RPM win.
+        # When its short timeout expires, live MicroSquirt RPM resumes automatically.
+        simulated_rpm = get_rpm_override()
+        vehicle.engine.rpm = simulated_rpm if simulated_rpm is not None else int(rpm)
         vehicle.engine.coolant = round(coolant, 1)
         vehicle.engine.battery = round(battery, 1)
 
