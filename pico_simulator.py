@@ -1,4 +1,3 @@
-'PY'
 import glob
 import threading
 import time
@@ -32,16 +31,9 @@ class PicoSimulatorReader:
             return
 
         self.port = self.find_port()
-
-        self.serial = serial.Serial(
-            self.port,
-            self.BAUD,
-            timeout=1.0
-        )
-
+        self.serial = serial.Serial(self.port, self.BAUD, timeout=1.0)
         self.connected = True
         self.last_error = None
-
         print(f"Pico simulator connected: {self.port}")
 
     def disconnect(self):
@@ -67,74 +59,69 @@ class PicoSimulatorReader:
             return
 
         key, value = line.split("=", 1)
-
         key = key.strip().upper()
         value = value.strip()
+
+        # RPM is numeric instead of boolean. This lets Pico 2 test the
+        # dash shift-light thresholds without touching the real ECU code.
+        if key == "RPM":
+            try:
+                rpm = max(0, int(float(value)))
+            except ValueError:
+                return
+
+            vehicle.engine.rpm = rpm
+            print(f"PICO SIM: RPM={rpm}")
+            return
+
         state = self.bool_value(value)
 
         if key == "LEFT":
             vehicle.lights.left_turn = state
-
         elif key == "RIGHT":
             vehicle.lights.right_turn = state
-
         elif key == "HIGHBEAM":
             vehicle.lights.high_beams = state
-
         elif key == "HEADLIGHTS":
             vehicle.lights.headlights = state
-
         elif key == "PARKING":
             vehicle.lights.parking = state
-
         elif key == "BRAKE":
             vehicle.lights.brake = state
-
         elif key == "REVERSE":
             vehicle.lights.reverse = state
-
         elif key == "FOG":
             vehicle.lights.fog = state
-
         elif key == "DRIVER_DOOR":
             vehicle.doors.driver = state
-
         elif key == "PASSENGER_DOOR":
             vehicle.doors.passenger = state
-
         elif key == "HOOD":
             vehicle.doors.hood = state
-
         elif key == "HATCH":
             vehicle.doors.hatch = state
-
-        elif key == "CHECK_ENGINE":
-            vehicle.warnings.checkEngine = state
-
-        elif key == "OIL_WARNING":
-            vehicle.warnings.oil = state
-
+        elif key == "ABS_WARNING":
+            vehicle.warnings.abs = state
         elif key == "BATTERY_WARNING":
             vehicle.warnings.battery = state
-
-        elif key == "COOLANT_WARNING":
-            vehicle.warnings.coolant = state
-
-        elif key == "LOW_FUEL":
-            vehicle.warnings.lowFuel = state
-
-        elif key == "SEATBELT":
-            vehicle.warnings.seatbelt = state
-
         elif key == "BRAKE_WARNING":
             vehicle.warnings.brake = state
-
+        elif key == "CHECK_ENGINE":
+            vehicle.warnings.checkEngine = state
+        elif key == "COOLANT_WARNING":
+            vehicle.warnings.coolant = state
         elif key == "DOOR_AJAR":
             vehicle.warnings.doorAjar = state
-
+        elif key == "LOW_FUEL":
+            vehicle.warnings.lowFuel = state
+        elif key == "OIL_WARNING":
+            vehicle.warnings.oil = state
+        elif key == "SEATBELT":
+            vehicle.warnings.seatbelt = state
         elif key == "SECURITY":
             vehicle.warnings.security = state
-
+        elif key == "TPMS_WARNING":
+            vehicle.warnings.tpms = state
         else:
             return
 
@@ -146,13 +133,10 @@ class PicoSimulatorReader:
         while self.running:
             try:
                 self.connect()
-
                 line = self.serial.readline()
 
                 if line:
-                    self.process_line(
-                        line.decode("utf-8", errors="ignore")
-                    )
+                    self.process_line(line.decode("utf-8", errors="ignore"))
 
             except Exception as exc:
                 self.last_error = str(exc)
@@ -167,18 +151,15 @@ class PicoSimulatorReader:
             return
 
         self.running = True
-
         self.thread = threading.Thread(
             target=self._run,
             name="pico-simulator-reader",
-            daemon=True
+            daemon=True,
         )
-
         self.thread.start()
 
     def stop(self):
         self.running = False
 
-pico_simulator = PicoSimulatorReader()
 
-'PY'
+pico_simulator = PicoSimulatorReader()
