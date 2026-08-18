@@ -4,6 +4,9 @@ from pathlib import Path
 from flask import Flask, jsonify, send_from_directory
 
 from vehicle_data import vehicle
+from microsquirt import microsquirt
+from pico_simulator import pico_simulator
+
 
 app = Flask(__name__, static_folder=".")
 ROOT = Path(__file__).resolve().parent
@@ -16,7 +19,14 @@ ASSET_GROUPS = {
     "icons": ROOT / "assets" / "icons" / "dashboard" / "warnings",
     "indicators": ROOT / "assets" / "icons" / "dashboard" / "indicators",
 }
-SUPPORTED_ASSET_SUFFIXES = {".svg", ".png", ".jpg", ".jpeg", ".webp"}
+
+SUPPORTED_ASSET_SUFFIXES = {
+    ".svg",
+    ".png",
+    ".jpg",
+    ".jpeg",
+    ".webp"
+}
 
 
 @app.route("/")
@@ -34,16 +44,24 @@ def _scan_asset_folder(group_name: str, folder: Path):
         return []
 
     assets = []
+
     for path in sorted(folder.rglob("*")):
-        if not path.is_file() or path.suffix.lower() not in SUPPORTED_ASSET_SUFFIXES:
+        if (
+            not path.is_file()
+            or path.suffix.lower() not in SUPPORTED_ASSET_SUFFIXES
+        ):
             continue
 
         relative_from_root = path.relative_to(ROOT).as_posix()
         relative_from_group = path.relative_to(folder).as_posix()
+
         assets.append(
             {
                 "id": f"asset:{group_name}:{relative_from_group}",
-                "name": path.stem.replace("_", " ").replace("-", " ").title(),
+                "name": path.stem
+                    .replace("_", " ")
+                    .replace("-", " ")
+                    .title(),
                 "file": path.name,
                 "url": f"/{relative_from_root}",
                 "format": path.suffix.lower().lstrip("."),
@@ -51,6 +69,7 @@ def _scan_asset_folder(group_name: str, folder: Path):
                 "path": relative_from_group,
             }
         )
+
     return assets
 
 
@@ -70,4 +89,12 @@ def static_files(path):
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=8000, debug=True)
+    microsquirt.start()
+    pico_simulator.start()
+
+    app.run(
+        host="0.0.0.0",
+        port=8000,
+        debug=True,
+        use_reloader=False
+    )

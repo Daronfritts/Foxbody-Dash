@@ -976,3 +976,16 @@ body{
 /*==================================================
     REVISION 2 COMPLETE
 ==================================================*/
+
+/* Factory Foxbody screen mask */
+#screenMaskOverlay {
+    position: fixed;
+    left: -100px;
+    top: -140px;
+    width: 1420px;
+    height: 1100px;
+    z-index: 999999;
+    pointer-events: none;
+    user-select: none;
+    display: block;
+}

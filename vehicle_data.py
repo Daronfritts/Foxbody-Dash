@@ -10,6 +10,14 @@ class EngineState:
     oil: int = 52
     battery: float = 14.2
 
+    # Live MicroSquirt values
+    afr: float = 14.7
+    map: float = 100.0
+    tps: float = 0.0
+    iat: float = 70.0
+    advance: float = 0.0
+    pulse_width: float = 0.0
+
 
 @dataclass
 class DoorState:
@@ -32,10 +40,26 @@ class LightState:
 
 
 @dataclass
+class WarningState:
+    abs: bool = False
+    battery: bool = False
+    brake: bool = False
+    checkEngine: bool = False
+    coolant: bool = False
+    doorAjar: bool = False
+    lowFuel: bool = False
+    oil: bool = False
+    seatbelt: bool = False
+    security: bool = False
+    tpms: bool = False
+
+
+@dataclass
 class VehicleState:
     engine: EngineState = field(default_factory=EngineState)
     doors: DoorState = field(default_factory=DoorState)
     lights: LightState = field(default_factory=LightState)
+    warnings: WarningState = field(default_factory=WarningState)
 
 
 vehicle = VehicleState()
