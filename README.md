@@ -1,7 +1,7 @@
 # FoxbodyDash
 
 <p align="center">
-  <img src="assets/images/dashboard_template.PNG" alt="FoxbodyDash Dashboard Template" width="900">
+  <img src="assets/images/IMG_4377.jpeg" alt="FoxbodyDash Custom Dashboard" width="900">
 </p>
 
 A modern touchscreen digital dashboard and Body Control Module (BCM) for the 1988 Ford Mustang Foxbody.
