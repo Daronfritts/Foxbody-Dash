@@ -1,14 +1,16 @@
-# FoxbodyDash
+# Fox Body Mustang Digital Dash — FoxbodyDash
 
 <p align="center">
-  <img src="assets/images/IMG_4377.jpeg" alt="FoxbodyDash Custom Dashboard" width="900">
+  <img src="assets/images/IMG_4377.jpeg" alt="Fox Body Mustang Raspberry Pi digital dash custom dashboard" width="900">
 </p>
 
-A modern touchscreen digital dashboard and Body Control Module (BCM) for the 1988 Ford Mustang Foxbody.
+FoxbodyDash is a custom **Fox Body Mustang digital dash** and vehicle electronics project built around a **Raspberry Pi** for a **1988 Ford Mustang Foxbody**. It combines a touchscreen digital instrument cluster, custom gauge layouts, warning indicators, vehicle controls, diagnostics, and Body Control Module (BCM) functions into one integrated platform.
 
-FoxbodyDash is more than a digital gauge cluster. It is part of a complete vehicle electronics system built around a Raspberry Pi that replaces many of the functions normally handled by separate automotive modules.
+The project is designed as a **Raspberry Pi Mustang dashboard** with a factory-inspired appearance, modern touchscreen controls, live engine data, and expandable automotive electronics. It is being developed specifically for a 1988 Mustang 5.0, while keeping the software modular enough to adapt to other Foxbody Mustangs and custom vehicle builds.
 
-The goal is to combine a professional-quality digital dashboard with a custom Body Control Module into a single integrated platform while maintaining an OEM-style appearance and operation.
+FoxbodyDash also integrates with **MicroSquirt ECU** data and is being developed alongside a custom BCM architecture for lighting, locks, windows, wipers, security, cooling fans, diagnostics, and other vehicle functions.
+
+**Search terms:** Foxbody dash, Fox Body Mustang digital dash, Mustang digital dashboard, Raspberry Pi car dashboard, Raspberry Pi Mustang dash, 1988 Mustang digital cluster, MicroSquirt dashboard, custom automotive dashboard, touchscreen car dash, Foxbody electronics.
 
 ---
 
