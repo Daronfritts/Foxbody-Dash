@@ -6,10 +6,13 @@ from flask import Flask, jsonify, send_from_directory
 from vehicle_data import vehicle
 from microsquirt import microsquirt
 from pico_simulator import pico_simulator
+from tuning_mode import TuningModeManager
 
 
 app = Flask(__name__, static_folder=".")
 ROOT = Path(__file__).resolve().parent
+
+tuning_mode = TuningModeManager(microsquirt.start, microsquirt.stop)
 
 ASSET_GROUPS = {
     "shapes": ROOT / "assets" / "designer" / "shapes",
@@ -81,6 +84,23 @@ def designer_assets_api():
             for group_name, folder in ASSET_GROUPS.items()
         }
     )
+
+
+@app.route("/api/tuning/status")
+def tuning_status_api():
+    return jsonify(tuning_mode.status())
+
+
+@app.route("/api/tuning/open", methods=["POST"])
+def tuning_open_api():
+    state, status_code = tuning_mode.open()
+    return jsonify(state), status_code
+
+
+@app.route("/api/tuning/close", methods=["POST"])
+def tuning_close_api():
+    state, status_code = tuning_mode.close()
+    return jsonify(state), status_code
 
 
 @app.route("/<path:path>")
