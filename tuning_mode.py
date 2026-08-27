@@ -94,10 +94,9 @@ class TuningModeManager:
     def status(self) -> dict:
         command = self._command()
         with self._lock:
+            # The watcher owns process-exit cleanup and ECU reconnection.  Do
+            # not clear state here or a status poll could race that cleanup.
             running = bool(self._process and self._process.poll() is None)
-            if self._process and not running:
-                self._process = None
-                self._active = False
             return {
                 "active": self._active,
                 "running": running,
