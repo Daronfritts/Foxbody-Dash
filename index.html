@@ -9,6 +9,7 @@
   <link rel="stylesheet" href="css/studio5.css?v=studio9" />
   <link rel="stylesheet" href="css/nav-mode.css?v=1" />
   <link rel="stylesheet" href="css/appearancePatch.css?v=1" />
+  <link rel="stylesheet" href="css/tuning-mode.css?v=1" />
   <style>
     /* Keep every dashboard node inside one stacking context so the physical
        screen-opening mask always stays above gauges/icons, even when saved
@@ -39,6 +40,7 @@
     <header id="appBar">
       <div class="brand"><strong>FOXBODY DASH</strong><span id="modeBadge">RUN</span></div>
       <div class="appActions">
+        <button id="tuningModeButton" type="button">TUNE</button>
         <button id="vehiclePageButton" type="button">VEHICLE</button>
         <button id="editModeButton" type="button">EDIT</button>
         <button id="panelToggleButton" type="button">PANELS</button>
@@ -131,6 +133,11 @@
     <footer id="statusBar"><span id="appStatus">READY</span><span id="selectionStatus">NO SELECTION</span><span>1024 × 600</span></footer>
   </div>
 
+  <div id="tuningModeOverlay" hidden>
+    <span id="tuningModeMessage">TUNERSTUDIO ACTIVE — SAVE CHANGES BEFORE RETURNING</span>
+    <button id="returnFromTuningButton" type="button">FOX DASH</button>
+  </div>
+
   <div id="fatalError" hidden></div>
   <script src="js/app/catalog.js?v=studio9"></script>
   <script src="js/app/gaugeRenderer.js?v=studio9"></script>
@@ -138,5 +145,6 @@
   <script src="js/app/indicatorLibrary.js?v=studio9"></script>
   <script src="js/app/navMode.js?v=1"></script>
   <script src="js/app/appearancePatch.js?v=1"></script>
+  <script src="js/app/tuningMode.js?v=1"></script>
 </body>
 </html>
