@@ -9,12 +9,24 @@
   display: none;
 }
 
+/* Physical dash bezel safe zone: keep every editor control below the
+   upper portion of the LCD that is covered after installation. */
 #foxApp.editing {
-  grid-template-rows: 58px 1fr 26px;
+  --editor-safe-top: clamp(120px, 18vh, 200px);
+  grid-template-rows: var(--editor-safe-top) 58px minmax(0, 1fr) 26px;
 }
 
 #foxApp.editing #appBar {
   display: flex;
+  grid-row: 2;
+}
+
+#foxApp.editing #studio {
+  grid-row: 3;
+}
+
+#foxApp.editing #statusBar {
+  grid-row: 4;
 }
 
 /* Vehicle navigation lives in the dashboard nav while running. */
@@ -33,8 +45,11 @@
 }
 
 #foxApp.editing #dashCanvas {
-  width: min(calc((100vh - 100px) * 1.7066667), calc(100vw - 16px));
-  max-height: calc(100vh - 100px);
+  width: min(
+    calc((100vh - var(--editor-safe-top) - 100px) * 1.7066667),
+    calc(100vw - 16px)
+  );
+  max-height: calc(100vh - var(--editor-safe-top) - 100px);
 }
 
 .navStrip button:disabled {
