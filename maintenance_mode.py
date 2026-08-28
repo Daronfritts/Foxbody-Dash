@@ -14,6 +14,7 @@ from typing import Optional
 class MaintenanceModeManager:
     def __init__(self):
         self._terminal: Optional[subprocess.Popen] = None
+        self._return_helper: Optional[subprocess.Popen] = None
         self._last_error: Optional[str] = None
         self._lock = threading.RLock()
 
@@ -43,6 +44,10 @@ class MaintenanceModeManager:
                 "terminal_running": bool(
                     self._terminal and self._terminal.poll() is None
                 ),
+                "return_helper_available": self._tool("xmessage") is not None,
+                "return_helper_running": bool(
+                    self._return_helper and self._return_helper.poll() is None
+                ),
                 "last_error": self._last_error,
             }
 
@@ -65,8 +70,73 @@ class MaintenanceModeManager:
         return True
 
     def show_desktop(self) -> tuple[dict, int]:
-        ok = self._wmctrl("-k", "on")
-        return self.status(), 200 if ok else 503
+        xmessage = self._tool("xmessage")
+        if not xmessage:
+            self._last_error = (
+                "xmessage is required for the touchscreen return button. "
+                "Install the x11-utils package."
+            )
+            return self.status(), 503
+
+        if not self._wmctrl("-k", "on"):
+            return self.status(), 503
+
+        try:
+            with self._lock:
+                helper = subprocess.Popen(
+                    [
+                        xmessage,
+                        "-center",
+                        "-title",
+                        "FoxbodyDash Return",
+                        "-buttons",
+                        "RETURN TO DASH:0",
+                        "-default",
+                        "RETURN TO DASH",
+                        "FOXBODY DESKTOP\n\nTap RETURN TO DASH when finished.",
+                    ],
+                    env=self._desktop_env(),
+                    start_new_session=True,
+                )
+                self._return_helper = helper
+        except Exception as exc:
+            self._last_error = str(exc)
+            self._wmctrl("-k", "off")
+            self._wmctrl("-a", "FoxbodyDash Studio")
+            return self.status(), 500
+
+        self._last_error = None
+        threading.Thread(
+            target=self._watch_return_helper,
+            args=(helper,),
+            daemon=True,
+        ).start()
+        threading.Thread(target=self._focus_return_helper, daemon=True).start()
+        return self.status(), 200
+
+    def _watch_return_helper(self, helper: subprocess.Popen) -> None:
+        helper.wait()
+        with self._lock:
+            if helper is not self._return_helper:
+                return
+            self._return_helper = None
+        self._restore_dash_window()
+
+    def _focus_return_helper(self) -> None:
+        for _ in range(20):
+            with self._lock:
+                if (
+                    not self._return_helper
+                    or self._return_helper.poll() is not None
+                ):
+                    return
+            if self._wmctrl("-a", "FoxbodyDash Return"):
+                return
+            time.sleep(0.2)
+
+    def _restore_dash_window(self) -> bool:
+        self._wmctrl("-k", "off")
+        return self._wmctrl("-a", "FoxbodyDash Studio")
 
     def return_to_dash(self) -> tuple[dict, int]:
         with self._lock:
@@ -74,8 +144,12 @@ class MaintenanceModeManager:
                 self._terminal.terminate()
             self._terminal = None
 
-        self._wmctrl("-k", "off")
-        ok = self._wmctrl("-a", "FoxbodyDash Studio")
+            helper = self._return_helper
+            self._return_helper = None
+            if helper and helper.poll() is None:
+                helper.terminate()
+
+        ok = self._restore_dash_window()
         return self.status(), 200 if ok else 503
 
     def open_terminal(self) -> tuple[dict, int]:
