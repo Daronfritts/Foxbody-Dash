@@ -168,26 +168,60 @@ class MaintenanceModeManager:
         self._wmctrl("-k", "off")
         try:
             with self._lock:
-                if self._terminal and self._terminal.poll() is None:
-                    return self.status(), 200
-                self._terminal = subprocess.Popen(
-                    [terminal],
-                    env=self._desktop_env(),
-                    start_new_session=True,
-                )
+                if not self._terminal or self._terminal.poll() is not None:
+                    self._terminal = subprocess.Popen(
+                        [terminal],
+                        env=self._desktop_env(),
+                        start_new_session=True,
+                    )
         except Exception as exc:
             self._last_error = str(exc)
             return self.status(), 500
 
         self._last_error = None
+        # Always raise the terminal, including when it was already running.
         threading.Thread(target=self._focus_terminal, daemon=True).start()
         return self.status(), 200
+
+    def _terminal_window_id(self) -> Optional[str]:
+        wmctrl = self._tool("wmctrl")
+        if not wmctrl:
+            return None
+        result = subprocess.run(
+            [wmctrl, "-lx"],
+            env=self._desktop_env(),
+            stdout=subprocess.PIPE,
+            stderr=subprocess.DEVNULL,
+            text=True,
+            check=False,
+        )
+        if result.returncode != 0:
+            return None
+
+        for line in result.stdout.splitlines():
+            lowered = line.lower()
+            if any(
+                marker in lowered
+                for marker in ("qterminal", "lxterminal", "shell no.")
+            ):
+                fields = line.split(None, 1)
+                if fields:
+                    return fields[0]
+        return None
 
     def _focus_terminal(self) -> None:
         for _ in range(20):
             with self._lock:
                 if not self._terminal or self._terminal.poll() is not None:
                     return
-            if self._wmctrl("-a", "QTerminal"):
-                return
+
+            window_id = self._terminal_window_id()
+            if window_id:
+                self._wmctrl("-i", "-r", window_id, "-b", "remove,hidden")
+                if self._wmctrl("-i", "-a", window_id):
+                    return
+
+            for title in ("Shell No. 1", "QTerminal", "LXTerminal"):
+                if self._wmctrl("-a", title):
+                    return
             time.sleep(0.2)
