@@ -1,5 +1,6 @@
 from dataclasses import asdict
 from pathlib import Path
+import logging
 
 from flask import Flask, jsonify, request, send_from_directory
 
@@ -141,9 +142,13 @@ if __name__ == "__main__":
     microsquirt.start()
     pico_simulator.start()
 
+    # The dashboard polls continuously. Keep routine successful requests out of
+    # journald so normal gauge updates do not create unnecessary disk I/O.
+    logging.getLogger("werkzeug").setLevel(logging.WARNING)
+
     app.run(
         host="0.0.0.0",
         port=8000,
-        debug=True,
+        debug=False,
         use_reloader=False
     )
