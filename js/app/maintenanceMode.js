@@ -3,7 +3,7 @@
 
   const REQUIRED_TAPS = 5;
   const WINDOW_MS = 4000;
-  let editTaps = [];
+  let unlockTaps = [];
   let busy = false;
 
   const overlay = document.getElementById("maintenanceOverlay");
@@ -56,21 +56,19 @@
     }
   }
 
-  document.addEventListener("click", event => {
-    const button = event.target.closest("button");
-    if (!button || button.textContent.trim().toUpperCase() !== "EDIT") return;
+  const unlockTarget = document.querySelector("#statusBar span:last-child");
 
+  unlockTarget?.addEventListener("click", event => {
     const now = Date.now();
-    editTaps = editTaps.filter(time => now - time <= WINDOW_MS);
-    editTaps.push(now);
+    unlockTaps = unlockTaps.filter(time => now - time <= WINDOW_MS);
+    unlockTaps.push(now);
 
-    if (editTaps.length < REQUIRED_TAPS) return;
+    if (unlockTaps.length < REQUIRED_TAPS) return;
 
-    editTaps = [];
+    unlockTaps = [];
     event.preventDefault();
-    event.stopImmediatePropagation();
     setOpen(true);
-  }, true);
+  });
 
   document.getElementById("maintenanceDesktop")?.addEventListener(
     "click", () => call("desktop")
