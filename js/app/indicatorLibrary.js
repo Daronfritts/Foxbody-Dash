@@ -190,14 +190,6 @@
     select.dataset.dynamicIconSignature = signature;
   }
 
-  async function pollLive() {
-    try {
-      const response = await fetch("/api/vehicle");
-      if (response.ok) live = await response.json();
-    } catch (_) {}
-    syncDynamicIconVisibility();
-  }
-
   function init() {
     const tab = document.querySelector('[data-library="indicators"]');
     if (tab) tab.addEventListener("click", () => setTimeout(renderIndicatorLibrary, 0));
@@ -209,9 +201,12 @@
     const app = document.getElementById("foxApp");
     if (app) observer.observe(app, { childList: true, subtree: true, attributes: true, attributeFilter: ["class"] });
 
+    window.addEventListener("foxdash:live", event => {
+      live = event.detail || {};
+      syncDynamicIconVisibility();
+    });
+
     loadAssets();
-    pollLive();
-    setInterval(pollLive, 500);
   }
 
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);
