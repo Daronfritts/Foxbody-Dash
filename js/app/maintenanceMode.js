@@ -46,6 +46,8 @@
       const state = await response.json();
       if (!state.wmctrl_available) {
         message.textContent = "MAINTENANCE NEEDS WMCTRL INSTALLED";
+      } else if (!state.return_helper_available) {
+        message.textContent = "DESKTOP RETURN BUTTON NEEDS X11-UTILS";
       } else if (!state.terminal_available) {
         message.textContent = "DESKTOP READY — TERMINAL PROGRAM NOT FOUND";
       } else {
