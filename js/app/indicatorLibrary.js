@@ -104,6 +104,26 @@
     return button;
   }
 
+  function addBuiltInIndicator(template) {
+    const layout = loadLayout();
+    const catalog = window.FoxDashCatalog;
+    if (!layout?.items || !catalog?.fromTemplate) return;
+
+    layout.items.push(catalog.fromTemplate(template));
+    saveLayout(layout);
+    location.reload();
+  }
+
+  function makeBuiltInCard(template) {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "libraryCard";
+    const source = template.defaults?.dataSource || "none";
+    button.innerHTML = `<span>${template.label}</span><small>${sourceLabel(source).toUpperCase()}</small>`;
+    button.addEventListener("click", () => addBuiltInIndicator(template));
+    return button;
+  }
+
   function renderIndicatorLibrary() {
     const library = document.getElementById("libraryItems");
     const tab = document.querySelector('[data-library="indicators"]');
@@ -116,6 +136,16 @@
     library.appendChild(note);
 
     if (!indicatorAssets.length) {
+      const builtIns = window.FoxDashCatalog?.templates?.icons || [];
+      if (builtIns.length) {
+        const builtInNote = document.createElement("div");
+        builtInNote.className = "alertPickerNote";
+        builtInNote.textContent = "Built-in live indicators. Tap one to add it to the dash.";
+        library.appendChild(builtInNote);
+        builtIns.forEach(template => library.appendChild(makeBuiltInCard(template)));
+        return;
+      }
+
       const empty = document.createElement("div");
       empty.className = "alertPickerNote";
       empty.textContent = "No indicator artwork yet. Drop SVG/PNG files into the indicators folder and refresh.";
