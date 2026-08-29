@@ -171,7 +171,7 @@
   function dynamicIconItems() {
     const layout = loadLayout();
     return (layout?.items || []).filter(item =>
-      item.type === "icon" &&
+      (item.type === "icon" || item.type === "systemIcon") &&
       (item.config?.role === "indicator" || item.config?.role === "alert")
     );
   }
