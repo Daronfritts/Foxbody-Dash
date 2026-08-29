@@ -1,15 +1,21 @@
 from dataclasses import asdict
 from pathlib import Path
+import logging
 
-from flask import Flask, jsonify, send_from_directory
+from flask import Flask, jsonify, request, send_from_directory
 
 from vehicle_data import vehicle
 from microsquirt import microsquirt
 from pico_simulator import pico_simulator
+from tuning_mode import TuningModeManager
+from maintenance_mode import MaintenanceModeManager
 
 
 app = Flask(__name__, static_folder=".")
 ROOT = Path(__file__).resolve().parent
+
+tuning_mode = TuningModeManager(microsquirt.start, microsquirt.stop)
+maintenance_mode = MaintenanceModeManager()
 
 ASSET_GROUPS = {
     "shapes": ROOT / "assets" / "designer" / "shapes",
@@ -83,6 +89,50 @@ def designer_assets_api():
     )
 
 
+@app.route("/api/tuning/status")
+def tuning_status_api():
+    return jsonify(tuning_mode.status())
+
+
+@app.route("/api/tuning/open", methods=["POST"])
+def tuning_open_api():
+    state, status_code = tuning_mode.open()
+    return jsonify(state), status_code
+
+
+@app.route("/api/tuning/close", methods=["POST"])
+def tuning_close_api():
+    state, status_code = tuning_mode.close()
+    return jsonify(state), status_code
+
+
+def _local_request_only():
+    return request.remote_addr in {"127.0.0.1", "::1"}
+
+
+@app.route("/api/maintenance/status")
+def maintenance_status_api():
+    return jsonify(maintenance_mode.status())
+
+
+@app.route("/api/maintenance/<action>", methods=["POST"])
+def maintenance_action_api(action):
+    if not _local_request_only():
+        return jsonify({"last_error": "Maintenance actions are local-only."}), 403
+
+    actions = {
+        "desktop": maintenance_mode.show_desktop,
+        "terminal": maintenance_mode.open_terminal,
+        "return": maintenance_mode.return_to_dash,
+    }
+    handler = actions.get(action)
+    if handler is None:
+        return jsonify({"last_error": "Unknown maintenance action."}), 404
+
+    state, status_code = handler()
+    return jsonify(state), status_code
+
+
 @app.route("/<path:path>")
 def static_files(path):
     return send_from_directory(".", path)
@@ -92,9 +142,13 @@ if __name__ == "__main__":
     microsquirt.start()
     pico_simulator.start()
 
+    # The dashboard polls continuously. Keep routine successful requests out of
+    # journald so normal gauge updates do not create unnecessary disk I/O.
+    logging.getLogger("werkzeug").setLevel(logging.WARNING)
+
     app.run(
         host="0.0.0.0",
         port=8000,
-        debug=True,
+        debug=False,
         use_reloader=False
     )
