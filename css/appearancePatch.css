@@ -81,3 +81,20 @@
 #shiftAppearanceFields[hidden] {
   display: none;
 }
+
+/* Keep every dashboard navigation button inside its saved navigation node.
+   Equal-width flex buttons prevent HOME / VEHICLE / TUNE / EDIT from clipping
+   on the 1024 x 600 display, even when additional buttons are added. */
+.navStrip {
+  gap: clamp(2px, .5vw, 6px);
+  padding-inline: clamp(2px, .5vw, 6px);
+}
+
+.navStrip button {
+  flex: 1 1 0;
+  min-width: 0;
+  max-width: 100%;
+  padding-inline: clamp(2px, .7vw, 8px);
+  font-size: clamp(9px, 1.35vw, 16px);
+  overflow: hidden;
+}
