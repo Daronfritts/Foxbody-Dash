@@ -34,8 +34,9 @@
         nav.append(
           makeNavButton("HOME", null, true),
           makeNavButton("VEHICLE", null, true),
-          makeNavButton("TUNE", null, true),
-          makeNavButton("EDIT", null, true)
+          makeNavButton("MUSIC", null, true),
+          makeNavButton("DIAGNOSTICS", null, true),
+          makeNavButton("SETTINGS", null, true)
         );
         return;
       }
@@ -43,8 +44,9 @@
       nav.append(
         makeNavButton("HOME", () => { window.location.href = "index.html"; }),
         makeNavButton("VEHICLE", () => { window.location.href = "pages/vehicle.html"; }),
-        makeNavButton("TUNE", () => { window.FoxTuningMode?.open(); }),
-        makeNavButton("EDIT", () => { editButton.click(); })
+        makeNavButton("MUSIC", null, true),
+        makeNavButton("DIAGNOSTICS", () => { window.FoxTuningMode?.open(); }),
+        makeNavButton("SETTINGS", () => { editButton.click(); })
       );
     });
   }

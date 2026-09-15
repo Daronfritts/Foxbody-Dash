@@ -56,3 +56,17 @@
   opacity: .55;
   cursor: default;
 }
+
+
+/* Invisible controls aligned to the navigation artwork. */
+.dashNavHotspots {
+  border: 0;
+  background: transparent;
+}
+.dashNavHotspots button {
+  border: 0;
+  background: transparent;
+  color: transparent;
+  box-shadow: none;
+  opacity: 0;
+}

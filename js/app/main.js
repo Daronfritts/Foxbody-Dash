@@ -13,7 +13,7 @@
   };
 
   const DISPLAY={width:2560,height:720,aspect:2560/720};
-  const STORAGE="foxbodyDash.studio.v9",LEGACY=[];
+  const STORAGE="foxbodyDash.studio.v10",LEGACY=[];
   let edit=false,selectedId=null,gesture=null,live={},activeLibrary="widgets",assets={shapes:[],materials:[],images:[],gaugeParts:[],icons:[]};
   const brokenAssets=new Set();
   function setImageSource(img,src){if(!src||brokenAssets.has(src)){img.hidden=true;return;}img.addEventListener("error",()=>{brokenAssets.add(src);img.hidden=true;},{once:true});img.src=src;}
@@ -28,18 +28,19 @@
     ]};
   }
 
-  const defaultLayout={version:9,canvas:{color:"#000000",material:"none",imageUrl:"assets/designer/images/FoxbodyDash_2560x720.webp",scaleMode:"stretch"},items:[
+  const defaultLayout={version:10,canvas:{color:"#000000",material:"none",imageUrl:"assets/designer/images/FoxbodyDash_2560x720.webp",scaleMode:"stretch"},items:[
     dashNeedle("RPM","engine.rpm",3.9,13.5,15.6),
     dashNeedle("FUEL","engine.fuel",21.9,25.8,8.8),
     dashNeedle("OIL PSI","engine.oil",33.1,25.8,8.8),
     dashNeedle("VOLTS","engine.battery",58.5,25.8,8.8),
     dashNeedle("COOLANT","engine.coolant",69.7,25.8,8.8),
-    dashNeedle("SPEED","engine.speed",80.5,13.5,15.6)
+    dashNeedle("SPEED","engine.speed",80.5,13.5,15.6),
+    {id:C.id("nav"),type:"nav",name:"Dashboard Navigation",x:9.3,y:88,w:80.5,h:9.5,rotation:0,opacity:1,visible:true,lockAspect:false,transparentSurface:true,material:"none",dataSource:"none",z:20,config:{hotspots:true}}
   ]};
 
   function fail(err){console.error(err);ui.fatal.hidden=false;ui.fatal.textContent="DASH ERROR: "+(err?.stack||err?.message||String(err));}
   window.addEventListener("error",e=>fail(e.error||e.message));window.addEventListener("unhandledrejection",e=>fail(e.reason));
-  function normalize(v){v.version=9;v.canvas={color:v.canvas?.color||v.canvas?.background||"#000000",material:v.canvas?.material||"none",imageUrl:v.canvas?.imageUrl||null,scaleMode:v.canvas?.scaleMode||"cover"};(v.items||[]).forEach(i=>{if(i.type==="text"){i.transparentSurface=true;i.material="none";i.config??={};i.config.textColor??="#ffffff";i.config.fontFamily??="Arial, Helvetica, sans-serif";i.config.fontWeight??="700";i.config.letterSpacing??=2;i.config.textAlign??="center";}if(i.type==="status")i.alerts=C.alertDefinitions.map(([dataSource,label,icon])=>({dataSource,label,icon,enabled:true}));if(i.type==="gauge"){i.config??={};i.config.tickScale??=1;}if(i.type==="gaugeAssembly"){const ticks=(i.children||[]).find(c=>c.part==="ticks");if(ticks){ticks.config??={};ticks.config.tickScale??=1;}}});return v;}
+  function normalize(v){v.version=10;v.canvas={color:v.canvas?.color||v.canvas?.background||"#000000",material:v.canvas?.material||"none",imageUrl:v.canvas?.imageUrl||null,scaleMode:v.canvas?.scaleMode||"cover"};(v.items||[]).forEach(i=>{if(i.type==="text"){i.transparentSurface=true;i.material="none";i.config??={};i.config.textColor??="#ffffff";i.config.fontFamily??="Arial, Helvetica, sans-serif";i.config.fontWeight??="700";i.config.letterSpacing??=2;i.config.textAlign??="center";}if(i.type==="status")i.alerts=C.alertDefinitions.map(([dataSource,label,icon])=>({dataSource,label,icon,enabled:true}));if(i.type==="gauge"){i.config??={};i.config.tickScale??=1;}if(i.type==="gaugeAssembly"){const ticks=(i.children||[]).find(c=>c.part==="ticks");if(ticks){ticks.config??={};ticks.config.tickScale??=1;}}});return v;}
   function load(){try{const own=localStorage.getItem(STORAGE);if(own)return normalize(JSON.parse(own));for(const key of LEGACY){const raw=localStorage.getItem(key);if(raw){const v=JSON.parse(raw);if(v?.items)return normalize(v);}}}catch(e){console.warn("Layout load failed",e);}return clone(defaultLayout);}
   let layout=load();
   function save(){localStorage.setItem(STORAGE,JSON.stringify(layout));ui.status.textContent="SAVED";clearTimeout(save.t);save.t=setTimeout(()=>ui.status.textContent="READY",700);}
@@ -66,7 +67,7 @@
     if(item.type==="digital"){s.classList.add("digitalValue");const n=Number(value),d=item.config?.decimals??0;s.innerHTML=`<strong>${Number.isFinite(n)?n.toFixed(d):"0"}</strong><span>${item.config?.unit||item.name||""}</span>`;return;}
     if(item.type==="bar"){s.classList.add("barGauge");const min=item.config?.min??0,max=item.config?.max??100,n=Number(value),pct=Number.isFinite(n)?Math.max(0,Math.min(100,(n-min)/(max-min)*100)):0;s.innerHTML=`<div class="barGaugeFill" style="width:${pct}%"></div><div class="barGaugeText">${Number.isFinite(n)?Math.round(n):"0"} ${item.config?.unit||""}</div>`;return;}
     if(item.type==="info"){s.classList.add("infoBox");s.innerHTML=`<div class="infoTop"><span>${new Date().toLocaleTimeString([],{hour:"numeric",minute:"2-digit"})}</span><span>FOXBODY</span></div><div class="infoGear"><small>GEAR</small><strong>${live.vehicle?.gear??"N"}</strong></div><div class="infoBottom"><span>TRIP ${live.vehicle?.trip??"--"}</span><span>${live.vehicle?.outsideTemp??"--"}°F</span></div>`;return;}
-    if(item.type==="status"){renderStatus(s,item);return;}if(item.type==="nav"){s.classList.add("navStrip");["HOME","VEHICLE","DIAG","SETTINGS"].forEach(label=>{const b=document.createElement("button");b.type="button";b.textContent=label;if(label==="VEHICLE")b.addEventListener("click",e=>{if(!edit){e.stopPropagation();location.href="pages/vehicle.html";}});s.appendChild(b);});return;}
+    if(item.type==="status"){renderStatus(s,item);return;}if(item.type==="nav"){s.classList.add("navStrip");if(item.config?.hotspots)s.classList.add("dashNavHotspots");["HOME","VEHICLE","MUSIC","DIAGNOSTICS","SETTINGS"].forEach(label=>{const b=document.createElement("button");b.type="button";b.textContent=label;if(label==="VEHICLE")b.addEventListener("click",e=>{if(!edit){e.stopPropagation();location.href="pages/vehicle.html";}});s.appendChild(b);});return;}
     if(item.type==="shift"){s.classList.add("shiftLight");if(Number(value)>=Number(item.config?.hot??6000))s.classList.add("hot");const img=document.createElement("img");img.src=item.assetUrl||"assets/images/mustangWhite.svg";img.alt="";s.appendChild(img);return;}
     if(item.type==="text"){const c=item.config||{};s.classList.add("textNode");s.textContent=c.text||item.name||"TEXT";s.style.color=c.textColor||"#ffffff";s.style.fontFamily=c.fontFamily||"Arial, Helvetica, sans-serif";s.style.fontWeight=String(c.fontWeight||700);s.style.letterSpacing=`${Number(c.letterSpacing??2)}px`;s.style.justifyContent=c.textAlign==="left"?"flex-start":c.textAlign==="right"?"flex-end":"center";s.style.textAlign=c.textAlign||"center";return;}
     if(item.type==="image"||item.type==="icon"){if(item.scaleMode==="tile"){s.style.backgroundImage=`url('${item.assetUrl}')`;s.style.backgroundRepeat="repeat";s.style.backgroundSize="auto";}else{const img=document.createElement("img");setImageSource(img,item.assetUrl);img.alt="";img.className=`nodeImage ${item.scaleMode||"stretch"}`;s.appendChild(img);}}
