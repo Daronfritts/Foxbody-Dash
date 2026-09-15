@@ -15,7 +15,7 @@ The main page must be built only from the new studio/runtime stack:
 Legacy fixed-dashboard/layout files are not authoritative and must not be reintroduced into `index.html`.
 
 ## Core Direction
-The main screen is a 1024×600 canvas populated by independent configurable objects. Nothing visible on the main dashboard should require a permanently hardcoded position.
+The main screen is a 2560×720 canvas populated by independent configurable objects. Nothing visible on the main dashboard should require a permanently hardcoded position.
 
 Every main-screen object must be capable of becoming part of the same designer system: gauges, gauge parts, info boxes, warning/status strips, nav bars, text, shapes, imported images, icons, decorative panels and materials.
 
@@ -92,7 +92,7 @@ Do not modify these as part of the dashboard rewrite unless the user explicitly 
 The Vehicle page remains a separate preserved subsystem.
 
 ## Current Branch
-`feature/dashboard-designer-engine`
+`feature/tunerstudio-mode`
 
 Keep this work isolated from `main` until it is tested on the Raspberry Pi touchscreen.
 

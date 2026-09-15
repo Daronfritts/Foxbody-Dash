@@ -40,13 +40,13 @@
 }
 
 #dashCanvas {
-  width: min(calc((100vh - 42px) * 1.7066667), calc(100vw - 16px));
+  width: min(calc((100vh - 42px) * 3.5555556), calc(100vw - 16px));
   max-height: calc(100vh - 42px);
 }
 
 #foxApp.editing #dashCanvas {
   width: min(
-    calc((100vh - var(--editor-safe-top) - 100px) * 1.7066667),
+    calc((100vh - var(--editor-safe-top) - 100px) * 3.5555556),
     calc(100vw - 16px)
   );
   max-height: calc(100vh - var(--editor-safe-top) - 100px);

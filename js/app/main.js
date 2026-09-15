@@ -12,23 +12,34 @@
     duplicate:q("duplicateElement"),front:q("bringForward"),back:q("sendBackward"),remove:q("deleteElement"),fatal:q("fatalError")
   };
 
-  const STORAGE="foxbodyDash.studio.v7",LEGACY=["foxbodyDash.studio.v6","foxbodyDash.studio.v4","foxbodyDash.studio.v3","foxbodyDash.studio.v2"];
+  const DISPLAY={width:2560,height:720,aspect:2560/720};
+  const STORAGE="foxbodyDash.studio.v8",LEGACY=["foxbodyDash.studio.v6","foxbodyDash.studio.v4","foxbodyDash.studio.v3","foxbodyDash.studio.v2"];
   let edit=false,selectedId=null,gesture=null,live={},activeLibrary="widgets",assets={shapes:[],materials:[],images:[],gaugeParts:[],icons:[]};
   const brokenAssets=new Set();
   function setImageSource(img,src){if(!src||brokenAssets.has(src)){img.hidden=true;return;}img.addEventListener("error",()=>{brokenAssets.add(src);img.hidden=true;},{once:true});img.src=src;}
 
-  const defaultLayout={version:7,canvas:{color:"#000000",material:"none",imageUrl:null,scaleMode:"cover"},items:[
-    C.fromTemplate(C.templates.widgets[0],{name:"RPM",x:5,y:12,w:29,h:50}),
-    C.fromTemplate(C.templates.widgets[0],{name:"SPEED",x:66,y:12,w:29,h:50,dataSource:"engine.speed",config:{...C.profileFor("engine.speed"),startAngle:225,endAngle:495,faceTransparent:true,faceColor:"#080808",tickColor:"#eeeeee",tickScale:1,needleColor:"#e52b2b",hubColor:"#111111",needleStyle:"tapered",showIcon:true}}),
-    C.fromTemplate(C.templates.widgets[3],{x:38,y:16,w:24,h:40}),
-    C.fromTemplate(C.templates.widgets[6],{x:42,y:2,w:16,h:12}),
-    C.fromTemplate(C.templates.widgets[7],{x:38,y:2,w:24,h:10,config:{text:"FOXBODY",textColor:"#ffffff",fontFamily:"Arial Black, Arial, sans-serif",fontWeight:"900",letterSpacing:2,textAlign:"center"}}),
-    C.fromTemplate(C.templates.widgets[4],{x:5,y:80,w:90,h:8}),C.fromTemplate(C.templates.widgets[5],{x:5,y:90,w:90,h:8})
+  function dashNeedle(name,dataSource,x,y,w){
+    const h=w*DISPLAY.aspect,profile=clone(C.profileFor(dataSource)||{});
+    const config={...profile,startAngle:225,endAngle:495,needleColor:"#d83225",needleStyle:"tapered"};
+    return {id:C.id("gauge"),type:"gaugeAssembly",name,x,y,w,h,rotation:0,opacity:1,visible:true,lockAspect:true,transparentSurface:true,material:"none",gaugeShape:"ellipse",dataSource,z:10,config:{profileTitle:profile.title,profileUnit:profile.unit},children:[
+      {id:C.id("base"),type:"shape",shape:"ellipse",name:name+" Base",x:0,y:0,w:100,h:100,rotation:0,opacity:1,visible:true,transparentSurface:true,material:"none",z:1,isGaugeBase:true},
+      {id:C.id("needle"),type:"gaugePart",part:"needle",name:name+" Needle",x:0,y:0,w:100,h:100,rotation:0,opacity:1,visible:true,transparentSurface:true,material:"none",dataSource,gaugeShape:"ellipse",geometry:"ellipse",z:2,config},
+      {id:C.id("hub"),type:"gaugePart",part:"hub",name:name+" Hub",x:0,y:0,w:100,h:100,rotation:0,opacity:1,visible:true,transparentSurface:true,material:"none",dataSource:"none",gaugeShape:"ellipse",geometry:"ellipse",z:3,config:{hubColor:"#111111"}}
+    ]};
+  }
+
+  const defaultLayout={version:8,canvas:{color:"#000000",material:"none",imageUrl:"assets/designer/images/FoxbodyDash_2560x720.webp",scaleMode:"stretch"},items:[
+    dashNeedle("RPM","engine.rpm",3.9,13.5,15.6),
+    dashNeedle("FUEL","engine.fuel",21.9,25.8,8.8),
+    dashNeedle("OIL PSI","engine.oil",33.1,25.8,8.8),
+    dashNeedle("VOLTS","engine.battery",58.5,25.8,8.8),
+    dashNeedle("COOLANT","engine.coolant",69.7,25.8,8.8),
+    dashNeedle("SPEED","engine.speed",80.5,13.5,15.6)
   ]};
 
   function fail(err){console.error(err);ui.fatal.hidden=false;ui.fatal.textContent="DASH ERROR: "+(err?.stack||err?.message||String(err));}
   window.addEventListener("error",e=>fail(e.error||e.message));window.addEventListener("unhandledrejection",e=>fail(e.reason));
-  function normalize(v){v.version=7;v.canvas={color:v.canvas?.color||v.canvas?.background||"#000000",material:v.canvas?.material||"none",imageUrl:v.canvas?.imageUrl||null,scaleMode:v.canvas?.scaleMode||"cover"};(v.items||[]).forEach(i=>{if(i.type==="text"){i.transparentSurface=true;i.material="none";i.config??={};i.config.textColor??="#ffffff";i.config.fontFamily??="Arial, Helvetica, sans-serif";i.config.fontWeight??="700";i.config.letterSpacing??=2;i.config.textAlign??="center";}if(i.type==="status")i.alerts=C.alertDefinitions.map(([dataSource,label,icon])=>({dataSource,label,icon,enabled:true}));if(i.type==="gauge"){i.config??={};i.config.tickScale??=1;}if(i.type==="gaugeAssembly"){const ticks=(i.children||[]).find(c=>c.part==="ticks");if(ticks){ticks.config??={};ticks.config.tickScale??=1;}}});return v;}
+  function normalize(v){v.version=8;v.canvas={color:v.canvas?.color||v.canvas?.background||"#000000",material:v.canvas?.material||"none",imageUrl:v.canvas?.imageUrl||null,scaleMode:v.canvas?.scaleMode||"cover"};(v.items||[]).forEach(i=>{if(i.type==="text"){i.transparentSurface=true;i.material="none";i.config??={};i.config.textColor??="#ffffff";i.config.fontFamily??="Arial, Helvetica, sans-serif";i.config.fontWeight??="700";i.config.letterSpacing??=2;i.config.textAlign??="center";}if(i.type==="status")i.alerts=C.alertDefinitions.map(([dataSource,label,icon])=>({dataSource,label,icon,enabled:true}));if(i.type==="gauge"){i.config??={};i.config.tickScale??=1;}if(i.type==="gaugeAssembly"){const ticks=(i.children||[]).find(c=>c.part==="ticks");if(ticks){ticks.config??={};ticks.config.tickScale??=1;}}});return v;}
   function load(){try{const own=localStorage.getItem(STORAGE);if(own)return normalize(JSON.parse(own));for(const key of LEGACY){const raw=localStorage.getItem(key);if(raw){const v=JSON.parse(raw);if(v?.items)return normalize(v);}}}catch(e){console.warn("Layout load failed",e);}return clone(defaultLayout);}
   let layout=load();
   function save(){localStorage.setItem(STORAGE,JSON.stringify(layout));ui.status.textContent="SAVED";clearTimeout(save.t);save.t=setTimeout(()=>ui.status.textContent="READY",700);}
