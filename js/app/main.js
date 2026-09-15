@@ -13,7 +13,7 @@
   };
 
   const DISPLAY={width:2560,height:720,aspect:2560/720};
-  const STORAGE="foxbodyDash.studio.v8",LEGACY=["foxbodyDash.studio.v6","foxbodyDash.studio.v4","foxbodyDash.studio.v3","foxbodyDash.studio.v2"];
+  const STORAGE="foxbodyDash.studio.v9",LEGACY=[];
   let edit=false,selectedId=null,gesture=null,live={},activeLibrary="widgets",assets={shapes:[],materials:[],images:[],gaugeParts:[],icons:[]};
   const brokenAssets=new Set();
   function setImageSource(img,src){if(!src||brokenAssets.has(src)){img.hidden=true;return;}img.addEventListener("error",()=>{brokenAssets.add(src);img.hidden=true;},{once:true});img.src=src;}
@@ -28,7 +28,7 @@
     ]};
   }
 
-  const defaultLayout={version:8,canvas:{color:"#000000",material:"none",imageUrl:"assets/designer/images/FoxbodyDash_2560x720.webp",scaleMode:"stretch"},items:[
+  const defaultLayout={version:9,canvas:{color:"#000000",material:"none",imageUrl:"assets/designer/images/FoxbodyDash_2560x720.webp",scaleMode:"stretch"},items:[
     dashNeedle("RPM","engine.rpm",3.9,13.5,15.6),
     dashNeedle("FUEL","engine.fuel",21.9,25.8,8.8),
     dashNeedle("OIL PSI","engine.oil",33.1,25.8,8.8),
@@ -39,7 +39,7 @@
 
   function fail(err){console.error(err);ui.fatal.hidden=false;ui.fatal.textContent="DASH ERROR: "+(err?.stack||err?.message||String(err));}
   window.addEventListener("error",e=>fail(e.error||e.message));window.addEventListener("unhandledrejection",e=>fail(e.reason));
-  function normalize(v){v.version=8;v.canvas={color:v.canvas?.color||v.canvas?.background||"#000000",material:v.canvas?.material||"none",imageUrl:v.canvas?.imageUrl||null,scaleMode:v.canvas?.scaleMode||"cover"};(v.items||[]).forEach(i=>{if(i.type==="text"){i.transparentSurface=true;i.material="none";i.config??={};i.config.textColor??="#ffffff";i.config.fontFamily??="Arial, Helvetica, sans-serif";i.config.fontWeight??="700";i.config.letterSpacing??=2;i.config.textAlign??="center";}if(i.type==="status")i.alerts=C.alertDefinitions.map(([dataSource,label,icon])=>({dataSource,label,icon,enabled:true}));if(i.type==="gauge"){i.config??={};i.config.tickScale??=1;}if(i.type==="gaugeAssembly"){const ticks=(i.children||[]).find(c=>c.part==="ticks");if(ticks){ticks.config??={};ticks.config.tickScale??=1;}}});return v;}
+  function normalize(v){v.version=9;v.canvas={color:v.canvas?.color||v.canvas?.background||"#000000",material:v.canvas?.material||"none",imageUrl:v.canvas?.imageUrl||null,scaleMode:v.canvas?.scaleMode||"cover"};(v.items||[]).forEach(i=>{if(i.type==="text"){i.transparentSurface=true;i.material="none";i.config??={};i.config.textColor??="#ffffff";i.config.fontFamily??="Arial, Helvetica, sans-serif";i.config.fontWeight??="700";i.config.letterSpacing??=2;i.config.textAlign??="center";}if(i.type==="status")i.alerts=C.alertDefinitions.map(([dataSource,label,icon])=>({dataSource,label,icon,enabled:true}));if(i.type==="gauge"){i.config??={};i.config.tickScale??=1;}if(i.type==="gaugeAssembly"){const ticks=(i.children||[]).find(c=>c.part==="ticks");if(ticks){ticks.config??={};ticks.config.tickScale??=1;}}});return v;}
   function load(){try{const own=localStorage.getItem(STORAGE);if(own)return normalize(JSON.parse(own));for(const key of LEGACY){const raw=localStorage.getItem(key);if(raw){const v=JSON.parse(raw);if(v?.items)return normalize(v);}}}catch(e){console.warn("Layout load failed",e);}return clone(defaultLayout);}
   let layout=load();
   function save(){localStorage.setItem(STORAGE,JSON.stringify(layout));ui.status.textContent="SAVED";clearTimeout(save.t);save.t=setTimeout(()=>ui.status.textContent="READY",700);}
