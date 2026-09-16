@@ -9,11 +9,11 @@
     name:q("fieldName"),data:q("fieldData"),x:q("fieldX"),y:q("fieldY"),w:q("fieldW"),h:q("fieldH"),rotate:q("fieldRotate"),opacity:q("fieldOpacity"),material:q("fieldMaterial"),scale:q("fieldScaleMode"),transparent:q("fieldTransparent"),visible:q("fieldVisible"),aspect:q("fieldAspect"),
     materialField:q("materialField"),scaleField:q("scaleModeField"),textFields:q("textStyleFields"),textContent:q("fieldTextContent"),textFont:q("fieldTextFont"),textColor:q("fieldTextColor"),textWeight:q("fieldTextWeight"),textSpacing:q("fieldTextSpacing"),textAlign:q("fieldTextAlign"),
     gaugeFields:q("gaugeStyleFields"),gaugeShape:q("fieldGaugeShape"),needleStyle:q("fieldNeedleStyle"),faceTransparent:q("fieldFaceTransparent"),faceColor:q("fieldFaceColor"),tickColor:q("fieldTickColor"),needleColor:q("fieldNeedleColor"),hubColor:q("fieldHubColor"),tickDown:q("tickSizeDown"),tickUp:q("tickSizeUp"),tickValue:q("tickSizeValue"),
-    duplicate:q("duplicateElement"),front:q("bringForward"),back:q("sendBackward"),remove:q("deleteElement"),fatal:q("fatalError")
+    duplicate:q("duplicateElement"),front:q("bringForward"),back:q("sendBackward"),remove:q("deleteElement"),undo:q("undoLayoutButton"),redo:q("redoLayoutButton"),reset:q("resetLayoutButton"),fatal:q("fatalError")
   };
 
   const DISPLAY={width:2560,height:720,aspect:2560/720};
-  const STORAGE="foxbodyDash.studio.v11",LEGACY=[];
+  const STORAGE="foxbodyDash.studio.v12",LEGACY=[];
   let edit=false,selectedId=null,gesture=null,live={},activeLibrary="widgets",assets={shapes:[],materials:[],images:[],gaugeParts:[],icons:[]};
   const brokenAssets=new Set();
   function setImageSource(img,src){if(!src||brokenAssets.has(src)){img.hidden=true;return;}img.addEventListener("error",()=>{brokenAssets.add(src);img.hidden=true;},{once:true});img.src=src;}
@@ -21,14 +21,14 @@
   function dashNeedle(name,dataSource,x,y,w){
     const h=w*DISPLAY.aspect,profile=clone(C.profileFor(dataSource)||{});
     const config={...profile,startAngle:225,endAngle:495,needleColor:"#d83225",needleStyle:"tapered"};
-    return {id:C.id("gauge"),type:"gaugeAssembly",name,x,y,w,h,rotation:0,opacity:1,visible:true,lockAspect:true,transparentSurface:true,material:"none",gaugeShape:"ellipse",dataSource,z:10,config:{profileTitle:profile.title,profileUnit:profile.unit},children:[
+    return {id:C.id("gauge"),type:"gaugeAssembly",name,x,y,w,h,rotation:0,opacity:1,visible:true,lockAspect:true,transparentSurface:true,material:"none",gaugeShape:"ellipse",dataSource,z:10,config:{profileTitle:profile.title,profileUnit:profile.unit,overlayOnly:true},children:[
       {id:C.id("base"),type:"shape",shape:"ellipse",name:name+" Base",x:0,y:0,w:100,h:100,rotation:0,opacity:1,visible:true,transparentSurface:true,material:"none",z:1,isGaugeBase:true},
       {id:C.id("needle"),type:"gaugePart",part:"needle",name:name+" Needle",x:0,y:0,w:100,h:100,rotation:0,opacity:1,visible:true,transparentSurface:true,material:"none",dataSource,gaugeShape:"ellipse",geometry:"ellipse",z:2,config},
       {id:C.id("hub"),type:"gaugePart",part:"hub",name:name+" Hub",x:0,y:0,w:100,h:100,rotation:0,opacity:1,visible:true,transparentSurface:true,material:"none",dataSource:"none",gaugeShape:"ellipse",geometry:"ellipse",z:3,config:{hubColor:"#111111"}}
     ]};
   }
 
-  const defaultLayout={version:11,canvas:{color:"#000000",material:"none",imageUrl:"assets/designer/images/FoxbodyDash_2560x720_dynamic.webp",scaleMode:"stretch"},items:[
+  const defaultLayout={version:12,canvas:{color:"#000000",material:"none",imageUrl:"assets/designer/images/FoxbodyDash_2560x720_dynamic.webp",scaleMode:"stretch"},items:[
     dashNeedle("RPM","engine.rpm",3.63,21.94,15.6),
     dashNeedle("FUEL","engine.fuel",21.99,32.87,8.8),
     dashNeedle("OIL PSI","engine.oil",32.94,34.15,8.8),
@@ -41,10 +41,28 @@
 
   function fail(err){console.error(err);ui.fatal.hidden=false;ui.fatal.textContent="DASH ERROR: "+(err?.stack||err?.message||String(err));}
   window.addEventListener("error",e=>fail(e.error||e.message));window.addEventListener("unhandledrejection",e=>fail(e.reason));
-  function normalize(v){v.version=11;v.canvas={color:v.canvas?.color||v.canvas?.background||"#000000",material:v.canvas?.material||"none",imageUrl:v.canvas?.imageUrl||null,scaleMode:v.canvas?.scaleMode||"cover"};(v.items||[]).forEach(i=>{if(i.type==="text"){i.transparentSurface=true;i.material="none";i.config??={};i.config.textColor??="#ffffff";i.config.fontFamily??="Arial, Helvetica, sans-serif";i.config.fontWeight??="700";i.config.letterSpacing??=2;i.config.textAlign??="center";}if(i.type==="status")i.alerts=C.alertDefinitions.map(([dataSource,label,icon])=>({dataSource,label,icon,enabled:true}));if(i.type==="gauge"){i.config??={};i.config.tickScale??=1;}if(i.type==="gaugeAssembly"){const ticks=(i.children||[]).find(c=>c.part==="ticks");if(ticks){ticks.config??={};ticks.config.tickScale??=1;}}});return v;}
+  function normalize(v){v.version=12;v.canvas={color:v.canvas?.color||v.canvas?.background||"#000000",material:v.canvas?.material||"none",imageUrl:v.canvas?.imageUrl||null,scaleMode:v.canvas?.scaleMode||"cover"};(v.items||[]).forEach(i=>{if(i.type==="text"){i.transparentSurface=true;i.material="none";i.config??={};i.config.textColor??="#ffffff";i.config.fontFamily??="Arial, Helvetica, sans-serif";i.config.fontWeight??="700";i.config.letterSpacing??=2;i.config.textAlign??="center";}if(i.type==="status")i.alerts=C.alertDefinitions.map(([dataSource,label,icon])=>({dataSource,label,icon,enabled:true}));if(i.type==="gauge"){i.config??={};i.config.tickScale??=1;}if(i.type==="gaugeAssembly"){const ticks=(i.children||[]).find(c=>c.part==="ticks");if(ticks){ticks.config??={};ticks.config.tickScale??=1;}}});return v;}
   function load(){try{const own=localStorage.getItem(STORAGE);if(own)return normalize(JSON.parse(own));for(const key of LEGACY){const raw=localStorage.getItem(key);if(raw){const v=JSON.parse(raw);if(v?.items)return normalize(v);}}}catch(e){console.warn("Layout load failed",e);}return clone(defaultLayout);}
   let layout=load();
-  function save(){localStorage.setItem(STORAGE,JSON.stringify(layout));ui.status.textContent="SAVED";clearTimeout(save.t);save.t=setTimeout(()=>ui.status.textContent="READY",700);}
+  const layoutHistory=[clone(layout)],layoutRedo=[];
+  function persist(){localStorage.setItem(STORAGE,JSON.stringify(layout));}
+  function save(){
+    const current=JSON.stringify(layout),last=JSON.stringify(layoutHistory[layoutHistory.length-1]);
+    if(current!==last){layoutHistory.push(clone(layout));if(layoutHistory.length>50)layoutHistory.shift();layoutRedo.length=0;}
+    persist();ui.status.textContent="SAVED";clearTimeout(save.t);save.t=setTimeout(()=>ui.status.textContent="READY",700);
+  }
+  function undo(){
+    if(layoutHistory.length<2){ui.status.textContent="NOTHING TO UNDO";return;}
+    layoutRedo.push(layoutHistory.pop());layout=clone(layoutHistory[layoutHistory.length-1]);selectedId=null;persist();render();ui.status.textContent="UNDONE";
+  }
+  function redo(){
+    if(!layoutRedo.length){ui.status.textContent="NOTHING TO REDO";return;}
+    const next=layoutRedo.pop();layoutHistory.push(clone(next));layout=clone(next);selectedId=null;persist();render();ui.status.textContent="REDONE";
+  }
+  function resetLayout(){
+    if(!window.confirm("Restore the clean 2560×720 dashboard layout?"))return;
+    layout=clone(defaultLayout);selectedId=null;save();render();ui.status.textContent="DEFAULT DASH RESTORED";
+  }
   function selected(){return layout.items.find(i=>i.id===selectedId)||null;}
   function isGaugeLike(i){return i&&(i.type==="gauge"||i.type==="gaugeAssembly");}
   function assemblyBase(i){return (i?.children||[]).find(c=>c.isGaugeBase)||i?.children?.[0]||null;}
@@ -137,7 +155,7 @@
   function card(label,detail,fn){const b=document.createElement("button");b.type="button";b.className="libraryCard";b.innerHTML=`<span>${label}</span><small>${detail}</small>`;b.addEventListener("click",fn);return b;}
   function renderCanvasLibrary(){ui.library.innerHTML=`<div class="canvasTools"><label>Canvas color<input id="canvasColor" type="color" value="${layout.canvas.color}"></label><label>Image scale<select id="canvasScale"><option value="cover">Cover</option><option value="contain">Contain</option><option value="stretch">Stretch</option><option value="tile">Tile</option></select></label><button id="clearCanvasImage" type="button">CLEAR IMAGE / DESIGN</button></div><div class="librarySubhead">DESIGNS</div>`;q("canvasScale").value=layout.canvas.scaleMode;q("canvasColor").addEventListener("input",e=>{layout.canvas.color=e.target.value;layout.canvas.material="none";layout.canvas.imageUrl=null;save();render();});q("canvasScale").addEventListener("change",e=>{layout.canvas.scaleMode=e.target.value;save();render();renderLibrary("canvas");});q("clearCanvasImage").addEventListener("click",()=>{layout.canvas.material="none";layout.canvas.imageUrl=null;save();render();renderLibrary("canvas");});C.materials.filter(m=>m.id!=="none").forEach(m=>ui.library.appendChild(card(m.label,"CANVAS",()=>{layout.canvas.material=m.id;layout.canvas.imageUrl=null;save();render();})));assets.materials.forEach(a=>ui.library.appendChild(card(a.name,"DESIGN",()=>{layout.canvas.material=a.id;layout.canvas.imageUrl=null;save();render();})));assets.images.forEach(a=>ui.library.appendChild(card(a.name,"IMAGE",()=>{layout.canvas.imageUrl=a.url;layout.canvas.material="none";save();render();})));}
   function renderLibrary(group){activeLibrary=group;ui.library.replaceChildren();document.querySelectorAll("[data-library]").forEach(b=>b.classList.toggle("active",b.dataset.library===group));if(group==="canvas")return renderCanvasLibrary();if(["widgets","shapes","gaugeParts"].includes(group))C.templates[group].forEach(t=>ui.library.appendChild(card(t.label,t.type.toUpperCase(),()=>add(C.fromTemplate(t)))));if(group==="icons"){ui.library.innerHTML='<div class="alertPickerNote">Dashboard warning assets. These are the alert icons used by the dash and status bar.</div>';assets.icons.forEach(a=>{const def=C.alertForFile(a.file);ui.library.appendChild(card(def?.label||a.name,"ALERT",()=>add({id:C.id("alert"),type:"icon",name:def?.label||a.name,assetUrl:a.url,dataSource:def?.dataSource||"none",x:10,y:10,w:8,h:10,z:Date.now(),visible:true,opacity:1,rotation:0,lockAspect:true,transparentSurface:true,material:"none",scaleMode:"contain",config:{role:"alert"}})));});return;}if(group==="materials"){C.materials.filter(m=>m.id!=="none").forEach(m=>ui.library.appendChild(card(m.label,"APPLY",()=>applyMaterial(m.id))));assets.materials.forEach(a=>ui.library.appendChild(card(a.name,"CUSTOM",()=>applyMaterial(a.id))));return;}if(group==="images")assets.images.forEach(a=>ui.library.appendChild(card(a.name,"IMAGE",()=>add({id:C.id("image"),type:"image",name:a.name,assetUrl:a.url,x:10,y:10,w:22,h:18,z:Date.now(),visible:true,opacity:1,rotation:0,lockAspect:false,transparentSurface:true,material:"none",scaleMode:"stretch"}))));}
-  function applyMaterial(id){const item=selected();if(!item||item.type==="text")return;if(item.type==="gaugeAssembly"){const b=assemblyBase(item);if(b){b.material=id;b.transparentSurface=false;b.surfaceColor=null;}}else if(item.type==="gauge"){item.material=id;item.transparentSurface=true;item.config??={};item.config.faceTransparent=true;}else{item.material=id;item.transparentSurface=false;}save();render();}
+  function applyMaterial(id){const item=selected();if(!item||item.type==="text")return;if(item.type==="gaugeAssembly"&&item.config?.overlayOnly){ui.status.textContent="GAUGE FACE IS PART OF THE DASH ARTWORK";ui.material.value="none";return;}if(item.type==="gaugeAssembly"){const b=assemblyBase(item);if(b){b.material=id;b.transparentSurface=false;b.surfaceColor=null;}}else if(item.type==="gauge"){item.material=id;item.transparentSurface=true;item.config??={};item.config.faceTransparent=true;}else{item.material=id;item.transparentSurface=false;}save();render();}
 
   function setDataOptions(item){const groups=[];if(isGaugeLike(item)||item.type==="digital"||item.type==="bar"||item.type==="gaugePart")groups.push(["GAUGES / LIVE DATA",C.gaugeDataSources]);else if(item.type==="systemIcon")groups.push(["INDICATOR LIGHTS",C.indicatorDataSources]);else if(item.type==="icon"&&String(item.dataSource||"").startsWith("warnings."))groups.push(["ALERTS",C.alertDataSources]);else if(item.type==="status")groups.push(["STATUS BAR ALERTS",[["none","Status bar uses dashboard warnings"]]]);else groups.push(["LIVE DATA",C.gaugeDataSources],["BODY",C.bodyDataSources]);ui.data.replaceChildren();groups.forEach(([label,items])=>{const g=document.createElement("optgroup");g.label=label;items.forEach(([v,l])=>{const o=document.createElement("option");o.value=v;o.textContent=l;g.appendChild(o);});ui.data.appendChild(g);});ui.data.value=item.dataSource||"none";}
   function colorOr(v,f){return /^#[0-9a-f]{6}$/i.test(v||"")?v:f;}
@@ -148,6 +166,7 @@
     const isText=item.type==="text";ui.textFields.hidden=!isText;ui.materialField.hidden=isText;ui.scaleField.hidden=isText;ui.transparent.closest("label").hidden=isText;
     if(isText){const c=item.config||{};ui.textContent.value=c.text||item.name||"TEXT";ui.textFont.value=c.fontFamily||"Arial, Helvetica, sans-serif";ui.textColor.value=colorOr(c.textColor,"#ffffff");ui.textWeight.value=String(c.fontWeight||"700");ui.textSpacing.value=Number(c.letterSpacing??2);ui.textAlign.value=c.textAlign||"center";}
     ui.gaugeFields.hidden=!isGaugeLike(item);
+    const overlayOnly=item.config?.overlayOnly===true;ui.material.disabled=overlayOnly;ui.faceTransparent.disabled=overlayOnly;ui.faceColor.disabled=overlayOnly;
     if(isGaugeLike(item)){const c=item.config||{},base=assemblyBase(item),parts=item.children||[],needle=parts.find(x=>x.part==="needle"),ticks=tickConfig(item);ui.gaugeShape.value=item.gaugeShape||base?.shape||"ellipse";ui.needleStyle.value=needle?.config?.needleStyle||c.needleStyle||"tapered";ui.faceTransparent.checked=item.type==="gaugeAssembly"?!!base?.transparentSurface:c.faceTransparent!==false;ui.faceColor.value=colorOr(item.type==="gaugeAssembly"?base?.surfaceColor:c.faceColor,"#080808");ui.tickColor.value=colorOr(parts.find(x=>x.part==="ticks")?.config?.tickColor||c.tickColor,"#eeeeee");ui.needleColor.value=colorOr(needle?.config?.needleColor||c.needleColor,"#e52b2b");ui.hubColor.value=colorOr(parts.find(x=>x.part==="hub")?.config?.hubColor||c.hubColor,"#111111");ui.tickValue.textContent=`${Math.round(Number(ticks?.tickScale??1)*100)}%`;}
   }
   function bindSimple(control,key,parse=v=>v){control.addEventListener("change",()=>{const item=selected();if(!item)return;item[key]=parse(control.type==="checkbox"?control.checked:control.value);save();render();});}
@@ -175,7 +194,9 @@
     bindSimple(ui.name,"name");bindSimple(ui.x,"x",Number);bindSimple(ui.y,"y",Number);bindSimple(ui.w,"w",Number);bindSimple(ui.h,"h",Number);bindSimple(ui.rotate,"rotation",Number);bindSimple(ui.opacity,"opacity",Number);bindSimple(ui.scale,"scaleMode");bindSimple(ui.transparent,"transparentSurface",Boolean);bindSimple(ui.visible,"visible",Boolean);bindSimple(ui.aspect,"lockAspect",Boolean);
     ui.data.addEventListener("change",()=>{const i=selected();if(!i)return;const source=ui.data.value;if(isGaugeLike(i)){applyGaugeProfile(i,source);}else{i.dataSource=source;if(i.type==="gaugePart"&&C.profileFor(source)){i.config=profileConfig(source,i.config||{});if(i.part==="label")i.config.text=C.profileFor(source).title;if(i.part==="digital")i.config.unit=C.profileFor(source).unit||"";}}save();render();});
     ui.material.addEventListener("change",()=>applyMaterial(ui.material.value));bindTextControls();bindGaugeControls();
-    window.addEventListener("keydown",e=>{if(["INPUT","SELECT","TEXTAREA"].includes(e.target?.tagName))return;if(e.key.toLowerCase()==="e"){e.preventDefault();ui.edit.click();}else if(e.key==="Escape"&&edit){e.preventDefault();ui.edit.click();}});
+    window.addEventListener("keydown",e=>{if(["INPUT","SELECT","TEXTAREA"].includes(e.target?.tagName))return;if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==="z"){e.preventDefault();e.shiftKey?redo():undo();}else if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==="y"){e.preventDefault();redo();}else if(e.key.toLowerCase()==="e"){e.preventDefault();ui.edit.click();}else if(e.key==="Escape"&&edit){e.preventDefault();ui.edit.click();}});
+    ui.undo.addEventListener("click",undo);ui.redo.addEventListener("click",redo);ui.reset.addEventListener("click",resetLayout);
+    window.FoxDashStudio={addItem:add,undo,redo,reset:resetLayout,getLayout:()=>clone(layout)};
     ui.duplicate.addEventListener("click",()=>{const item=selected();if(!item)return;const c=clone(item);c.id=C.id(item.type);c.name=(item.name||item.type)+" Copy";c.x=item.x+2;c.y=item.y+2;c.z=Date.now();add(c);});ui.remove.addEventListener("click",()=>{if(!selectedId)return;layout.items=layout.items.filter(i=>i.id!==selectedId);selectedId=null;save();render();});ui.front.addEventListener("click",()=>{const i=selected();if(i){i.z=Math.max(0,...layout.items.map(x=>x.z||0))+1;save();render();}});ui.back.addEventListener("click",()=>{const i=selected();if(i){i.z=Math.min(0,...layout.items.map(x=>x.z||0))-1;save();render();}});ui.canvas.addEventListener("pointerdown",e=>{if(edit&&e.target===ui.canvas){selectedId=null;render();}});
     renderLibrary("widgets");render();loadAssets();poll();setInterval(poll,1000);
   }catch(e){fail(e);}

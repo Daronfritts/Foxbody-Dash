@@ -1,7 +1,7 @@
 (() => {
   "use strict";
 
-  const STORAGE = "foxbodyDash.studio.v7";
+  const STORAGE = "foxbodyDash.studio.v12";
   const SOURCE_OPTIONS = [
     ["none", "None / Always visible"],
     ["lights.left_turn", "Left Turn"],
@@ -66,11 +66,8 @@
   }
 
   function addIndicator(asset) {
-    const layout = loadLayout();
-    if (!layout?.items) return;
-
     const dataSource = inferSource(asset.file || asset.name);
-    layout.items.push({
+    const item = {
       id: `indicator-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`,
       type: "icon",
       name: asset.name || "Indicator",
@@ -89,9 +86,15 @@
       material: "none",
       scaleMode: "contain",
       config: { role: "indicator" },
-    });
+    };
+    if (window.FoxDashStudio?.addItem) {
+      window.FoxDashStudio.addItem(item);
+      return;
+    }
+    const layout = loadLayout();
+    if (!layout?.items) return;
+    layout.items.push(item);
     saveLayout(layout);
-    location.reload();
   }
 
   function makeCard(asset) {
@@ -105,13 +108,17 @@
   }
 
   function addBuiltInIndicator(template) {
-    const layout = loadLayout();
     const catalog = window.FoxDashCatalog;
-    if (!layout?.items || !catalog?.fromTemplate) return;
-
-    layout.items.push(catalog.fromTemplate(template));
+    if (!catalog?.fromTemplate) return;
+    const item = catalog.fromTemplate(template);
+    if (window.FoxDashStudio?.addItem) {
+      window.FoxDashStudio.addItem(item);
+      return;
+    }
+    const layout = loadLayout();
+    if (!layout?.items) return;
+    layout.items.push(item);
     saveLayout(layout);
-    location.reload();
   }
 
   function makeBuiltInCard(template) {
