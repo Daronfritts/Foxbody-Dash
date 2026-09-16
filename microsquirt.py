@@ -133,8 +133,16 @@ class MicroSquirtReader:
         )
         self.thread.start()
 
-    def stop(self):
+    def stop(self, wait=False):
         self.running = False
+
+        if wait and self.thread and self.thread.is_alive():
+            self.thread.join(timeout=2.0)
+
+        # Make the handoff deterministic even if a serial timeout delayed the
+        # reader thread's normal cleanup.
+        if wait:
+            self.disconnect()
 
 
 microsquirt = MicroSquirtReader()
