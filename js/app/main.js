@@ -147,10 +147,10 @@
     if(!edit||gesture)return;
     e.preventDefault();
     e.stopPropagation();
-    const node=e.currentTarget;
-    selectedId=node.dataset.id;
-    const item=selected();
+    const node=e.currentTarget,item=layout.items.find(candidate=>candidate.id===node.dataset.id);
     if(!item)return;
+    if(item.config?.protected){selectedId=null;ui.status.textContent="PROTECTED DASHBOARD COMPONENT";render();return;}
+    selectedId=item.id;
     if(item.type==="status")renderLibrary("icons");
     document.querySelectorAll(".dashNode.selected").forEach(n=>n.classList.remove("selected"));
     node.classList.add("selected");

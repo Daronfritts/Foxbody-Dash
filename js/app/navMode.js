@@ -13,7 +13,7 @@
     button.disabled = disabled;
 
     if (action) {
-      button.addEventListener("click", event => {
+      button.addEventListener("pointerdown", event => {
         event.preventDefault();
         event.stopPropagation();
         action();
