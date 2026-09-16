@@ -15,11 +15,12 @@
    so the controller maps the dashboard to the full ultrawide panel. */
 #canvasWrap {
   padding: 8px;
+  align-items: end;
 }
 
 #dashCanvas {
   width: 100%;
-  height: 100%;
+  height: calc(100% - 24px);
   max-width: none;
   max-height: none;
   aspect-ratio: auto;
@@ -56,6 +57,10 @@
   height: auto;
   max-height: calc(100vh - var(--editor-safe-top) - 100px);
   aspect-ratio: 2560 / 720;
+}
+
+#foxApp.editing #canvasWrap {
+  align-items: center;
 }
 
 /* Vehicle navigation lives in the dashboard nav while running. */
