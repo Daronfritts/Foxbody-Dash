@@ -28,6 +28,12 @@
     ]};
   }
 
+  const FACTORY_INDICATOR_DIMMERS=[
+    {id:"factory-left-turn-dimmer",name:"Left Turn Indicator",x:5.55,y:5.7,w:3.35,h:10,dataSource:"lights.left_turn"},
+    {id:"factory-high-beam-dimmer",name:"High Beam Indicator",x:15.9,y:5.7,w:3.6,h:10,dataSource:"lights.high_beams"},
+    {id:"factory-right-turn-dimmer",name:"Right Turn Indicator",x:91.4,y:5.7,w:3.6,h:10,dataSource:"lights.right_turn"}
+  ].map(item=>({...item,type:"indicatorDimmer",rotation:0,opacity:1,visible:true,lockAspect:false,transparentSurface:true,material:"none",z:14,config:{protected:true}}));
+
   const defaultLayout={version:13,canvas:{color:"#000000",material:"none",imageUrl:"assets/designer/images/FoxbodyDash_2560x720_dynamic.webp",scaleMode:"stretch"},items:[
     dashNeedle("RPM","engine.rpm",3.63,21.94,15.6),
     dashNeedle("FUEL","engine.fuel",21.99,32.87,8.8),
@@ -35,13 +41,14 @@
     dashNeedle("VOLTS","engine.battery",58.5,35.71,8.8),
     dashNeedle("COOLANT","engine.coolant",69.5,36.41,8.8),
     dashNeedle("SPEED","engine.speed",79.81,22.1,15.6),
+    ...clone(FACTORY_INDICATOR_DIMMERS),
     {id:C.id("alerts"),type:"status",name:"Live Alerts",x:4.1,y:71.2,w:92.2,h:10.3,rotation:0,opacity:1,visible:true,lockAspect:false,transparentSurface:true,material:"none",dataSource:"none",z:15,config:{overlay:true,protected:true},alerts:C.alertDefinitions.map(([dataSource,label,icon])=>({dataSource,label,icon,enabled:true}))},
     {id:C.id("nav"),type:"nav",name:"Dashboard Navigation",x:9.3,y:88,w:80.5,h:9.5,rotation:0,opacity:1,visible:true,lockAspect:false,transparentSurface:true,material:"none",dataSource:"none",z:20,config:{hotspots:true,protected:true}}
   ]};
 
   function fail(err){console.error(err);ui.fatal.hidden=false;ui.fatal.textContent="DASH ERROR: "+(err?.stack||err?.message||String(err));}
   window.addEventListener("error",e=>fail(e.error||e.message));window.addEventListener("unhandledrejection",e=>fail(e.reason));
-  function normalize(v){v.version=13;v.canvas={color:v.canvas?.color||v.canvas?.background||"#000000",material:v.canvas?.material||"none",imageUrl:v.canvas?.imageUrl||null,scaleMode:v.canvas?.scaleMode||"cover"};(v.items||[]).forEach(i=>{if(i.type==="text"){i.transparentSurface=true;i.material="none";i.config??={};i.config.textColor??="#ffffff";i.config.fontFamily??="Arial, Helvetica, sans-serif";i.config.fontWeight??="700";i.config.letterSpacing??=2;i.config.textAlign??="center";}if(i.type==="status")i.alerts=C.alertDefinitions.map(([dataSource,label,icon])=>({dataSource,label,icon,enabled:true}));if(i.type==="gauge"){i.config??={};i.config.tickScale??=1;}if(i.type==="gaugeAssembly"){const ticks=(i.children||[]).find(c=>c.part==="ticks");if(ticks){ticks.config??={};ticks.config.tickScale??=1;}}});return v;}
+  function normalize(v){v.version=13;v.items=Array.isArray(v.items)?v.items:[];FACTORY_INDICATOR_DIMMERS.forEach(factory=>{if(!v.items.some(item=>item.id===factory.id))v.items.push(clone(factory));});v.canvas={color:v.canvas?.color||v.canvas?.background||"#000000",material:v.canvas?.material||"none",imageUrl:v.canvas?.imageUrl||null,scaleMode:v.canvas?.scaleMode||"cover"};v.items.forEach(i=>{if(i.type==="text"){i.transparentSurface=true;i.material="none";i.config??={};i.config.textColor??="#ffffff";i.config.fontFamily??="Arial, Helvetica, sans-serif";i.config.fontWeight??="700";i.config.letterSpacing??=2;i.config.textAlign??="center";}if(i.type==="status")i.alerts=C.alertDefinitions.map(([dataSource,label,icon])=>({dataSource,label,icon,enabled:true}));if(i.type==="gauge"){i.config??={};i.config.tickScale??=1;}if(i.type==="gaugeAssembly"){const ticks=(i.children||[]).find(c=>c.part==="ticks");if(ticks){ticks.config??={};ticks.config.tickScale??=1;}}});return v;}
   function load(){try{const own=localStorage.getItem(STORAGE);if(own)return normalize(JSON.parse(own));for(const key of LEGACY){const raw=localStorage.getItem(key);if(raw){const v=JSON.parse(raw);if(v?.items)return normalize(v);}}}catch(e){console.warn("Layout load failed",e);}return clone(defaultLayout);}
   let layout=load(),layoutHistory=[clone(layout)],layoutRedo=[];
   function readStored(key){try{const value=JSON.parse(localStorage.getItem(key)||"null");return value&&typeof value==="object"?value:null;}catch{return null;}}
@@ -130,6 +137,7 @@
 
   function renderContent(node,item){
     const s=surface(item),value=read(live,item.dataSource);node.appendChild(s);
+    if(item.type==="indicatorDimmer"){const active=value===true||value===1||value==="1"||String(value).toLowerCase()==="true"||String(value).toLowerCase()==="on";s.classList.add("factoryIndicatorDimmer");s.style.background=active?"transparent":"rgba(0,0,0,.88)";return;}
     if(item.type==="gauge"){makeGaugeFace(s,item,value);return;}if(item.type==="gaugePart"){G.renderPart(s,item,value);return;}if(item.type==="gaugeAssembly"){renderAssembly(s,item);return;}if(item.type==="systemIcon"){G.renderSystemIcon(s,item,Boolean(value));return;}
     if(item.type==="digital"){s.classList.add("digitalValue");const n=Number(value),d=item.config?.decimals??0;s.innerHTML=`<strong>${Number.isFinite(n)?n.toFixed(d):"0"}</strong><span>${item.config?.unit||item.name||""}</span>`;return;}
     if(item.type==="bar"){s.classList.add("barGauge");const min=item.config?.min??0,max=item.config?.max??100,n=Number(value),pct=Number.isFinite(n)?Math.max(0,Math.min(100,(n-min)/(max-min)*100)):0;s.innerHTML=`<div class="barGaugeFill" style="width:${pct}%"></div><div class="barGaugeText">${Number.isFinite(n)?Math.round(n):"0"} ${item.config?.unit||""}</div>`;return;}
