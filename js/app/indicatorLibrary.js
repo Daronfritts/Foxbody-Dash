@@ -1,7 +1,7 @@
 (() => {
   "use strict";
 
-  const STORAGE = "foxbodyDash.studio.v12";
+  const STORAGE = "foxbodyDash.studio.v13";
   const SOURCE_OPTIONS = [
     ["none", "None / Always visible"],
     ["lights.left_turn", "Left Turn"],
@@ -53,6 +53,8 @@
   }
 
   function loadLayout() {
+    const active = window.FoxDashStudio?.getLayout?.();
+    if (active?.items) return active;
     try {
       return JSON.parse(localStorage.getItem(STORAGE) || "null");
     } catch (error) {
