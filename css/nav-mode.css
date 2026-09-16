@@ -2,11 +2,27 @@
    Keeps the normal driving view clean. The editor toolbar only appears while editing. */
 
 #foxApp {
-  grid-template-rows: 1fr 26px;
+  grid-template-rows: 1fr;
 }
 
-#appBar {
+#appBar,
+#statusBar {
   display: none;
+}
+
+/* In run mode the hardware/controller may expose a taller logical HDMI
+   viewport than the panel's physical 2560x720 pixels. Fill that viewport
+   so the controller maps the dashboard to the full ultrawide panel. */
+#canvasWrap {
+  padding: 8px;
+}
+
+#dashCanvas {
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  max-height: none;
+  aspect-ratio: auto;
 }
 
 /* Physical dash bezel safe zone: keep every editor control below the
@@ -26,7 +42,20 @@
 }
 
 #foxApp.editing #statusBar {
+  display: flex;
   grid-row: 4;
+}
+
+/* Editing remains on a true 2560x720 stage so saved percentage
+   coordinates and round-gauge geometry stay predictable. */
+#foxApp.editing #dashCanvas {
+  width: min(
+    calc((100vh - var(--editor-safe-top) - 100px) * 3.5555556),
+    calc(100vw - 16px)
+  );
+  height: auto;
+  max-height: calc(100vh - var(--editor-safe-top) - 100px);
+  aspect-ratio: 2560 / 720;
 }
 
 /* Vehicle navigation lives in the dashboard nav while running. */
@@ -39,30 +68,17 @@
   color: #49bfff;
 }
 
-#dashCanvas {
-  width: min(calc((100vh - 42px) * 3.5555556), calc(100vw - 16px));
-  max-height: calc(100vh - 42px);
-}
-
-#foxApp.editing #dashCanvas {
-  width: min(
-    calc((100vh - var(--editor-safe-top) - 100px) * 3.5555556),
-    calc(100vw - 16px)
-  );
-  max-height: calc(100vh - var(--editor-safe-top) - 100px);
-}
-
 .navStrip button:disabled {
   opacity: .55;
   cursor: default;
 }
-
 
 /* Invisible controls aligned to the navigation artwork. */
 .dashNavHotspots {
   border: 0;
   background: transparent;
 }
+
 .dashNavHotspots button {
   flex: 1 1 20%;
   width: 20%;
