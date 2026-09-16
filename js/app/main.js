@@ -13,7 +13,7 @@
   };
 
   const DISPLAY={width:2560,height:720,aspect:2560/720};
-  const STORAGE="foxbodyDash.studio.v10",LEGACY=[];
+  const STORAGE="foxbodyDash.studio.v11",LEGACY=[];
   let edit=false,selectedId=null,gesture=null,live={},activeLibrary="widgets",assets={shapes:[],materials:[],images:[],gaugeParts:[],icons:[]};
   const brokenAssets=new Set();
   function setImageSource(img,src){if(!src||brokenAssets.has(src)){img.hidden=true;return;}img.addEventListener("error",()=>{brokenAssets.add(src);img.hidden=true;},{once:true});img.src=src;}
@@ -28,19 +28,20 @@
     ]};
   }
 
-  const defaultLayout={version:10,canvas:{color:"#000000",material:"none",imageUrl:"assets/designer/images/FoxbodyDash_2560x720.webp",scaleMode:"stretch"},items:[
-    dashNeedle("RPM","engine.rpm",3.9,13.5,15.6),
-    dashNeedle("FUEL","engine.fuel",21.9,25.8,8.8),
-    dashNeedle("OIL PSI","engine.oil",33.1,25.8,8.8),
-    dashNeedle("VOLTS","engine.battery",58.5,25.8,8.8),
-    dashNeedle("COOLANT","engine.coolant",69.7,25.8,8.8),
-    dashNeedle("SPEED","engine.speed",80.5,13.5,15.6),
+  const defaultLayout={version:11,canvas:{color:"#000000",material:"none",imageUrl:"assets/designer/images/FoxbodyDash_2560x720_dynamic.webp",scaleMode:"stretch"},items:[
+    dashNeedle("RPM","engine.rpm",3.63,21.94,15.6),
+    dashNeedle("FUEL","engine.fuel",21.99,32.87,8.8),
+    dashNeedle("OIL PSI","engine.oil",32.94,34.15,8.8),
+    dashNeedle("VOLTS","engine.battery",58.5,35.71,8.8),
+    dashNeedle("COOLANT","engine.coolant",69.5,36.41,8.8),
+    dashNeedle("SPEED","engine.speed",79.81,22.1,15.6),
+    {id:C.id("alerts"),type:"status",name:"Live Alerts",x:4.1,y:71.2,w:92.2,h:10.3,rotation:0,opacity:1,visible:true,lockAspect:false,transparentSurface:true,material:"none",dataSource:"none",z:15,config:{overlay:true},alerts:C.alertDefinitions.map(([dataSource,label,icon])=>({dataSource,label,icon,enabled:true}))},
     {id:C.id("nav"),type:"nav",name:"Dashboard Navigation",x:9.3,y:88,w:80.5,h:9.5,rotation:0,opacity:1,visible:true,lockAspect:false,transparentSurface:true,material:"none",dataSource:"none",z:20,config:{hotspots:true}}
   ]};
 
   function fail(err){console.error(err);ui.fatal.hidden=false;ui.fatal.textContent="DASH ERROR: "+(err?.stack||err?.message||String(err));}
   window.addEventListener("error",e=>fail(e.error||e.message));window.addEventListener("unhandledrejection",e=>fail(e.reason));
-  function normalize(v){v.version=10;v.canvas={color:v.canvas?.color||v.canvas?.background||"#000000",material:v.canvas?.material||"none",imageUrl:v.canvas?.imageUrl||null,scaleMode:v.canvas?.scaleMode||"cover"};(v.items||[]).forEach(i=>{if(i.type==="text"){i.transparentSurface=true;i.material="none";i.config??={};i.config.textColor??="#ffffff";i.config.fontFamily??="Arial, Helvetica, sans-serif";i.config.fontWeight??="700";i.config.letterSpacing??=2;i.config.textAlign??="center";}if(i.type==="status")i.alerts=C.alertDefinitions.map(([dataSource,label,icon])=>({dataSource,label,icon,enabled:true}));if(i.type==="gauge"){i.config??={};i.config.tickScale??=1;}if(i.type==="gaugeAssembly"){const ticks=(i.children||[]).find(c=>c.part==="ticks");if(ticks){ticks.config??={};ticks.config.tickScale??=1;}}});return v;}
+  function normalize(v){v.version=11;v.canvas={color:v.canvas?.color||v.canvas?.background||"#000000",material:v.canvas?.material||"none",imageUrl:v.canvas?.imageUrl||null,scaleMode:v.canvas?.scaleMode||"cover"};(v.items||[]).forEach(i=>{if(i.type==="text"){i.transparentSurface=true;i.material="none";i.config??={};i.config.textColor??="#ffffff";i.config.fontFamily??="Arial, Helvetica, sans-serif";i.config.fontWeight??="700";i.config.letterSpacing??=2;i.config.textAlign??="center";}if(i.type==="status")i.alerts=C.alertDefinitions.map(([dataSource,label,icon])=>({dataSource,label,icon,enabled:true}));if(i.type==="gauge"){i.config??={};i.config.tickScale??=1;}if(i.type==="gaugeAssembly"){const ticks=(i.children||[]).find(c=>c.part==="ticks");if(ticks){ticks.config??={};ticks.config.tickScale??=1;}}});return v;}
   function load(){try{const own=localStorage.getItem(STORAGE);if(own)return normalize(JSON.parse(own));for(const key of LEGACY){const raw=localStorage.getItem(key);if(raw){const v=JSON.parse(raw);if(v?.items)return normalize(v);}}}catch(e){console.warn("Layout load failed",e);}return clone(defaultLayout);}
   let layout=load();
   function save(){localStorage.setItem(STORAGE,JSON.stringify(layout));ui.status.textContent="SAVED";clearTimeout(save.t);save.t=setTimeout(()=>ui.status.textContent="READY",700);}
@@ -59,7 +60,7 @@
   function makeGaugeFace(host,item,value){host.style.background="transparent";const shape=item.gaugeShape||"ellipse",face=document.createElement("div");face.className=`gaugeFaceLayer ${shape}`;const cfg=item.config||{};face.style.background=cfg.faceTransparent===false?(cfg.faceColor||"#080808"):materialCss(item.material||"none");if(cfg.faceTransparent!==false&&(!item.material||item.material==="none"))face.style.background="transparent";const layer=document.createElement("div");layer.className="gaugeRenderLayer";host.append(face,layer);G.render(layer,item,value);renderGaugeAutoIcon(host,item,item.dataSource);}
   function renderGaugeAutoIcon(host,item,source){const p=C.profileFor(source);if(!p||item.config?.showIcon===false)return;const wrap=document.createElement("div");wrap.className="gaugeAutoIcon";G.renderSystemIcon(wrap,{icon:p.icon,name:p.title,config:{inactiveColor:"#b9bdc2",activeColor:"#b9bdc2"}},false);host.appendChild(wrap);}
   function renderAssembly(host,item){const shape=item.gaugeShape||assemblyBase(item)?.shape||"ellipse";(item.children||[]).slice().sort((a,b)=>(a.z||0)-(b.z||0)).forEach(original=>{const child=clone(original);if(child.type==="gaugePart"){child.geometry=shape;child.gaugeShape=shape;if(["ticks","needle","hub"].includes(child.part)){child.x=0;child.y=0;child.w=100;child.h=100;}}const n=document.createElement("div");n.className="assemblyPart";Object.assign(n.style,{left:`${child.x}%`,top:`${child.y}%`,width:`${child.w}%`,height:`${child.h}%`,transform:`rotate(${child.rotation||0}deg)`,opacity:String(child.opacity??1),zIndex:String(child.z||1)});host.appendChild(n);renderContent(n,child);});renderGaugeAutoIcon(host,item,item.dataSource);}
-  function renderStatus(host,item){host.classList.add("statusStrip");const defs=item.alerts?.length?item.alerts:C.alertDefinitions.map(([dataSource,label,icon])=>({dataSource,label,icon,enabled:true}));defs.filter(a=>a.enabled!==false).forEach(a=>{const wrap=document.createElement("span");wrap.className="statusAlertIcon";const img=document.createElement("img");img.src=`assets/icons/dashboard/warnings/${a.icon}.svg`;img.alt=a.label||"";img.style.opacity=read(live,a.dataSource)?.toString()==="true"?"1":"0.34";wrap.appendChild(img);host.appendChild(wrap);});}
+  function renderStatus(host,item){host.classList.add("statusStrip");if(item.config?.overlay)host.classList.add("dashAlertOverlay");const defs=item.alerts?.length?item.alerts:C.alertDefinitions.map(([dataSource,label,icon])=>({dataSource,label,icon,enabled:true}));defs.filter(a=>a.enabled!==false).forEach(a=>{const wrap=document.createElement("span");wrap.className="statusAlertIcon";const img=document.createElement("img");img.src=`assets/icons/dashboard/warnings/${a.icon}.svg`;img.alt=a.label||"";img.style.opacity=read(live,a.dataSource)?.toString()==="true"?"1":"0";wrap.appendChild(img);host.appendChild(wrap);});}
 
   function renderContent(node,item){
     const s=surface(item),value=read(live,item.dataSource);node.appendChild(s);
@@ -174,6 +175,7 @@
     bindSimple(ui.name,"name");bindSimple(ui.x,"x",Number);bindSimple(ui.y,"y",Number);bindSimple(ui.w,"w",Number);bindSimple(ui.h,"h",Number);bindSimple(ui.rotate,"rotation",Number);bindSimple(ui.opacity,"opacity",Number);bindSimple(ui.scale,"scaleMode");bindSimple(ui.transparent,"transparentSurface",Boolean);bindSimple(ui.visible,"visible",Boolean);bindSimple(ui.aspect,"lockAspect",Boolean);
     ui.data.addEventListener("change",()=>{const i=selected();if(!i)return;const source=ui.data.value;if(isGaugeLike(i)){applyGaugeProfile(i,source);}else{i.dataSource=source;if(i.type==="gaugePart"&&C.profileFor(source)){i.config=profileConfig(source,i.config||{});if(i.part==="label")i.config.text=C.profileFor(source).title;if(i.part==="digital")i.config.unit=C.profileFor(source).unit||"";}}save();render();});
     ui.material.addEventListener("change",()=>applyMaterial(ui.material.value));bindTextControls();bindGaugeControls();
+    window.addEventListener("keydown",e=>{if(["INPUT","SELECT","TEXTAREA"].includes(e.target?.tagName))return;if(e.key.toLowerCase()==="e"){e.preventDefault();ui.edit.click();}else if(e.key==="Escape"&&edit){e.preventDefault();ui.edit.click();}});
     ui.duplicate.addEventListener("click",()=>{const item=selected();if(!item)return;const c=clone(item);c.id=C.id(item.type);c.name=(item.name||item.type)+" Copy";c.x=item.x+2;c.y=item.y+2;c.z=Date.now();add(c);});ui.remove.addEventListener("click",()=>{if(!selectedId)return;layout.items=layout.items.filter(i=>i.id!==selectedId);selectedId=null;save();render();});ui.front.addEventListener("click",()=>{const i=selected();if(i){i.z=Math.max(0,...layout.items.map(x=>x.z||0))+1;save();render();}});ui.back.addEventListener("click",()=>{const i=selected();if(i){i.z=Math.min(0,...layout.items.map(x=>x.z||0))-1;save();render();}});ui.canvas.addEventListener("pointerdown",e=>{if(edit&&e.target===ui.canvas){selectedId=null;render();}});
     renderLibrary("widgets");render();loadAssets();poll();setInterval(poll,1000);
   }catch(e){fail(e);}

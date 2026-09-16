@@ -36,3 +36,6 @@ textarea,
 [role="button"] {
     cursor: none !important;
 }
+.dashAlertOverlay{border:0;background:transparent}
+.dashAlertOverlay .statusAlertIcon{flex:1;height:100%;display:grid;place-items:center}
+.dashAlertOverlay .statusAlertIcon img{max-width:58%;max-height:76%;object-fit:contain;transition:opacity .12s ease}
