@@ -14,7 +14,7 @@
    viewport than the panel's physical 2560x720 pixels. Fill that viewport
    so the controller maps the dashboard to the full ultrawide panel. */
 #canvasWrap {
-  padding: 8px 46px 8px 26px;
+  padding: 8px 46px 8px 36px;
   align-items: end;
 }
 
