@@ -8,6 +8,7 @@ paths, which keeps the local API from becoming an arbitrary command runner.
 from __future__ import annotations
 
 import os
+import re
 import shlex
 import shutil
 import subprocess
@@ -18,6 +19,7 @@ from typing import Callable, Optional
 
 
 class TuningModeManager:
+    RETURN_STRIP_PIXELS = 72
     DEFAULT_COMMANDS = (
         "/opt/TunerStudioMS/TunerStudio.sh",
         "/home/dietpi/TunerStudioMS/TunerStudio.sh",
@@ -77,8 +79,95 @@ class TuningModeManager:
                 check=False,
             )
             if result.returncode == 0:
+                width, height = self._screen_size(env)
+                strip = max(
+                    58,
+                    int(os.getenv(
+                        "FOX_TUNING_RETURN_STRIP",
+                        str(self.RETURN_STRIP_PIXELS),
+                    )),
+                )
+                subprocess.run(
+                    [
+                        wmctrl,
+                        "-r",
+                        "TunerStudio",
+                        "-b",
+                        "remove,fullscreen,maximized_vert,maximized_horz",
+                    ],
+                    env=env,
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.DEVNULL,
+                    check=False,
+                )
+                subprocess.run(
+                    [
+                        wmctrl,
+                        "-r",
+                        "TunerStudio",
+                        "-e",
+                        f"0,0,0,{width},{max(200, height - strip)}",
+                    ],
+                    env=env,
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.DEVNULL,
+                    check=False,
+                )
+                subprocess.run(
+                    [wmctrl, "-a", "TunerStudio"],
+                    env=env,
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.DEVNULL,
+                    check=False,
+                )
                 return
             time.sleep(0.25)
+
+    @staticmethod
+    def _screen_size(env: dict[str, str]) -> tuple[int, int]:
+        xrandr = shutil.which("xrandr")
+        if xrandr:
+            result = subprocess.run(
+                [xrandr, "--current"],
+                env=env,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.DEVNULL,
+                text=True,
+                check=False,
+            )
+            match = re.search(r"current\s+(\d+)\s+x\s+(\d+)", result.stdout)
+            if match:
+                return int(match.group(1)), int(match.group(2))
+        return 2560, 720
+
+    def _focus_dashboard(self) -> None:
+        wmctrl = shutil.which("wmctrl")
+        if not wmctrl:
+            return
+        env = self._desktop_env()
+        for title in ("FoxbodyDash Studio", "Chromium"):
+            result = subprocess.run(
+                [wmctrl, "-a", title],
+                env=env,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+                check=False,
+            )
+            if result.returncode == 0:
+                return
+
+    def _request_tunerstudio_close(self) -> bool:
+        wmctrl = shutil.which("wmctrl")
+        if not wmctrl:
+            return False
+        result = subprocess.run(
+            [wmctrl, "-c", "TunerStudio"],
+            env=self._desktop_env(),
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            check=False,
+        )
+        return result.returncode == 0
 
     def _watch_process(self, process: subprocess.Popen) -> None:
         process.wait()
@@ -90,6 +179,7 @@ class TuningModeManager:
             self._active = False
         if was_active:
             self._ecu_start()
+            self._focus_dashboard()
 
     def status(self) -> dict:
         command = self._command()
@@ -169,9 +259,16 @@ class TuningModeManager:
 
             process = self._process
             if process and process.poll() is None:
-                # SIGTERM gives TunerStudio a chance to close normally.  We do
-                # not force-kill it because that could discard an unsaved tune.
-                process.terminate()
+                # Ask the Java window to close normally so TunerStudio can
+                # flush its project state. Fall back to the launcher process
+                # only when X11 window control is unavailable.
+                if not self._request_tunerstudio_close():
+                    process.terminate()
+                threading.Thread(
+                    target=self._focus_dashboard,
+                    name="foxbodydash-focus",
+                    daemon=True,
+                ).start()
                 return {
                     **self.status(),
                     "message": (
@@ -183,4 +280,5 @@ class TuningModeManager:
             self._process = None
             self._active = False
             self._ecu_start()
+            self._focus_dashboard()
             return self.status(), 200
