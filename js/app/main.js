@@ -9,27 +9,115 @@
     name:q("fieldName"),data:q("fieldData"),x:q("fieldX"),y:q("fieldY"),w:q("fieldW"),h:q("fieldH"),rotate:q("fieldRotate"),opacity:q("fieldOpacity"),material:q("fieldMaterial"),scale:q("fieldScaleMode"),transparent:q("fieldTransparent"),visible:q("fieldVisible"),aspect:q("fieldAspect"),
     materialField:q("materialField"),scaleField:q("scaleModeField"),textFields:q("textStyleFields"),textContent:q("fieldTextContent"),textFont:q("fieldTextFont"),textColor:q("fieldTextColor"),textWeight:q("fieldTextWeight"),textSpacing:q("fieldTextSpacing"),textAlign:q("fieldTextAlign"),
     gaugeFields:q("gaugeStyleFields"),gaugeShape:q("fieldGaugeShape"),needleStyle:q("fieldNeedleStyle"),faceTransparent:q("fieldFaceTransparent"),faceColor:q("fieldFaceColor"),tickColor:q("fieldTickColor"),needleColor:q("fieldNeedleColor"),hubColor:q("fieldHubColor"),tickDown:q("tickSizeDown"),tickUp:q("tickSizeUp"),tickValue:q("tickSizeValue"),
-    duplicate:q("duplicateElement"),front:q("bringForward"),back:q("sendBackward"),remove:q("deleteElement"),fatal:q("fatalError")
+    duplicate:q("duplicateElement"),front:q("bringForward"),back:q("sendBackward"),remove:q("deleteElement"),undo:q("undoLayoutButton"),redo:q("redoLayoutButton"),reset:q("resetLayoutButton"),restore:q("restorePreviousButton"),fatal:q("fatalError")
   };
 
-  const STORAGE="foxbodyDash.studio.v7",LEGACY=["foxbodyDash.studio.v6","foxbodyDash.studio.v4","foxbodyDash.studio.v3","foxbodyDash.studio.v2"];
-  let edit=false,selectedId=null,gesture=null,live={},activeLibrary="widgets",assets={shapes:[],materials:[],images:[],gaugeParts:[],icons:[]};
+  const DISPLAY={width:2560,height:720,aspect:2560/720};
+  const STORAGE="foxbodyDash.studio.v13",DRAFT_STORAGE="foxbodyDash.studio.v13.draft",BACKUP_STORAGE="foxbodyDash.studio.v13.backups",LEGACY=[];
+  let edit=false,editBase=null,selectedId=null,gesture=null,live={},activeLibrary="widgets",assets={shapes:[],materials:[],images:[],gaugeParts:[],icons:[]};
+  const brokenAssets=new Set();
+  function setImageSource(img,src){if(!src||brokenAssets.has(src)){img.hidden=true;return;}img.addEventListener("error",()=>{brokenAssets.add(src);img.hidden=true;},{once:true});img.src=src;}
 
-  const defaultLayout={version:7,canvas:{color:"#000000",material:"none",imageUrl:null,scaleMode:"cover"},items:[
-    C.fromTemplate(C.templates.widgets[0],{name:"RPM",x:5,y:12,w:29,h:50}),
-    C.fromTemplate(C.templates.widgets[0],{name:"SPEED",x:66,y:12,w:29,h:50,dataSource:"engine.speed",config:{...C.profileFor("engine.speed"),startAngle:225,endAngle:495,faceTransparent:true,faceColor:"#080808",tickColor:"#eeeeee",tickScale:1,needleColor:"#e52b2b",hubColor:"#111111",needleStyle:"tapered",showIcon:true}}),
-    C.fromTemplate(C.templates.widgets[3],{x:38,y:16,w:24,h:40}),
-    C.fromTemplate(C.templates.widgets[6],{x:42,y:2,w:16,h:12}),
-    C.fromTemplate(C.templates.widgets[7],{x:38,y:2,w:24,h:10,config:{text:"FOXBODY",textColor:"#ffffff",fontFamily:"Arial Black, Arial, sans-serif",fontWeight:"900",letterSpacing:2,textAlign:"center"}}),
-    C.fromTemplate(C.templates.widgets[4],{x:5,y:80,w:90,h:8}),C.fromTemplate(C.templates.widgets[5],{x:5,y:90,w:90,h:8})
+  function dashNeedle(name,dataSource,x,y,w){
+    const h=w*DISPLAY.aspect,profile=clone(C.profileFor(dataSource)||{});
+    const config={...profile,startAngle:225,endAngle:495,needleColor:"#d83225",needleStyle:"tapered"};
+    return {id:C.id("gauge"),type:"gaugeAssembly",name,x,y,w,h,rotation:0,opacity:1,visible:true,lockAspect:true,transparentSurface:true,material:"none",gaugeShape:"ellipse",dataSource,z:10,config:{profileTitle:profile.title,profileUnit:profile.unit,overlayOnly:true,protected:true},children:[
+      {id:C.id("base"),type:"shape",shape:"ellipse",name:name+" Base",x:0,y:0,w:100,h:100,rotation:0,opacity:1,visible:true,transparentSurface:true,material:"none",z:1,isGaugeBase:true},
+      {id:C.id("needle"),type:"gaugePart",part:"needle",name:name+" Needle",x:0,y:0,w:100,h:100,rotation:0,opacity:1,visible:true,transparentSurface:true,material:"none",dataSource,gaugeShape:"ellipse",geometry:"ellipse",z:2,config},
+      {id:C.id("hub"),type:"gaugePart",part:"hub",name:name+" Hub",x:0,y:0,w:100,h:100,rotation:0,opacity:1,visible:true,transparentSurface:true,material:"none",dataSource:"none",gaugeShape:"ellipse",geometry:"ellipse",z:3,config:{hubColor:"#111111"}}
+    ]};
+  }
+
+  const FACTORY_INDICATOR_DIMMERS=[
+    {id:"factory-left-turn-dimmer",name:"Left Turn Indicator",x:5.55,y:5.7,w:3.35,h:10,dataSource:"lights.left_turn"},
+    {id:"factory-high-beam-dimmer",name:"High Beam Indicator",x:15.9,y:5.7,w:3.6,h:10,dataSource:"lights.high_beams"},
+    {id:"factory-right-turn-dimmer",name:"Right Turn Indicator",x:91.4,y:5.7,w:3.6,h:10,dataSource:"lights.right_turn"}
+  ].map(item=>({...item,type:"indicatorDimmer",rotation:0,opacity:1,visible:true,lockAspect:false,transparentSurface:true,material:"none",z:14,config:{protected:true}}));
+
+  const defaultLayout={version:13,canvas:{color:"#000000",material:"none",imageUrl:"assets/designer/images/FoxbodyDash_2560x720_dynamic.webp",scaleMode:"stretch"},items:[
+    dashNeedle("RPM","engine.rpm",3.63,21.94,15.6),
+    dashNeedle("FUEL","engine.fuel",21.99,32.87,8.8),
+    dashNeedle("OIL PSI","engine.oil",32.94,34.15,8.8),
+    dashNeedle("VOLTS","engine.battery",58.5,35.71,8.8),
+    dashNeedle("COOLANT","engine.coolant",69.5,36.41,8.8),
+    dashNeedle("SPEED","engine.speed",79.81,22.1,15.6),
+    ...clone(FACTORY_INDICATOR_DIMMERS),
+    {id:C.id("alerts"),type:"status",name:"Live Alerts",x:4.1,y:71.2,w:92.2,h:10.3,rotation:0,opacity:1,visible:true,lockAspect:false,transparentSurface:true,material:"none",dataSource:"none",z:15,config:{overlay:true,protected:true},alerts:C.alertDefinitions.map(([dataSource,label,icon])=>({dataSource,label,icon,enabled:true}))},
+    {id:C.id("nav"),type:"nav",name:"Dashboard Navigation",x:9.3,y:88,w:80.5,h:9.5,rotation:0,opacity:1,visible:true,lockAspect:false,transparentSurface:true,material:"none",dataSource:"none",z:20,config:{hotspots:true,protected:true}}
   ]};
 
   function fail(err){console.error(err);ui.fatal.hidden=false;ui.fatal.textContent="DASH ERROR: "+(err?.stack||err?.message||String(err));}
   window.addEventListener("error",e=>fail(e.error||e.message));window.addEventListener("unhandledrejection",e=>fail(e.reason));
-  function normalize(v){v.version=7;v.canvas={color:v.canvas?.color||v.canvas?.background||"#000000",material:v.canvas?.material||"none",imageUrl:v.canvas?.imageUrl||null,scaleMode:v.canvas?.scaleMode||"cover"};(v.items||[]).forEach(i=>{if(i.type==="text"){i.transparentSurface=true;i.material="none";i.config??={};i.config.textColor??="#ffffff";i.config.fontFamily??="Arial, Helvetica, sans-serif";i.config.fontWeight??="700";i.config.letterSpacing??=2;i.config.textAlign??="center";}if(i.type==="status")i.alerts=C.alertDefinitions.map(([dataSource,label,icon])=>({dataSource,label,icon,enabled:true}));if(i.type==="gauge"){i.config??={};i.config.tickScale??=1;}if(i.type==="gaugeAssembly"){const ticks=(i.children||[]).find(c=>c.part==="ticks");if(ticks){ticks.config??={};ticks.config.tickScale??=1;}}});return v;}
+  function normalize(v){v.version=13;v.items=Array.isArray(v.items)?v.items:[];FACTORY_INDICATOR_DIMMERS.forEach(factory=>{if(!v.items.some(item=>item.id===factory.id))v.items.push(clone(factory));});v.canvas={color:v.canvas?.color||v.canvas?.background||"#000000",material:v.canvas?.material||"none",imageUrl:v.canvas?.imageUrl||null,scaleMode:v.canvas?.scaleMode||"cover"};v.items.forEach(i=>{if(i.type==="text"){i.transparentSurface=true;i.material="none";i.config??={};i.config.textColor??="#ffffff";i.config.fontFamily??="Arial, Helvetica, sans-serif";i.config.fontWeight??="700";i.config.letterSpacing??=2;i.config.textAlign??="center";}if(i.type==="status")i.alerts=C.alertDefinitions.map(([dataSource,label,icon])=>({dataSource,label,icon,enabled:true}));if(i.type==="gauge"){i.config??={};i.config.tickScale??=1;}if(i.type==="gaugeAssembly"){const ticks=(i.children||[]).find(c=>c.part==="ticks");if(ticks){ticks.config??={};ticks.config.tickScale??=1;}}});return v;}
   function load(){try{const own=localStorage.getItem(STORAGE);if(own)return normalize(JSON.parse(own));for(const key of LEGACY){const raw=localStorage.getItem(key);if(raw){const v=JSON.parse(raw);if(v?.items)return normalize(v);}}}catch(e){console.warn("Layout load failed",e);}return clone(defaultLayout);}
-  let layout=load();
-  function save(){localStorage.setItem(STORAGE,JSON.stringify(layout));ui.status.textContent="SAVED";clearTimeout(save.t);save.t=setTimeout(()=>ui.status.textContent="READY",700);}
+  let layout=load(),layoutHistory=[clone(layout)],layoutRedo=[];
+  function readStored(key){try{const value=JSON.parse(localStorage.getItem(key)||"null");return value&&typeof value==="object"?value:null;}catch{return null;}}
+  function writeWorkingCopy(){localStorage.setItem(edit?DRAFT_STORAGE:STORAGE,JSON.stringify(layout));}
+  function save(){
+    const current=JSON.stringify(layout),last=JSON.stringify(layoutHistory[layoutHistory.length-1]);
+    if(current!==last){layoutHistory.push(clone(layout));if(layoutHistory.length>50)layoutHistory.shift();layoutRedo.length=0;}
+    writeWorkingCopy();ui.status.textContent=edit?"DRAFT AUTOSAVED":"SAVED";clearTimeout(save.t);save.t=setTimeout(()=>ui.status.textContent=edit?"DRAFT MODE":"READY",900);
+  }
+  function validateLayout(candidate){
+    const errors=[],seen=new Set();
+    if(!candidate||!Array.isArray(candidate.items))return ["Layout is missing its item list"];
+    if(!candidate.canvas||typeof candidate.canvas!=="object")errors.push("Canvas settings are missing");
+    candidate.items.forEach((item,index)=>{
+      const label=item.name||item.type||`item ${index+1}`;
+      if(!item.id||seen.has(item.id))errors.push(`${label}: duplicate or missing ID`);else seen.add(item.id);
+      if(!item.type)errors.push(`${label}: missing type`);
+      for(const key of ["x","y","w","h"])if(!Number.isFinite(Number(item[key])))errors.push(`${label}: invalid ${key}`);
+      if(Number(item.w)<=0||Number(item.h)<=0)errors.push(`${label}: size must be positive`);
+      if(Number(item.x)<0||Number(item.y)<0||Number(item.x)+Number(item.w)>100.2||Number(item.y)+Number(item.h)>100.2)errors.push(`${label}: outside the dashboard canvas`);
+      if(item.config?.overlayOnly){const base=(item.children||[]).find(child=>child.isGaugeBase);if(item.material!=="none"||base?.material!=="none"||base?.transparentSurface!==true)errors.push(`${label}: protected artwork gauge face was modified`);}
+    });
+    return errors;
+  }
+  function setEditorChrome(active){
+    edit=active;ui.app.classList.toggle("editing",edit);ui.mode.textContent=edit?"DRAFT":"RUN";ui.edit.textContent=edit?"CANCEL":"EDIT";ui.edit.classList.toggle("active",edit);
+    if(!edit){selectedId=null;ui.app.classList.remove("libraryCollapsed","inspectorCollapsed");}
+    render();renderLibrary(activeLibrary);
+  }
+  function beginEdit(){
+    if(edit)return;
+    editBase=clone(layout);
+    const recovered=readStored(DRAFT_STORAGE),useRecovered=!!recovered&&window.confirm("Recover the autosaved builder draft from the previous session?");
+    if(useRecovered)layout=normalize(recovered);else localStorage.removeItem(DRAFT_STORAGE);
+    layoutHistory=[clone(layout)];layoutRedo=[];localStorage.setItem(DRAFT_STORAGE,JSON.stringify(layout));setEditorChrome(true);ui.status.textContent=useRecovered?"DRAFT RECOVERED":"DRAFT MODE";
+  }
+  function cancelEdit(){
+    if(!edit)return;
+    const dirty=JSON.stringify(layout)!==JSON.stringify(editBase);
+    if(dirty&&!window.confirm("Discard all unapplied builder changes?"))return;
+    layout=clone(editBase||readStored(STORAGE)||defaultLayout);editBase=null;localStorage.removeItem(DRAFT_STORAGE);layoutHistory=[clone(layout)];layoutRedo=[];setEditorChrome(false);ui.status.textContent="DRAFT DISCARDED";
+  }
+  function backupProduction(){
+    const backups=readStored(BACKUP_STORAGE)||[],production=readStored(STORAGE)||clone(defaultLayout);
+    backups.unshift({savedAt:new Date().toISOString(),layout:production});localStorage.setItem(BACKUP_STORAGE,JSON.stringify(backups.slice(0,10)));
+  }
+  function applyDraft(){
+    if(!edit){ui.status.textContent="OPEN THE BUILDER FIRST";return;}
+    const errors=validateLayout(layout);
+    if(errors.length){ui.status.textContent=`APPLY BLOCKED — ${errors[0]}`;window.alert(`Dashboard validation failed:\n\n${errors.slice(0,8).join("\n")}`);return;}
+    backupProduction();localStorage.setItem(STORAGE,JSON.stringify(layout));localStorage.removeItem(DRAFT_STORAGE);editBase=null;layoutHistory=[clone(layout)];layoutRedo=[];setEditorChrome(false);ui.status.textContent="DASHBOARD APPLIED";
+  }
+  function undo(){
+    if(layoutHistory.length<2){ui.status.textContent="NOTHING TO UNDO";return;}
+    layoutRedo.push(layoutHistory.pop());layout=clone(layoutHistory[layoutHistory.length-1]);selectedId=null;writeWorkingCopy();render();ui.status.textContent="UNDONE";
+  }
+  function redo(){
+    if(!layoutRedo.length){ui.status.textContent="NOTHING TO REDO";return;}
+    const next=layoutRedo.pop();layoutHistory.push(clone(next));layout=clone(next);selectedId=null;writeWorkingCopy();render();ui.status.textContent="REDONE";
+  }
+  function resetLayout(){
+    if(!window.confirm("Load the clean 2560×720 layout into this draft? Nothing changes permanently until Apply."))return;
+    layout=clone(defaultLayout);selectedId=null;save();render();ui.status.textContent="DEFAULT LOADED INTO DRAFT";
+  }
+  function restorePrevious(){
+    const backups=readStored(BACKUP_STORAGE)||[];
+    if(!backups.length){ui.status.textContent="NO PREVIOUS APPLIED LAYOUT";return;}
+    layout=normalize(clone(backups[0].layout));selectedId=null;save();render();ui.status.textContent=`PREVIOUS LAYOUT LOADED — PRESS APPLY`;
+  }
   function selected(){return layout.items.find(i=>i.id===selectedId)||null;}
   function isGaugeLike(i){return i&&(i.type==="gauge"||i.type==="gaugeAssembly");}
   function assemblyBase(i){return (i?.children||[]).find(c=>c.isGaugeBase)||i?.children?.[0]||null;}
@@ -45,26 +133,75 @@
   function makeGaugeFace(host,item,value){host.style.background="transparent";const shape=item.gaugeShape||"ellipse",face=document.createElement("div");face.className=`gaugeFaceLayer ${shape}`;const cfg=item.config||{};face.style.background=cfg.faceTransparent===false?(cfg.faceColor||"#080808"):materialCss(item.material||"none");if(cfg.faceTransparent!==false&&(!item.material||item.material==="none"))face.style.background="transparent";const layer=document.createElement("div");layer.className="gaugeRenderLayer";host.append(face,layer);G.render(layer,item,value);renderGaugeAutoIcon(host,item,item.dataSource);}
   function renderGaugeAutoIcon(host,item,source){const p=C.profileFor(source);if(!p||item.config?.showIcon===false)return;const wrap=document.createElement("div");wrap.className="gaugeAutoIcon";G.renderSystemIcon(wrap,{icon:p.icon,name:p.title,config:{inactiveColor:"#b9bdc2",activeColor:"#b9bdc2"}},false);host.appendChild(wrap);}
   function renderAssembly(host,item){const shape=item.gaugeShape||assemblyBase(item)?.shape||"ellipse";(item.children||[]).slice().sort((a,b)=>(a.z||0)-(b.z||0)).forEach(original=>{const child=clone(original);if(child.type==="gaugePart"){child.geometry=shape;child.gaugeShape=shape;if(["ticks","needle","hub"].includes(child.part)){child.x=0;child.y=0;child.w=100;child.h=100;}}const n=document.createElement("div");n.className="assemblyPart";Object.assign(n.style,{left:`${child.x}%`,top:`${child.y}%`,width:`${child.w}%`,height:`${child.h}%`,transform:`rotate(${child.rotation||0}deg)`,opacity:String(child.opacity??1),zIndex:String(child.z||1)});host.appendChild(n);renderContent(n,child);});renderGaugeAutoIcon(host,item,item.dataSource);}
-  function renderStatus(host,item){host.classList.add("statusStrip");const defs=item.alerts?.length?item.alerts:C.alertDefinitions.map(([dataSource,label,icon])=>({dataSource,label,icon,enabled:true}));defs.filter(a=>a.enabled!==false).forEach(a=>{const wrap=document.createElement("span");wrap.className="statusAlertIcon";const img=document.createElement("img");img.src=`assets/icons/dashboard/warnings/${a.icon}.svg`;img.alt=a.label||"";img.style.opacity=read(live,a.dataSource)?.toString()==="true"?"1":"0.34";wrap.appendChild(img);host.appendChild(wrap);});}
+  function renderStatus(host,item){host.classList.add("statusStrip");if(item.config?.overlay)host.classList.add("dashAlertOverlay");const defs=item.alerts?.length?item.alerts:C.alertDefinitions.map(([dataSource,label,icon])=>({dataSource,label,icon,enabled:true}));defs.filter(a=>a.enabled!==false).forEach(a=>{const wrap=document.createElement("span");wrap.className="statusAlertIcon";const img=document.createElement("img");img.src=`assets/icons/dashboard/warnings/${a.icon}.svg`;img.alt=a.label||"";img.style.opacity=read(live,a.dataSource)?.toString()==="true"?"1":"0";wrap.appendChild(img);host.appendChild(wrap);});}
 
   function renderContent(node,item){
     const s=surface(item),value=read(live,item.dataSource);node.appendChild(s);
+    if(item.type==="indicatorDimmer"){const active=value===true||value===1||value==="1"||String(value).toLowerCase()==="true"||String(value).toLowerCase()==="on";s.classList.add("factoryIndicatorDimmer");s.style.background=active?"transparent":"rgba(0,0,0,.88)";return;}
     if(item.type==="gauge"){makeGaugeFace(s,item,value);return;}if(item.type==="gaugePart"){G.renderPart(s,item,value);return;}if(item.type==="gaugeAssembly"){renderAssembly(s,item);return;}if(item.type==="systemIcon"){G.renderSystemIcon(s,item,Boolean(value));return;}
     if(item.type==="digital"){s.classList.add("digitalValue");const n=Number(value),d=item.config?.decimals??0;s.innerHTML=`<strong>${Number.isFinite(n)?n.toFixed(d):"0"}</strong><span>${item.config?.unit||item.name||""}</span>`;return;}
     if(item.type==="bar"){s.classList.add("barGauge");const min=item.config?.min??0,max=item.config?.max??100,n=Number(value),pct=Number.isFinite(n)?Math.max(0,Math.min(100,(n-min)/(max-min)*100)):0;s.innerHTML=`<div class="barGaugeFill" style="width:${pct}%"></div><div class="barGaugeText">${Number.isFinite(n)?Math.round(n):"0"} ${item.config?.unit||""}</div>`;return;}
     if(item.type==="info"){s.classList.add("infoBox");s.innerHTML=`<div class="infoTop"><span>${new Date().toLocaleTimeString([],{hour:"numeric",minute:"2-digit"})}</span><span>FOXBODY</span></div><div class="infoGear"><small>GEAR</small><strong>${live.vehicle?.gear??"N"}</strong></div><div class="infoBottom"><span>TRIP ${live.vehicle?.trip??"--"}</span><span>${live.vehicle?.outsideTemp??"--"}°F</span></div>`;return;}
-    if(item.type==="status"){renderStatus(s,item);return;}if(item.type==="nav"){s.classList.add("navStrip");["HOME","VEHICLE","DIAG","SETTINGS"].forEach(label=>{const b=document.createElement("button");b.type="button";b.textContent=label;if(label==="VEHICLE")b.addEventListener("click",e=>{if(!edit){e.stopPropagation();location.href="pages/vehicle.html";}});s.appendChild(b);});return;}
+    if(item.type==="status"){renderStatus(s,item);return;}if(item.type==="nav"){s.classList.add("navStrip");if(item.config?.hotspots)s.classList.add("dashNavHotspots");["HOME","VEHICLE","MUSIC","DIAGNOSTICS","SETTINGS"].forEach(label=>{const b=document.createElement("button");b.type="button";b.textContent=label;if(label==="VEHICLE")b.addEventListener("click",e=>{if(!edit){e.stopPropagation();location.href="pages/vehicle.html";}});s.appendChild(b);});return;}
     if(item.type==="shift"){s.classList.add("shiftLight");if(Number(value)>=Number(item.config?.hot??6000))s.classList.add("hot");const img=document.createElement("img");img.src=item.assetUrl||"assets/images/mustangWhite.svg";img.alt="";s.appendChild(img);return;}
     if(item.type==="text"){const c=item.config||{};s.classList.add("textNode");s.textContent=c.text||item.name||"TEXT";s.style.color=c.textColor||"#ffffff";s.style.fontFamily=c.fontFamily||"Arial, Helvetica, sans-serif";s.style.fontWeight=String(c.fontWeight||700);s.style.letterSpacing=`${Number(c.letterSpacing??2)}px`;s.style.justifyContent=c.textAlign==="left"?"flex-start":c.textAlign==="right"?"flex-end":"center";s.style.textAlign=c.textAlign||"center";return;}
-    if(item.type==="image"||item.type==="icon"){if(item.scaleMode==="tile"){s.style.backgroundImage=`url('${item.assetUrl}')`;s.style.backgroundRepeat="repeat";s.style.backgroundSize="auto";}else{const img=document.createElement("img");img.src=item.assetUrl;img.alt="";img.className=`nodeImage ${item.scaleMode||"stretch"}`;s.appendChild(img);}}
+    if(item.type==="image"||item.type==="icon"){if(item.scaleMode==="tile"){s.style.backgroundImage=`url('${item.assetUrl}')`;s.style.backgroundRepeat="repeat";s.style.backgroundSize="auto";}else{const img=document.createElement("img");setImageSource(img,item.assetUrl);img.alt="";img.className=`nodeImage ${item.scaleMode||"stretch"}`;s.appendChild(img);}}
   }
 
   function render(){ui.canvas.replaceChildren();applyCanvasBackground();layout.items.slice().sort((a,b)=>(a.z||0)-(b.z||0)).forEach(item=>{if(item.visible===false&&!edit)return;const n=document.createElement("div");n.className="dashNode";n.dataset.id=item.id;if(item.visible===false)n.classList.add("hidden");if(item.id===selectedId)n.classList.add("selected");Object.assign(n.style,{left:`${item.x}%`,top:`${item.y}%`,width:`${item.w}%`,height:`${item.h}%`,transform:`rotate(${item.rotation||0}deg)`,opacity:String(item.opacity??1),zIndex:String(item.z||1)});ui.canvas.appendChild(n);renderContent(n,item);const grip=document.createElement("div");grip.className="resizeGrip";grip.dataset.resize="1";n.appendChild(grip);n.addEventListener("pointerdown",pointerDown);});inspect();}
 
-  function setEdit(v){edit=!!v;ui.app.classList.toggle("editing",edit);ui.mode.textContent=edit?"EDIT":"RUN";ui.edit.textContent=edit?"DONE":"EDIT";ui.edit.classList.toggle("active",edit);if(!edit){selectedId=null;ui.app.classList.remove("libraryCollapsed","inspectorCollapsed");}render();renderLibrary(activeLibrary);}
-  function pointerDown(e){if(!edit)return;e.preventDefault();selectedId=e.currentTarget.dataset.id;const item=selected();if(!item)return;if(item.type==="status")renderLibrary("icons");const rect=ui.canvas.getBoundingClientRect();gesture={pointerId:e.pointerId,mode:e.target.dataset.resize?"resize":"move",startX:e.clientX,startY:e.clientY,rect,item,origin:clone(item)};window.addEventListener("pointermove",pointerMove);window.addEventListener("pointerup",pointerUp,{once:true});render();}
-  function pointerMove(e){if(!gesture||e.pointerId!==gesture.pointerId)return;const g=gesture,dx=(e.clientX-g.startX)/g.rect.width*100,dy=(e.clientY-g.startY)/g.rect.height*100;if(g.mode==="move"){g.item.x=g.origin.x+dx;g.item.y=g.origin.y+dy;}else{let w=Math.max(1,g.origin.w+dx),h=Math.max(1,g.origin.h+dy);if(g.item.lockAspect){const r=g.origin.w/g.origin.h;if(Math.abs(dx)>Math.abs(dy))h=w/r;else w=h*r;}g.item.w=w;g.item.h=h;}render();}
-  function pointerUp(){window.removeEventListener("pointermove",pointerMove);if(gesture){gesture=null;save();render();}}
+  function setEdit(v){if(v)beginEdit();else cancelEdit();}
+  function pointerDown(e){
+    if(!edit||gesture)return;
+    e.preventDefault();
+    e.stopPropagation();
+    const node=e.currentTarget,item=layout.items.find(candidate=>candidate.id===node.dataset.id);
+    if(!item)return;
+    if(item.config?.protected){selectedId=null;ui.status.textContent="PROTECTED DASHBOARD COMPONENT";render();return;}
+    selectedId=item.id;
+    if(item.type==="status")renderLibrary("icons");
+    document.querySelectorAll(".dashNode.selected").forEach(n=>n.classList.remove("selected"));
+    node.classList.add("selected");
+    node.setPointerCapture?.(e.pointerId);
+    const rect=ui.canvas.getBoundingClientRect();
+    gesture={pointerId:e.pointerId,mode:e.target.dataset.resize?"resize":"move",startX:e.clientX,startY:e.clientY,rect,item,node,origin:clone(item)};
+    window.addEventListener("pointermove",pointerMove,{passive:false});
+    window.addEventListener("pointerup",pointerUp,{once:true});
+    window.addEventListener("pointercancel",pointerUp,{once:true});
+    inspect();
+  }
+  function pointerMove(e){
+    if(!gesture||e.pointerId!==gesture.pointerId)return;
+    e.preventDefault();
+    e.stopPropagation();
+    const g=gesture,dx=(e.clientX-g.startX)/g.rect.width*100,dy=(e.clientY-g.startY)/g.rect.height*100;
+    if(g.mode==="move"){
+      g.item.x=Math.max(0,Math.min(100-g.origin.w,g.origin.x+dx));
+      g.item.y=Math.max(0,Math.min(100-g.origin.h,g.origin.y+dy));
+      g.node.style.left=`${g.item.x}%`;
+      g.node.style.top=`${g.item.y}%`;
+    }else{
+      let w=Math.max(1,g.origin.w+dx),h=Math.max(1,g.origin.h+dy);
+      if(g.item.lockAspect){
+        const ratio=g.origin.w/g.origin.h;
+        if(Math.abs(dx)>Math.abs(dy))h=w/ratio;else w=h*ratio;
+      }
+      g.item.w=Math.min(100-g.origin.x,w);
+      g.item.h=Math.min(100-g.origin.y,h);
+      g.node.style.width=`${g.item.w}%`;
+      g.node.style.height=`${g.item.h}%`;
+    }
+  }
+  function pointerUp(e){
+    if(!gesture||e?.pointerId!==undefined&&e.pointerId!==gesture.pointerId)return;
+    window.removeEventListener("pointermove",pointerMove);
+    window.removeEventListener("pointercancel",pointerUp);
+    const g=gesture;
+    gesture=null;
+    g.node.releasePointerCapture?.(g.pointerId);
+    save();
+    render();
+  }
   function add(item){if(item.type==="text"){item.transparentSurface=true;item.material="none";item.config={text:"TEXT",textColor:"#ffffff",fontFamily:"Arial, Helvetica, sans-serif",fontWeight:"700",letterSpacing:2,textAlign:"center",...(item.config||{})};}layout.items.push(item);selectedId=item.id;save();render();}
 
   function intersectionArea(a,b){const l=Math.max(a.x,b.x),r=Math.min(a.x+a.w,b.x+b.w),t=Math.max(a.y,b.y),bt=Math.min(a.y+a.h,b.y+b.h);return Math.max(0,r-l)*Math.max(0,bt-t);}
@@ -74,7 +211,7 @@
   function card(label,detail,fn){const b=document.createElement("button");b.type="button";b.className="libraryCard";b.innerHTML=`<span>${label}</span><small>${detail}</small>`;b.addEventListener("click",fn);return b;}
   function renderCanvasLibrary(){ui.library.innerHTML=`<div class="canvasTools"><label>Canvas color<input id="canvasColor" type="color" value="${layout.canvas.color}"></label><label>Image scale<select id="canvasScale"><option value="cover">Cover</option><option value="contain">Contain</option><option value="stretch">Stretch</option><option value="tile">Tile</option></select></label><button id="clearCanvasImage" type="button">CLEAR IMAGE / DESIGN</button></div><div class="librarySubhead">DESIGNS</div>`;q("canvasScale").value=layout.canvas.scaleMode;q("canvasColor").addEventListener("input",e=>{layout.canvas.color=e.target.value;layout.canvas.material="none";layout.canvas.imageUrl=null;save();render();});q("canvasScale").addEventListener("change",e=>{layout.canvas.scaleMode=e.target.value;save();render();renderLibrary("canvas");});q("clearCanvasImage").addEventListener("click",()=>{layout.canvas.material="none";layout.canvas.imageUrl=null;save();render();renderLibrary("canvas");});C.materials.filter(m=>m.id!=="none").forEach(m=>ui.library.appendChild(card(m.label,"CANVAS",()=>{layout.canvas.material=m.id;layout.canvas.imageUrl=null;save();render();})));assets.materials.forEach(a=>ui.library.appendChild(card(a.name,"DESIGN",()=>{layout.canvas.material=a.id;layout.canvas.imageUrl=null;save();render();})));assets.images.forEach(a=>ui.library.appendChild(card(a.name,"IMAGE",()=>{layout.canvas.imageUrl=a.url;layout.canvas.material="none";save();render();})));}
   function renderLibrary(group){activeLibrary=group;ui.library.replaceChildren();document.querySelectorAll("[data-library]").forEach(b=>b.classList.toggle("active",b.dataset.library===group));if(group==="canvas")return renderCanvasLibrary();if(["widgets","shapes","gaugeParts"].includes(group))C.templates[group].forEach(t=>ui.library.appendChild(card(t.label,t.type.toUpperCase(),()=>add(C.fromTemplate(t)))));if(group==="icons"){ui.library.innerHTML='<div class="alertPickerNote">Dashboard warning assets. These are the alert icons used by the dash and status bar.</div>';assets.icons.forEach(a=>{const def=C.alertForFile(a.file);ui.library.appendChild(card(def?.label||a.name,"ALERT",()=>add({id:C.id("alert"),type:"icon",name:def?.label||a.name,assetUrl:a.url,dataSource:def?.dataSource||"none",x:10,y:10,w:8,h:10,z:Date.now(),visible:true,opacity:1,rotation:0,lockAspect:true,transparentSurface:true,material:"none",scaleMode:"contain",config:{role:"alert"}})));});return;}if(group==="materials"){C.materials.filter(m=>m.id!=="none").forEach(m=>ui.library.appendChild(card(m.label,"APPLY",()=>applyMaterial(m.id))));assets.materials.forEach(a=>ui.library.appendChild(card(a.name,"CUSTOM",()=>applyMaterial(a.id))));return;}if(group==="images")assets.images.forEach(a=>ui.library.appendChild(card(a.name,"IMAGE",()=>add({id:C.id("image"),type:"image",name:a.name,assetUrl:a.url,x:10,y:10,w:22,h:18,z:Date.now(),visible:true,opacity:1,rotation:0,lockAspect:false,transparentSurface:true,material:"none",scaleMode:"stretch"}))));}
-  function applyMaterial(id){const item=selected();if(!item||item.type==="text")return;if(item.type==="gaugeAssembly"){const b=assemblyBase(item);if(b){b.material=id;b.transparentSurface=false;b.surfaceColor=null;}}else if(item.type==="gauge"){item.material=id;item.transparentSurface=true;item.config??={};item.config.faceTransparent=true;}else{item.material=id;item.transparentSurface=false;}save();render();}
+  function applyMaterial(id){const item=selected();if(!item||item.type==="text")return;if(item.type==="gaugeAssembly"&&item.config?.overlayOnly){ui.status.textContent="GAUGE FACE IS PART OF THE DASH ARTWORK";ui.material.value="none";return;}if(item.type==="gaugeAssembly"){const b=assemblyBase(item);if(b){b.material=id;b.transparentSurface=false;b.surfaceColor=null;}}else if(item.type==="gauge"){item.material=id;item.transparentSurface=true;item.config??={};item.config.faceTransparent=true;}else{item.material=id;item.transparentSurface=false;}save();render();}
 
   function setDataOptions(item){const groups=[];if(isGaugeLike(item)||item.type==="digital"||item.type==="bar"||item.type==="gaugePart")groups.push(["GAUGES / LIVE DATA",C.gaugeDataSources]);else if(item.type==="systemIcon")groups.push(["INDICATOR LIGHTS",C.indicatorDataSources]);else if(item.type==="icon"&&String(item.dataSource||"").startsWith("warnings."))groups.push(["ALERTS",C.alertDataSources]);else if(item.type==="status")groups.push(["STATUS BAR ALERTS",[["none","Status bar uses dashboard warnings"]]]);else groups.push(["LIVE DATA",C.gaugeDataSources],["BODY",C.bodyDataSources]);ui.data.replaceChildren();groups.forEach(([label,items])=>{const g=document.createElement("optgroup");g.label=label;items.forEach(([v,l])=>{const o=document.createElement("option");o.value=v;o.textContent=l;g.appendChild(o);});ui.data.appendChild(g);});ui.data.value=item.dataSource||"none";}
   function colorOr(v,f){return /^#[0-9a-f]{6}$/i.test(v||"")?v:f;}
@@ -85,6 +222,7 @@
     const isText=item.type==="text";ui.textFields.hidden=!isText;ui.materialField.hidden=isText;ui.scaleField.hidden=isText;ui.transparent.closest("label").hidden=isText;
     if(isText){const c=item.config||{};ui.textContent.value=c.text||item.name||"TEXT";ui.textFont.value=c.fontFamily||"Arial, Helvetica, sans-serif";ui.textColor.value=colorOr(c.textColor,"#ffffff");ui.textWeight.value=String(c.fontWeight||"700");ui.textSpacing.value=Number(c.letterSpacing??2);ui.textAlign.value=c.textAlign||"center";}
     ui.gaugeFields.hidden=!isGaugeLike(item);
+    const overlayOnly=item.config?.overlayOnly===true;ui.material.disabled=overlayOnly;ui.faceTransparent.disabled=overlayOnly;ui.faceColor.disabled=overlayOnly;
     if(isGaugeLike(item)){const c=item.config||{},base=assemblyBase(item),parts=item.children||[],needle=parts.find(x=>x.part==="needle"),ticks=tickConfig(item);ui.gaugeShape.value=item.gaugeShape||base?.shape||"ellipse";ui.needleStyle.value=needle?.config?.needleStyle||c.needleStyle||"tapered";ui.faceTransparent.checked=item.type==="gaugeAssembly"?!!base?.transparentSurface:c.faceTransparent!==false;ui.faceColor.value=colorOr(item.type==="gaugeAssembly"?base?.surfaceColor:c.faceColor,"#080808");ui.tickColor.value=colorOr(parts.find(x=>x.part==="ticks")?.config?.tickColor||c.tickColor,"#eeeeee");ui.needleColor.value=colorOr(needle?.config?.needleColor||c.needleColor,"#e52b2b");ui.hubColor.value=colorOr(parts.find(x=>x.part==="hub")?.config?.hubColor||c.hubColor,"#111111");ui.tickValue.textContent=`${Math.round(Number(ticks?.tickScale??1)*100)}%`;}
   }
   function bindSimple(control,key,parse=v=>v){control.addEventListener("change",()=>{const item=selected();if(!item)return;item[key]=parse(control.type==="checkbox"?control.checked:control.value);save();render();});}
@@ -102,17 +240,20 @@
   }
   function options(){ui.material.innerHTML=C.materials.map(m=>`<option value="${m.id}">${m.label}</option>`).join("")+assets.materials.map(a=>`<option value="${a.id}">${a.name}</option>`).join("");}
   async function loadAssets(){try{const r=await fetch("/api/assets");if(r.ok)assets=await r.json();}catch(e){console.warn("Asset API unavailable",e);}options();renderLibrary(activeLibrary);}
-  async function poll(){try{const r=await fetch("/api/vehicle");if(r.ok){live=await r.json();if(!gesture)render();}}catch{}}
+  async function poll(){try{const r=await fetch("/api/vehicle");if(r.ok){live=await r.json();window.dispatchEvent(new CustomEvent("foxdash:live",{detail:live}));if(!gesture)render();}}catch{}}
 
   try{
     options();document.querySelectorAll("[data-library]").forEach(b=>b.addEventListener("click",()=>renderLibrary(b.dataset.library)));
-    ui.edit.addEventListener("click",()=>setEdit(!edit));ui.save.addEventListener("click",save);ui.build.addEventListener("click",buildGauge);ui.vehicle.addEventListener("click",()=>location.href="pages/vehicle.html");
+    ui.edit.addEventListener("click",()=>setEdit(!edit));ui.save.addEventListener("click",applyDraft);ui.build.addEventListener("click",buildGauge);ui.vehicle.addEventListener("click",()=>location.href="pages/vehicle.html");
     ui.panels.addEventListener("click",()=>{if(!edit)return;const both=ui.app.classList.contains("libraryCollapsed")&&ui.app.classList.contains("inspectorCollapsed");ui.app.classList.toggle("libraryCollapsed",!both);ui.app.classList.toggle("inspectorCollapsed",!both);ui.panels.textContent=both?"PANELS":"SHOW PANELS";});
     ui.collapseLibrary.addEventListener("click",()=>ui.app.classList.toggle("libraryCollapsed"));ui.collapseInspector.addEventListener("click",()=>ui.app.classList.toggle("inspectorCollapsed"));
     bindSimple(ui.name,"name");bindSimple(ui.x,"x",Number);bindSimple(ui.y,"y",Number);bindSimple(ui.w,"w",Number);bindSimple(ui.h,"h",Number);bindSimple(ui.rotate,"rotation",Number);bindSimple(ui.opacity,"opacity",Number);bindSimple(ui.scale,"scaleMode");bindSimple(ui.transparent,"transparentSurface",Boolean);bindSimple(ui.visible,"visible",Boolean);bindSimple(ui.aspect,"lockAspect",Boolean);
     ui.data.addEventListener("change",()=>{const i=selected();if(!i)return;const source=ui.data.value;if(isGaugeLike(i)){applyGaugeProfile(i,source);}else{i.dataSource=source;if(i.type==="gaugePart"&&C.profileFor(source)){i.config=profileConfig(source,i.config||{});if(i.part==="label")i.config.text=C.profileFor(source).title;if(i.part==="digital")i.config.unit=C.profileFor(source).unit||"";}}save();render();});
     ui.material.addEventListener("change",()=>applyMaterial(ui.material.value));bindTextControls();bindGaugeControls();
-    ui.duplicate.addEventListener("click",()=>{const item=selected();if(!item)return;const c=clone(item);c.id=C.id(item.type);c.name=(item.name||item.type)+" Copy";c.x=item.x+2;c.y=item.y+2;c.z=Date.now();add(c);});ui.remove.addEventListener("click",()=>{if(!selectedId)return;layout.items=layout.items.filter(i=>i.id!==selectedId);selectedId=null;save();render();});ui.front.addEventListener("click",()=>{const i=selected();if(i){i.z=Math.max(0,...layout.items.map(x=>x.z||0))+1;save();render();}});ui.back.addEventListener("click",()=>{const i=selected();if(i){i.z=Math.min(0,...layout.items.map(x=>x.z||0))-1;save();render();}});ui.canvas.addEventListener("pointerdown",e=>{if(edit&&e.target===ui.canvas){selectedId=null;render();}});
-    renderLibrary("widgets");render();loadAssets();poll();setInterval(poll,500);
+    window.addEventListener("keydown",e=>{if(["INPUT","SELECT","TEXTAREA"].includes(e.target?.tagName))return;if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==="z"){e.preventDefault();e.shiftKey?redo():undo();}else if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==="y"){e.preventDefault();redo();}else if(e.key.toLowerCase()==="e"){e.preventDefault();ui.edit.click();}else if(e.key==="Escape"&&edit){e.preventDefault();ui.edit.click();}});
+    ui.undo.addEventListener("click",undo);ui.redo.addEventListener("click",redo);ui.reset.addEventListener("click",resetLayout);ui.restore.addEventListener("click",restorePrevious);
+    window.FoxDashStudio={addItem:add,undo,redo,reset:resetLayout,apply:applyDraft,cancel:cancelEdit,validate:()=>validateLayout(layout),getLayout:()=>clone(layout)};
+    ui.duplicate.addEventListener("click",()=>{const item=selected();if(!item)return;const c=clone(item);c.id=C.id(item.type);c.name=(item.name||item.type)+" Copy";c.x=item.x+2;c.y=item.y+2;c.z=Date.now();add(c);});ui.remove.addEventListener("click",()=>{if(!selectedId)return;const item=selected();if(item?.config?.protected){ui.status.textContent="PROTECTED DASHBOARD COMPONENT";return;}layout.items=layout.items.filter(i=>i.id!==selectedId);selectedId=null;save();render();});ui.front.addEventListener("click",()=>{const i=selected();if(i){i.z=Math.max(0,...layout.items.map(x=>x.z||0))+1;save();render();}});ui.back.addEventListener("click",()=>{const i=selected();if(i){i.z=Math.min(0,...layout.items.map(x=>x.z||0))-1;save();render();}});ui.canvas.addEventListener("pointerdown",e=>{if(edit&&e.target===ui.canvas){selectedId=null;render();}});
+    renderLibrary("widgets");render();loadAssets();poll();setInterval(poll,1000);
   }catch(e){fail(e);}
 })();

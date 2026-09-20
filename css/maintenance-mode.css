@@ -1,0 +1,45 @@
+#maintenanceOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2147483646;
+  display: grid;
+  place-items: center;
+  background: rgba(0, 0, 0, 0.88);
+}
+
+#maintenanceOverlay[hidden] {
+  display: none;
+}
+
+.maintenanceCard {
+  width: min(720px, 84vw);
+  padding: 22px;
+  border: 2px solid #3f9ee8;
+  border-radius: 10px;
+  background: #090d12;
+  box-shadow: 0 0 28px rgba(36, 145, 230, 0.45);
+  color: #f5f7fa;
+  font-family: Arial, sans-serif;
+  text-align: center;
+}
+
+.maintenanceCard h2 {
+  margin: 0 0 8px;
+  letter-spacing: 0.1em;
+}
+
+.maintenanceButtons {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.maintenanceButtons button {
+  min-height: 62px;
+  border: 1px solid #3f9ee8;
+  border-radius: 6px;
+  background: #101d28;
+  color: white;
+  font: 800 16px Arial, sans-serif;
+}
