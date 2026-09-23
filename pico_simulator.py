@@ -1,4 +1,5 @@
 import glob
+import os
 import threading
 import time
 
@@ -9,6 +10,9 @@ from vehicle_data import set_rpm_override, vehicle
 
 class PicoSimulatorReader:
     BAUD = 115200
+    PORT_ENV = "FOXDASH_PICO_PORT"
+    DISABLE_ENV = "FOXDASH_PICO_DISABLE"
+    MICROSQUIRT_PORT_ENV = "FOXDASH_MICROSQUIRT_PORT"
 
     def __init__(self):
         self.running = False
@@ -18,15 +22,36 @@ class PicoSimulatorReader:
         self.connected = False
         self.last_error = None
 
+    def disabled(self):
+        return os.getenv(self.DISABLE_ENV, "").lower() in ("1", "true", "yes", "on")
+
     def find_port(self):
+        configured = os.getenv(self.PORT_ENV)
+        if configured:
+            return configured
+
+        microsquirt_port = os.getenv(self.MICROSQUIRT_PORT_ENV)
+        microsquirt_real = os.path.realpath(microsquirt_port) if microsquirt_port else None
         ports = sorted(glob.glob("/dev/ttyACM*"))
 
-        if not ports:
-            raise IOError("No Pico USB serial port found")
+        available = []
+        for port in ports:
+            if microsquirt_real and os.path.realpath(port) == microsquirt_real:
+                continue
+            available.append(port)
 
-        return ports[0]
+        if not available:
+            raise IOError(
+                "No Pico USB serial port found; set "
+                f"{self.PORT_ENV}=/dev/ttyACM1 or set {self.DISABLE_ENV}=1"
+            )
+
+        return available[0]
 
     def connect(self):
+        if self.disabled():
+            raise IOError("Pico simulator disabled")
+
         if self.serial and self.serial.is_open:
             return
 
@@ -128,6 +153,14 @@ class PicoSimulatorReader:
             return
 
         print(f"PICO SIM: {key}={int(state)}")
+
+    def status(self):
+        return {
+            "connected": self.connected,
+            "port": self.port,
+            "disabled": self.disabled(),
+            "last_error": self.last_error,
+        }
 
     def _run(self):
         print("Pico simulator reader started")
