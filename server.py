@@ -39,6 +39,16 @@ def vehicle_api():
     return jsonify(asdict(vehicle))
 
 
+@app.route("/api/status")
+def status_api():
+    return jsonify(
+        {
+            "microsquirt": microsquirt.status(),
+            "pico": pico_simulator.status(),
+        }
+    )
+
+
 def _scan_asset_folder(group_name: str, folder: Path):
     if not folder.exists():
         return []
