@@ -1,3 +1,5 @@
+import glob
+import os
 import struct
 import threading
 import time
@@ -8,17 +10,33 @@ from vehicle_data import get_rpm_override, vehicle
 
 
 class MicroSquirtReader:
-    PORT = "/dev/ttyUSB0"
-    BAUD = 115200
+    PORT_ENV = "FOXDASH_MICROSQUIRT_PORT"
+    BAUD_ENV = "FOXDASH_MICROSQUIRT_BAUD"
+    DEFAULT_BAUD = 115200
     PACKET_SIZE = 212
     POLL_SECONDS = 0.10
+    RECONNECT_SECONDS = 1.0
+    PORT_PATTERNS = (
+        "/dev/serial/by-id/*",
+        "/dev/ttyACM*",
+        "/dev/ttyUSB*",
+    )
 
     def __init__(self):
         self.running = False
         self.thread = None
         self.serial = None
+        self.port = None
         self.connected = False
         self.last_error = None
+        self.last_packet_at = None
+
+    @property
+    def baud(self):
+        try:
+            return int(os.getenv(self.BAUD_ENV, self.DEFAULT_BAUD))
+        except ValueError:
+            return self.DEFAULT_BAUD
 
     @staticmethod
     def _u16(data, offset):
@@ -27,6 +45,26 @@ class MicroSquirtReader:
     @staticmethod
     def _s16(data, offset):
         return struct.unpack_from(">h", data, offset)[0]
+
+    def candidate_ports(self):
+        configured = os.getenv(self.PORT_ENV)
+        if configured:
+            return [configured]
+
+        ports = []
+        for pattern in self.PORT_PATTERNS:
+            ports.extend(sorted(glob.glob(pattern)))
+
+        # Preserve order while removing duplicate real paths/symlinks.
+        unique = []
+        seen = set()
+        for port in ports:
+            real = os.path.realpath(port)
+            if real in seen:
+                continue
+            seen.add(real)
+            unique.append(port)
+        return unique
 
     def decode_packet(self, data):
         rpm = self._u16(data, 6)
@@ -56,21 +94,32 @@ class MicroSquirtReader:
         vehicle.engine.advance = round(advance, 1)
         vehicle.engine.iat = round(iat, 1)
         vehicle.engine.pulse_width = round(pulse_width, 3)
+        self.last_packet_at = time.time()
 
     def connect(self):
         if self.serial and self.serial.is_open:
             return
 
-        self.serial = serial.Serial(
-            self.PORT,
-            self.BAUD,
-            timeout=0.5
-        )
+        errors = []
+        for port in self.candidate_ports():
+            try:
+                self.serial = serial.Serial(port, self.baud, timeout=0.5)
+                self.serial.reset_input_buffer()
+                self.port = port
+                self.connected = True
+                self.last_error = None
+                print(f"MicroSquirt connected: {port} @ {self.baud}")
+                return
+            except Exception as exc:
+                errors.append(f"{port}: {exc}")
+                self.serial = None
 
-        self.serial.reset_input_buffer()
-        self.connected = True
-        self.last_error = None
-        print(f"MicroSquirt connected: {self.PORT} @ {self.BAUD}")
+        if not errors:
+            errors.append(
+                "no serial ports found; set "
+                f"{self.PORT_ENV}=/dev/ttyACM0 or your /dev/serial/by-id path"
+            )
+        raise IOError("MicroSquirt connection failed: " + "; ".join(errors))
 
     def disconnect(self):
         self.connected = False
@@ -82,6 +131,7 @@ class MicroSquirtReader:
                 pass
 
         self.serial = None
+        self.port = None
 
     def read_once(self):
         self.connect()
@@ -95,10 +145,19 @@ class MicroSquirtReader:
         if len(data) != self.PACKET_SIZE:
             raise IOError(
                 f"MicroSquirt packet length {len(data)}, "
-                f"expected {self.PACKET_SIZE}"
+                f"expected {self.PACKET_SIZE} on {self.port}"
             )
 
         self.decode_packet(data)
+
+    def status(self):
+        return {
+            "connected": self.connected,
+            "port": self.port,
+            "baud": self.baud,
+            "last_error": self.last_error,
+            "last_packet_at": self.last_packet_at,
+        }
 
     def _run(self):
         print("MicroSquirt reader started")
@@ -113,7 +172,7 @@ class MicroSquirtReader:
 
                 # ECU may be switched off with the ignition.
                 # Don't crash the dashboard; just keep trying.
-                time.sleep(1.0)
+                time.sleep(self.RECONNECT_SECONDS)
                 continue
 
             time.sleep(self.POLL_SECONDS)
