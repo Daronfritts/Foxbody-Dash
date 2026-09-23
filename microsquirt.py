@@ -16,6 +16,7 @@ class MicroSquirtReader:
     PACKET_SIZE = 212
     POLL_SECONDS = 0.10
     RECONNECT_SECONDS = 1.0
+    BAD_PORT_RETRY_SECONDS = 10.0
     PORT_PATTERNS = (
         "/dev/serial/by-id/*",
         "/dev/ttyACM*",
@@ -30,6 +31,7 @@ class MicroSquirtReader:
         self.connected = False
         self.last_error = None
         self.last_packet_at = None
+        self.bad_ports = {}
 
     @property
     def baud(self):
@@ -58,13 +60,21 @@ class MicroSquirtReader:
         # Preserve order while removing duplicate real paths/symlinks.
         unique = []
         seen = set()
+        now = time.monotonic()
         for port in ports:
             real = os.path.realpath(port)
             if real in seen:
                 continue
+            if self.bad_ports.get(real, 0) > now:
+                continue
             seen.add(real)
             unique.append(port)
         return unique
+
+    def mark_bad_port(self, port):
+        if os.getenv(self.PORT_ENV) or not port:
+            return
+        self.bad_ports[os.path.realpath(port)] = time.monotonic() + self.BAD_PORT_RETRY_SECONDS
 
     def decode_packet(self, data):
         rpm = self._u16(data, 6)
@@ -143,9 +153,11 @@ class MicroSquirtReader:
         data = self.serial.read(self.PACKET_SIZE)
 
         if len(data) != self.PACKET_SIZE:
+            failed_port = self.port
+            self.mark_bad_port(failed_port)
             raise IOError(
                 f"MicroSquirt packet length {len(data)}, "
-                f"expected {self.PACKET_SIZE} on {self.port}"
+                f"expected {self.PACKET_SIZE} on {failed_port}"
             )
 
         self.decode_packet(data)
