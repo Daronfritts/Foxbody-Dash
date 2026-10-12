@@ -13,7 +13,13 @@
   };
 
   const DISPLAY={width:2560,height:720,aspect:2560/720};
-  const STORAGE="foxbodyDash.studio.v13",DRAFT_STORAGE="foxbodyDash.studio.v13.draft",BACKUP_STORAGE="foxbodyDash.studio.v13.backups",LEGACY=[];
+  const STORAGE="foxbodyDash.studio.v13",DRAFT_STORAGE="foxbodyDash.studio.v13.draft",BACKUP_STORAGE="foxbodyDash.studio.v13.backups",LEGACY=[
+    "foxbodyDash.studio.v7",
+    "foxbodyDash.studio.v6",
+    "foxbodyDash.studio.v4",
+    "foxbodyDash.studio.v3",
+    "foxbodyDash.studio.v2"
+  ];
   let edit=false,editBase=null,selectedId=null,gesture=null,live={},activeLibrary="widgets",assets={shapes:[],materials:[],images:[],gaugeParts:[],icons:[]};
   const brokenAssets=new Set();
   function setImageSource(img,src){if(!src||brokenAssets.has(src)){img.hidden=true;return;}img.addEventListener("error",()=>{brokenAssets.add(src);img.hidden=true;},{once:true});img.src=src;}
@@ -151,6 +157,8 @@
   function render(){ui.canvas.replaceChildren();applyCanvasBackground();layout.items.slice().sort((a,b)=>(a.z||0)-(b.z||0)).forEach(item=>{if(item.visible===false&&!edit)return;const n=document.createElement("div");n.className="dashNode";n.dataset.id=item.id;if(item.visible===false)n.classList.add("hidden");if(item.id===selectedId)n.classList.add("selected");Object.assign(n.style,{left:`${item.x}%`,top:`${item.y}%`,width:`${item.w}%`,height:`${item.h}%`,transform:`rotate(${item.rotation||0}deg)`,opacity:String(item.opacity??1),zIndex:String(item.z||1)});ui.canvas.appendChild(n);renderContent(n,item);const grip=document.createElement("div");grip.className="resizeGrip";grip.dataset.resize="1";n.appendChild(grip);n.addEventListener("pointerdown",pointerDown);});inspect();}
 
   function setEdit(v){if(v)beginEdit();else cancelEdit();}
+  function applyNodeFrame(node,item){if(!node||!item)return;Object.assign(node.style,{left:`${item.x}%`,top:`${item.y}%`,width:`${item.w}%`,height:`${item.h}%`,transform:`rotate(${item.rotation||0}deg)`,opacity:String(item.opacity??1),zIndex:String(item.z||1)});}
+  function markSelectedNode(node){ui.canvas.querySelectorAll(".dashNode.selected").forEach(n=>n.classList.remove("selected"));if(node)node.classList.add("selected");inspect();}
   function pointerDown(e){
     if(!edit||gesture)return;
     e.preventDefault();
@@ -160,15 +168,13 @@
     if(item.config?.protected){selectedId=null;ui.status.textContent="PROTECTED DASHBOARD COMPONENT";render();return;}
     selectedId=item.id;
     if(item.type==="status")renderLibrary("icons");
-    document.querySelectorAll(".dashNode.selected").forEach(n=>n.classList.remove("selected"));
-    node.classList.add("selected");
-    node.setPointerCapture?.(e.pointerId);
+    markSelectedNode(node);
+    try{node.setPointerCapture?.(e.pointerId);}catch{}
     const rect=ui.canvas.getBoundingClientRect();
     gesture={pointerId:e.pointerId,mode:e.target.dataset.resize?"resize":"move",startX:e.clientX,startY:e.clientY,rect,item,node,origin:clone(item)};
     window.addEventListener("pointermove",pointerMove,{passive:false});
     window.addEventListener("pointerup",pointerUp,{once:true});
     window.addEventListener("pointercancel",pointerUp,{once:true});
-    inspect();
   }
   function pointerMove(e){
     if(!gesture||e.pointerId!==gesture.pointerId)return;
@@ -178,8 +184,6 @@
     if(g.mode==="move"){
       g.item.x=Math.max(0,Math.min(100-g.origin.w,g.origin.x+dx));
       g.item.y=Math.max(0,Math.min(100-g.origin.h,g.origin.y+dy));
-      g.node.style.left=`${g.item.x}%`;
-      g.node.style.top=`${g.item.y}%`;
     }else{
       let w=Math.max(1,g.origin.w+dx),h=Math.max(1,g.origin.h+dy);
       if(g.item.lockAspect){
@@ -188,9 +192,9 @@
       }
       g.item.w=Math.min(100-g.origin.x,w);
       g.item.h=Math.min(100-g.origin.y,h);
-      g.node.style.width=`${g.item.w}%`;
-      g.node.style.height=`${g.item.h}%`;
     }
+    applyNodeFrame(g.node,g.item);
+    inspect();
   }
   function pointerUp(e){
     if(!gesture||e?.pointerId!==undefined&&e.pointerId!==gesture.pointerId)return;
@@ -198,7 +202,7 @@
     window.removeEventListener("pointercancel",pointerUp);
     const g=gesture;
     gesture=null;
-    g.node.releasePointerCapture?.(g.pointerId);
+    try{g.node.releasePointerCapture?.(g.pointerId);}catch{}
     save();
     render();
   }
