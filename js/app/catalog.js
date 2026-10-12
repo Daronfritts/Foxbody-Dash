@@ -41,11 +41,11 @@ window.FoxDashCatalog = (() => {
 
   const iconTemplates = [
     ["left-turn","Left Turn","lights.left_turn","indicator"],["right-turn","Right Turn","lights.right_turn","indicator"],["headlights","Headlights","lights.headlights","indicator"],["high-beam","High Beams","lights.high_beams","indicator"],["fog","Fog Lights","lights.fog","indicator"]
-  ].map(([icon,label,dataSource,role])=>({type:"systemIcon",icon,label,defaults:{name:label,x:10,y:10,w:6,h:8,dataSource,material:"none",transparentSurface:true,scaleMode:"contain",config:{role,inactiveColor:"#6f7378",activeColor:"#40d7ff"}}}));
+  ].map(([icon,label,dataSource,role])=>({type:"systemIcon",icon,label,defaults:{name:label,x:10,y:10,w:3,h:10.7,dataSource,material:"none",transparentSurface:true,scaleMode:"contain",config:{role,inactiveColor:"#6f7378",activeColor:"#40d7ff"}}}));
 
   const templates = {
     widgets:[
-      {type:"gauge",label:"Analog Gauge",defaults:{name:"RPM",x:8,y:10,w:28,h:48,dataSource:"engine.rpm",material:"black-glass",transparentSurface:true,scaleMode:"stretch",gaugeShape:"ellipse",config:{...gaugeProfiles["engine.rpm"],startAngle:225,endAngle:495,faceTransparent:true,faceColor:"#080808",tickColor:"#eeeeee",tickScale:1,needleColor:"#e52b2b",hubColor:"#111111",showIcon:true}}},
+      {type:"gauge",label:"Analog Gauge",defaults:{name:"RPM",x:8,y:10,w:14,h:49.8,dataSource:"engine.rpm",material:"black-glass",transparentSurface:true,scaleMode:"stretch",gaugeShape:"ellipse",config:{...gaugeProfiles["engine.rpm"],startAngle:225,endAngle:495,faceTransparent:true,faceColor:"#080808",tickColor:"#eeeeee",tickScale:1,needleColor:"#e52b2b",hubColor:"#111111",showIcon:true}}},
       {type:"digital",label:"Digital Value",defaults:{name:"Digital Value",x:38,y:12,w:20,h:12,dataSource:"engine.speed",material:"black-glass",transparentSurface:false,scaleMode:"stretch",config:{unit:"MPH",decimals:0}}},
       {type:"bar",label:"Bar Gauge",defaults:{name:"Bar Gauge",x:36,y:30,w:30,h:9,dataSource:"engine.coolant",material:"black-glass",transparentSurface:false,scaleMode:"stretch",config:{min:100,max:260,unit:"°F"}}},
       {type:"info",label:"Info Box",defaults:{name:"Driver Info",x:38,y:14,w:24,h:42,dataSource:"none",material:"black-glass",transparentSurface:false,scaleMode:"stretch"}},
@@ -57,13 +57,13 @@ window.FoxDashCatalog = (() => {
     shapes:[
       {type:"shape",shape:"rectangle",label:"Rectangle",defaults:{name:"Rectangle",x:10,y:10,w:30,h:20,material:"gunmetal",transparentSurface:false,scaleMode:"stretch"}},
       {type:"shape",shape:"rounded",label:"Rounded Rectangle",defaults:{name:"Rounded Rectangle",x:10,y:10,w:30,h:20,material:"brushed-aluminum",transparentSurface:false,scaleMode:"stretch"}},
-      {type:"shape",shape:"ellipse",label:"Ellipse",defaults:{name:"Ellipse",x:10,y:10,w:24,h:24,material:"carbon",transparentSurface:false,scaleMode:"stretch"}},
+      {type:"shape",shape:"ellipse",label:"Ellipse",defaults:{name:"Ellipse",x:10,y:10,w:14,h:49.8,material:"carbon",transparentSurface:false,scaleMode:"stretch"}},
       {type:"shape",shape:"line",label:"Line",defaults:{name:"Line",x:10,y:10,w:35,h:2,material:"blue-metal",transparentSurface:false,scaleMode:"stretch"}}
     ],
     gaugeParts:[
-      {type:"gaugePart",part:"ticks",label:"Tick Scale",defaults:{name:"Ticks",x:20,y:20,w:25,h:25,dataSource:"engine.rpm",material:"none",transparentSurface:true,scaleMode:"stretch",config:{...gaugeProfiles["engine.rpm"],startAngle:225,endAngle:495,tickColor:"#eeeeee",tickScale:1}}},
-      {type:"gaugePart",part:"needle",label:"Needle",defaults:{name:"Needle",x:20,y:20,w:25,h:25,dataSource:"engine.rpm",material:"none",transparentSurface:true,scaleMode:"stretch",config:{...gaugeProfiles["engine.rpm"],startAngle:225,endAngle:495,needleColor:"#e52b2b"}}},
-      {type:"gaugePart",part:"hub",label:"Needle Hub",defaults:{name:"Hub",x:20,y:20,w:10,h:10,dataSource:"none",material:"none",transparentSurface:true,scaleMode:"stretch",config:{hubColor:"#111111"}}},
+      {type:"gaugePart",part:"ticks",label:"Tick Scale",defaults:{name:"Ticks",x:20,y:20,w:14,h:49.8,dataSource:"engine.rpm",material:"none",transparentSurface:true,scaleMode:"stretch",config:{...gaugeProfiles["engine.rpm"],startAngle:225,endAngle:495,tickColor:"#eeeeee",tickScale:1}}},
+      {type:"gaugePart",part:"needle",label:"Needle",defaults:{name:"Needle",x:20,y:20,w:14,h:49.8,dataSource:"engine.rpm",material:"none",transparentSurface:true,scaleMode:"stretch",config:{...gaugeProfiles["engine.rpm"],startAngle:225,endAngle:495,needleColor:"#e52b2b"}}},
+      {type:"gaugePart",part:"hub",label:"Needle Hub",defaults:{name:"Hub",x:20,y:20,w:4,h:14.2,dataSource:"none",material:"none",transparentSurface:true,scaleMode:"stretch",config:{hubColor:"#111111"}}},
       {type:"gaugePart",part:"digital",label:"Digital Readout",defaults:{name:"Digital Readout",x:20,y:20,w:16,h:8,dataSource:"none",material:"none",transparentSurface:true,scaleMode:"stretch",config:{defaultValue:0,decimals:0,unit:""}}},
       {type:"gaugePart",part:"label",label:"Gauge Label",defaults:{name:"Gauge Label",x:20,y:20,w:16,h:6,dataSource:"none",material:"none",transparentSurface:true,scaleMode:"stretch",config:{text:"RPM"}}}
     ],

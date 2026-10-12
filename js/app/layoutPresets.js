@@ -2,11 +2,12 @@
   "use strict";
 
   const ACTIVE_KEY = "foxbodyDash.activePreset";
-  const RUNTIME_KEY = "foxbodyDash.studio.v7";
+  const RUNTIME_KEY = "foxbodyDash.studio.v13";
   const PRESET_PREFIX = "foxbodyDash.preset.";
   const DEFAULT_PRESET = "dash1";
   const PRESETS = ["dash1", "dash2"];
   const LEGACY_KEYS = [
+    "foxbodyDash.studio.v7",
     "foxbodyDash.studio.v6",
     "foxbodyDash.studio.v4",
     "foxbodyDash.studio.v3",

@@ -1,7 +1,7 @@
 (() => {
   "use strict";
 
-  const STORAGE = "foxbodyDash.studio.v7";
+  const STORAGE = "foxbodyDash.studio.v13";
   const SOURCE_OPTIONS = [
     ["none", "None / Always visible"],
     ["lights.left_turn", "Left Turn"],
@@ -53,6 +53,8 @@
   }
 
   function loadLayout() {
+    const active = window.FoxDashStudio?.getLayout?.();
+    if (active?.items) return active;
     try {
       return JSON.parse(localStorage.getItem(STORAGE) || "null");
     } catch (error) {
@@ -66,11 +68,8 @@
   }
 
   function addIndicator(asset) {
-    const layout = loadLayout();
-    if (!layout?.items) return;
-
     const dataSource = inferSource(asset.file || asset.name);
-    layout.items.push({
+    const item = {
       id: `indicator-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`,
       type: "icon",
       name: asset.name || "Indicator",
@@ -89,9 +88,15 @@
       material: "none",
       scaleMode: "contain",
       config: { role: "indicator" },
-    });
+    };
+    if (window.FoxDashStudio?.addItem) {
+      window.FoxDashStudio.addItem(item);
+      return;
+    }
+    const layout = loadLayout();
+    if (!layout?.items) return;
+    layout.items.push(item);
     saveLayout(layout);
-    location.reload();
   }
 
   function makeCard(asset) {
@@ -101,6 +106,30 @@
     const dataSource = inferSource(asset.file || asset.name);
     button.innerHTML = `<span>${asset.name}</span><small>${sourceLabel(dataSource).toUpperCase()}</small>`;
     button.addEventListener("click", () => addIndicator(asset));
+    return button;
+  }
+
+  function addBuiltInIndicator(template) {
+    const catalog = window.FoxDashCatalog;
+    if (!catalog?.fromTemplate) return;
+    const item = catalog.fromTemplate(template);
+    if (window.FoxDashStudio?.addItem) {
+      window.FoxDashStudio.addItem(item);
+      return;
+    }
+    const layout = loadLayout();
+    if (!layout?.items) return;
+    layout.items.push(item);
+    saveLayout(layout);
+  }
+
+  function makeBuiltInCard(template) {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "libraryCard";
+    const source = template.defaults?.dataSource || "none";
+    button.innerHTML = `<span>${template.label}</span><small>${sourceLabel(source).toUpperCase()}</small>`;
+    button.addEventListener("click", () => addBuiltInIndicator(template));
     return button;
   }
 
@@ -116,6 +145,16 @@
     library.appendChild(note);
 
     if (!indicatorAssets.length) {
+      const builtIns = window.FoxDashCatalog?.templates?.icons || [];
+      if (builtIns.length) {
+        const builtInNote = document.createElement("div");
+        builtInNote.className = "alertPickerNote";
+        builtInNote.textContent = "Built-in live indicators. Tap one to add it to the dash.";
+        library.appendChild(builtInNote);
+        builtIns.forEach(template => library.appendChild(makeBuiltInCard(template)));
+        return;
+      }
+
       const empty = document.createElement("div");
       empty.className = "alertPickerNote";
       empty.textContent = "No indicator artwork yet. Drop SVG/PNG files into the indicators folder and refresh.";
@@ -141,7 +180,7 @@
   function dynamicIconItems() {
     const layout = loadLayout();
     return (layout?.items || []).filter(item =>
-      item.type === "icon" &&
+      (item.type === "icon" || item.type === "systemIcon") &&
       (item.config?.role === "indicator" || item.config?.role === "alert")
     );
   }
@@ -190,14 +229,6 @@
     select.dataset.dynamicIconSignature = signature;
   }
 
-  async function pollLive() {
-    try {
-      const response = await fetch("/api/vehicle");
-      if (response.ok) live = await response.json();
-    } catch (_) {}
-    syncDynamicIconVisibility();
-  }
-
   function init() {
     const tab = document.querySelector('[data-library="indicators"]');
     if (tab) tab.addEventListener("click", () => setTimeout(renderIndicatorLibrary, 0));
@@ -209,9 +240,12 @@
     const app = document.getElementById("foxApp");
     if (app) observer.observe(app, { childList: true, subtree: true, attributes: true, attributeFilter: ["class"] });
 
+    window.addEventListener("foxdash:live", event => {
+      live = event.detail || {};
+      syncDynamicIconVisibility();
+    });
+
     loadAssets();
-    pollLive();
-    setInterval(pollLive, 500);
   }
 
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);
