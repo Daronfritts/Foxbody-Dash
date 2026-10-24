@@ -90,8 +90,43 @@ const { chromium } = require('playwright');
     assert.equal(updated.digital,'63');assert.equal(updated.bar,'75%');assert.equal(updated.gear,'3');
     assert.equal(updated.indicator,'1');assert.equal(updated.warning,'1');assert.equal(updated.yellow,true);
     assert.equal(updated.dimmer,'transparent');assert.equal(updated.tick,'#12abcd');assert.equal(updated.fatal,true);
-    assert.ok(requests-before>=8 && requests-before<=18,`single ~10Hz feed, got ${requests-before} requests`);
-    console.log('PASS: 10Hz shared feed; retained DOM; all needle styles, assembly, digital, bar, info, warnings, indicators, shift colors and saved appearance');
+    assert.ok(requests-before>=16 && requests-before<=32,`single ~20Hz feed, got ${requests-before} requests`);
+    console.log('PASS: 20Hz shared feed; retained DOM; all needle styles, assembly, digital, bar, info, warnings, indicators, shift colors and saved appearance');
+
+    // Drive the renderer with a deterministic clock, including repeated ECU
+    // samples and a 150 ms packet gap. The previous 80 ms tween parked early.
+    const motion=await page.evaluate(source=>{
+      const frame=document.createElement('iframe');document.body.appendChild(frame);
+      const w=frame.contentWindow;let clock=0,queued=[];
+      Object.defineProperty(w.performance,'now',{value:()=>clock});
+      w.requestAnimationFrame=callback=>{queued.push(callback);return queued.length;};
+      w.eval(source);
+      const host=w.document.createElement('div');w.document.body.appendChild(host);
+      const item={type:'gaugePart',part:'needle',config:{min:0,max:8000,startAngle:225,endAngle:495,needleStyle:'classic'}};
+      const G=w.FoxGaugeRenderer;G.renderPart(host,item,3000);
+      const original=[...host.querySelectorAll('.gaugeNeedleGroup > *')];
+      function step(now){clock=now;const callbacks=queued;queued=[];callbacks.forEach(callback=>callback(now));
+        const tip=host.querySelector('.gaugeNeedleGroup').lastElementChild;
+        let angle=Math.atan2(Number(tip.getAttribute('y2'))-500,Number(tip.getAttribute('x2'))-500)*180/Math.PI+90;
+        while(angle<225)angle+=360;
+        return (angle-225)/270*8000;
+      }
+      G.update(host,item,2000);
+      const falling=[];
+      for(let now=16;now<=144;now+=16){if(now===96)G.update(host,item,2000);falling.push(step(now));}
+      clock=150;G.update(host,item,1000);
+      for(let now=160;now<=288;now+=16)falling.push(step(now));
+      clock=300;G.update(host,item,2500);
+      const rising=[];for(let now=304;now<=448;now+=16)rising.push(step(now));
+      clock=450;G.update(host,item,2500);
+      for(let now=464;now<=900;now+=16)step(now);
+      const result={falling,rising,settled:step(916),retained:original.every(n=>n.isConnected),pending:queued.length};
+      frame.remove();return result;
+    },await fs.readFile(path.join(root,'js/app/gaugeRenderer.js'),'utf8'));
+    assert.ok(motion.falling.every((v,i)=>v>999.9 && v<3000 && (i===0||v<motion.falling[i-1])), 'needle must keep falling through the former 80 ms stop and repeated samples');
+    assert.ok(motion.rising.every((v,i)=>v<=2500.1 && (i===0||v>motion.rising[i-1])), 'reversals must follow the latest sample without overshoot');
+    assert.ok(Math.abs(motion.settled-2500)<0.1);assert.equal(motion.pending,0);assert.equal(motion.retained,true);
+    console.log('PASS: continuous fall across packet gaps/duplicates; clean reversal; bounded motion; animation stops at steady RPM');
 
     // Delayed HTTP responses must not overlap or let an older response replace a newer sample.
     delay=250;maxActive=0;

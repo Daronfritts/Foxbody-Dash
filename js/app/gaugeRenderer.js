@@ -21,10 +21,15 @@ window.FoxGaugeRenderer = (() => {
     animationFrame=null;
     for(const [host,state] of animations){
       if(!host.isConnected){animations.delete(host);continue;}
-      const progress=Math.min(1,Math.max(0,(now-state.started)/80));
-      state.shown=state.from+(state.target-state.from)*progress;
+      // Follow the latest measured target every frame. A fixed-duration tween
+      // used to finish early and park the needle between incoming samples.
+      const elapsed=Math.max(0,Math.min(100,now-state.lastFrame));
+      state.lastFrame=now;
+      state.shown+=(state.target-state.shown)*(1-Math.exp(-elapsed/35));
+      const settled=Math.abs(state.target-state.shown)<0.1;
+      if(settled)state.shown=state.target;
       drawNeedle(state.root,state.item,state.shown);
-      if(progress===1)animations.delete(host);
+      if(settled)animations.delete(host);
     }
     if(animations.size)animationFrame=requestAnimationFrame(animateNeedles);
   }
@@ -40,7 +45,8 @@ window.FoxGaugeRenderer = (() => {
     if(item.type==="gaugePart"&&item.part!=="needle")return;
     const min=Number(c.min??0),max=Number(c.max??8000),target=clamp(Number(c.previewValue??(valid?number:min)),min,max);
     if(!Number.isFinite(target)||target===state.target)return;
-    state.from=state.shown;state.target=target;state.started=performance.now();
+    if(!animations.has(host))state.lastFrame=performance.now();
+    state.target=target;
     animations.set(host,state);
     if(animationFrame===null)animationFrame=requestAnimationFrame(animateNeedles);
   }

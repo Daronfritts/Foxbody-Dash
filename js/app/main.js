@@ -260,7 +260,7 @@
         window.dispatchEvent(new CustomEvent("foxdash:live",{detail:live}));
       }
     }catch(error){if(error.name!=="AbortError")console.warn("Vehicle data unavailable",error);}
-    finally{clearTimeout(timeout);setTimeout(poll,Math.max(0,100-(performance.now()-started)));}
+    finally{clearTimeout(timeout);setTimeout(poll,Math.max(0,50-(performance.now()-started)));}
   }
 
   try{

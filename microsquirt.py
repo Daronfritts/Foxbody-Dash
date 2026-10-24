@@ -14,7 +14,7 @@ class MicroSquirtReader:
     BAUD_ENV = "FOXDASH_MICROSQUIRT_BAUD"
     DEFAULT_BAUD = 115200
     PACKET_SIZE = 212
-    POLL_SECONDS = 0.10
+    POLL_SECONDS = 0.05
     RECONNECT_SECONDS = 1.0
     BAD_PORT_RETRY_SECONDS = 10.0
     PORT_PATTERNS = (
@@ -175,6 +175,7 @@ class MicroSquirtReader:
         print("MicroSquirt reader started")
 
         while self.running:
+            started = time.monotonic()
             try:
                 self.read_once()
 
@@ -187,7 +188,12 @@ class MicroSquirtReader:
                 time.sleep(self.RECONNECT_SECONDS)
                 continue
 
-            time.sleep(self.POLL_SECONDS)
+            # Include serial transfer time in the 20 Hz target interval rather
+            # than adding a full delay after each completed packet. Slow ECU
+            # responses stay serialized; no backlog of requests is created.
+            remaining = self.POLL_SECONDS - (time.monotonic() - started)
+            if remaining > 0:
+                time.sleep(remaining)
 
         self.disconnect()
         print("MicroSquirt reader stopped")
