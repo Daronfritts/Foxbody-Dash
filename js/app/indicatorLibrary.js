@@ -190,28 +190,22 @@
     select.dataset.dynamicIconSignature = signature;
   }
 
-  async function pollLive() {
-    try {
-      const response = await fetch("/api/vehicle");
-      if (response.ok) live = await response.json();
-    } catch (_) {}
-    syncDynamicIconVisibility();
-  }
 
   function init() {
     const tab = document.querySelector('[data-library="indicators"]');
     if (tab) tab.addEventListener("click", () => setTimeout(renderIndicatorLibrary, 0));
 
-    const observer = new MutationObserver(() => {
-      syncSelectedDynamicDataOptions();
+    window.addEventListener("foxdash:vehicle", event => {
+      live = event.detail;
       syncDynamicIconVisibility();
     });
-    const app = document.getElementById("foxApp");
-    if (app) observer.observe(app, { childList: true, subtree: true, attributes: true, attributeFilter: ["class"] });
+    const syncLayout = () => { syncSelectedDynamicDataOptions(); syncDynamicIconVisibility(); };
+    window.addEventListener("foxdash:render", syncLayout);
+    window.addEventListener("foxdash:selection", syncLayout);
 
     loadAssets();
-    pollLive();
-    setInterval(pollLive, 500);
+    live = window.FoxDashVehicle || {};
+    syncDynamicIconVisibility();
   }
 
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);
