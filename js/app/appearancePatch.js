@@ -47,8 +47,17 @@
   function bindTickPicker(){const picker=document.getElementById("fieldTickColor");if(!picker||picker.dataset.appearancePatchBound)return;picker.dataset.appearancePatchBound="1";picker.addEventListener("input",()=>{const node=selectedNode(),id=selectedId();if(!id||!isGaugeNode(node))return;tickColors[id]=picker.value;writeMap(TICK_KEY,tickColors);applyTickColor(node,picker.value);},true);}
   function refreshAppearance(){refreshQueued=false;bindTickPicker();syncInspectorPatch();applySavedGaugeAppearance();applyGaugePositionTweaks();applyShiftState();}
   function queueRefresh(){if(refreshQueued)return;refreshQueued=true;requestAnimationFrame(refreshAppearance);}
-  async function pollRpm(){try{const response=await fetch("/api/vehicle",{cache:"no-store"});if(response.ok){const data=await response.json();currentRpm=Number(data?.engine?.rpm)||0;}}catch{}applyShiftState();}
-  const observer=new MutationObserver(queueRefresh);
-  function start(){bindTickPicker();ensureGaugeTextControls();ensureShiftControls();refreshAppearance();observer.observe(document.body,{childList:true,subtree:true});pollRpm();setInterval(pollRpm,500);}
+  function start(){
+    bindTickPicker();ensureGaugeTextControls();ensureShiftControls();
+    currentRpm=Number(window.FoxDashVehicle?.engine?.rpm)||0;
+    refreshAppearance();
+    window.addEventListener("foxdash:render",queueRefresh);
+    window.addEventListener("foxdash:selection",queueRefresh);
+    window.addEventListener("foxdash:vehicle",event=>{
+      const rpm=Number(event.detail?.engine?.rpm)||0;
+      if(rpm!==currentRpm){currentRpm=rpm;applyShiftState();}
+    });
+    window.addEventListener("resize",queueRefresh);
+  }
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",start,{once:true});else start();
 })();

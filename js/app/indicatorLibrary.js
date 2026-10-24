@@ -233,19 +233,17 @@
     const tab = document.querySelector('[data-library="indicators"]');
     if (tab) tab.addEventListener("click", () => setTimeout(renderIndicatorLibrary, 0));
 
-    const observer = new MutationObserver(() => {
-      syncSelectedDynamicDataOptions();
-      syncDynamicIconVisibility();
-    });
-    const app = document.getElementById("foxApp");
-    if (app) observer.observe(app, { childList: true, subtree: true, attributes: true, attributeFilter: ["class"] });
-
-    window.addEventListener("foxdash:live", event => {
+    window.addEventListener("foxdash:vehicle", event => {
       live = event.detail || {};
       syncDynamicIconVisibility();
     });
+    const syncLayout = () => { syncSelectedDynamicDataOptions(); syncDynamicIconVisibility(); };
+    window.addEventListener("foxdash:render", syncLayout);
+    window.addEventListener("foxdash:selection", syncLayout);
 
+    live = window.FoxDashVehicle || {};
     loadAssets();
+    syncDynamicIconVisibility();
   }
 
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);
